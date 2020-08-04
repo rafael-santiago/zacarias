@@ -1,0 +1,3 @@
+[submodule "src/lib/kryptos"]
+	path = src/lib/kryptos
+	url = https://github.com/rafael-santiago/kryptos

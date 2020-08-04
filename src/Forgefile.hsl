@@ -1,0 +1,28 @@
+include ~/toolsets/null/null.hsl
+include ~/toolsets/utils/forge_projects.hsl
+
+var exit_code type int;
+
+project zacarias : toolset "no-tool-any-set" : $exit_code;
+
+zacarias.prologue() {
+    hefesto.sys.setenv("ZACARIAS_ROOTDIR", hefesto.sys.pwd());
+    var submodules type list;
+    $submodules = hefesto.sys.get_option("modules");
+
+    if ($submodules.count() == 0) {
+        $submodules.add_item("kbd");
+        $submodules.add_item("dev");
+        $submodules.add_item("cmd");
+    }
+
+    $exit_code = forge_projects($submodules);
+}
+
+zacarias.epilogue() {
+    if ($exit_code == 0) {
+        hefesto.sys.echo("INFO: Build success.\n");
+    } else {
+        hefesto.sys.echo("ERROR: Build has failed.\n");
+    }
+}

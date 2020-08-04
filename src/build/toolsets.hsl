@@ -1,0 +1,402 @@
+#
+#                          Copyright (C) 2020 by Rafael Santiago
+#
+# Use of this source code is governed by GPL-v2 license that can
+# be found in the COPYING file.
+#
+#
+
+include ~/toolsets/gcc/gcc-lib.hsl
+include ~/toolsets/gcc/gcc-app.hsl
+include ~/toolsets/clang/clang-lib.hsl
+include ~/toolsets/clang/clang-app.hsl
+include ~/toolsets/common/utils/lang/c/dependency_scanner.hsl
+
+include on linux ~/toolsets/linux/linux-module.hsl
+include on freebsd ~/toolsets/freebsd/freebsd-module.hsl
+include on netbsd ~/toolsets/netbsd/netbsd-module.hsl
+include on windows,openbsd,minixm,sunos ~/toolsets/null/null.hsl
+
+include ~/fsutil.hsl
+
+function zacarias_rootdir() : result type string {
+    result hefesto.sys.env("ZACARIAS_ROOTDIR");
+}
+
+function get_app_toolset() : result type string {
+    result get_toolset() + "-c-app";
+}
+
+function get_lib_toolset() : result type string {
+    result get_toolset() + "-c-lib";
+}
+
+function get_lkm_toolset() : result type string {
+    if (hefesto.sys.os_name() == "linux") {
+        result "linux-lkm";
+    } else if (hefesto.sys.os_name() == "freebsd") {
+        result "freebsd-kld";
+    } else if (hefesto.sys.os_name() == "netbsd") {
+        result "netbsd-module";
+    }
+    result "no-tool-any-set-lkm";
+}
+
+function get_codes(dirlist type list, deps type string) : result type list {
+    var oldcwd type string;
+    var codes type list;
+
+    $oldcwd = hefesto.sys.pwd();
+
+    hefesto.sys.setenv("GET_C_CPP_DEPS_SRC_ROOT", $oldcwd);
+
+    var d type int;
+
+    $d = 0;
+
+    while ($d < $dirlist.count()) {
+        var dirpath type string;
+        $dirpath = $dirlist.item($d);
+
+        if (hefesto.sys.cd($dirpath)) {
+            $deps = $deps + get_c_cpp_deps();
+            $codes.ls(".*\\.c$");
+            hefesto.sys.cd($oldcwd);
+        } else {
+            hefesto.sys.echo("WARN: Unable to access the path \'" + $dirpath + "'. Just skipping it.\n");
+        }
+
+        $d = $d + 1;
+    }
+
+    hefesto.sys.cd($oldcwd);
+
+    hefesto.sys.byref($deps);
+
+    result $codes;
+}
+
+function mkclean() : result type none {
+    var oldcwd type string;
+    $oldcwd = hefesto.sys.pwd();
+    mkclean_recur(lsdir());
+    hefesto.sys.cd($oldcwd);
+}
+
+function ask_user(query type string, answers type list) : result type string {
+    var a type string;
+    while ($answers.index_of($a) == -1) {
+        $a = hefesto.sys.prompt($query);
+    }
+    result $a;
+}
+
+local function mkclean_recur(dirlist type list) : result type none {
+    var d type int;
+
+    $d = 0;
+
+    while ($d < $dirlist.count()) {
+        if (hefesto.sys.cd($dirlist.item($d))) {
+            var objs type list;
+            $objs.ls(".*\\.o$");
+
+            var o type int;
+            $o = 0;
+            while ($o < $objs.count()) {
+                var filepath type string;
+                $filepath = $objs.item($o);
+                hefesto.sys.echo("Removing: " + $filepath + "\n");
+                hefesto.sys.rm($filepath);
+
+                $o = $o + 1;
+            }
+
+            mkclean_recur(lsdir());
+        }
+        $d = $d + 1;
+    }
+}
+
+local function build_libkryptos() : result type int {
+    var libpath type string;
+    var rootdir type string;
+
+    $rootdir = hefesto.sys.env("ZACARIAS_ROOTDIR");
+
+    $libpath = hefesto.sys.make_path($rootdir, "lib/kryptos/lib/libkryptos.a");
+
+    var exit_code type int;
+
+    $exit_code = 0;
+
+    if (isfile($libpath) == 0) {
+        $exit_code = 1;
+        var oldcwd type string;
+        $oldcwd = hefesto.sys.pwd();
+        $libpath = hefesto.sys.make_path($rootdir, "lib/kryptos/src/");
+        if (hefesto.sys.cd($libpath)) {
+            if (hefesto.sys.os_name() == "freebsd") {
+                $exit_code = hefesto.sys.run("hefesto");
+            } else {
+                $exit_code = hefesto.sys.run("hefesto --no-hmac-tests");
+            }
+            hefesto.sys.cd($oldcwd);
+        }
+    }
+
+    result $exit_code;
+}
+
+local function build_libcutest() : result type int {
+    var libpath type string;
+    var rootdir type string;
+
+    $rootdir = hefesto.sys.env("ZACARIAS_ROOTDIR");
+
+    $libpath = hefesto.sys.make_path($rootdir, "lib/cutest/src/lib/libcutest.a");
+
+    var exit_code type int;
+
+    $exit_code = 0;
+
+    if (isfile($libpath) == 0) {
+        $exit_code = 1;
+        var oldcwd type string;
+        $oldcwd = hefesto.sys.pwd();
+        $libpath = hefesto.sys.make_path($rootdir, "lib/cutest/src/");
+        if (hefesto.sys.cd($libpath)) {
+            $exit_code = hefesto.sys.run("hefesto");
+            hefesto.sys.cd($oldcwd);
+        }
+    }
+
+    result $exit_code;
+}
+
+local function build_libaccacia() : result type int {
+    var libpath type string;
+    var rootdir type string;
+
+    $rootdir = hefesto.sys.env("ZACARIAS_ROOTDIR");
+
+    $libpath = hefesto.sys.make_path($rootdir, "lib/accacia/lib/libaccacia.a");
+
+    var exit_code type int;
+
+    $exit_code = 0;
+
+    if (isfile($libpath) == 0) {
+        $exit_code = 1;
+        var oldcwd type string;
+        $oldcwd = hefesto.sys.pwd();
+        $libpath = hefesto.sys.make_path($rootdir, "lib/accacia/src");
+        if (hefesto.sys.cd($libpath)) {
+            $exit_code = hefesto.sys.run("hefesto");
+            hefesto.sys.cd($oldcwd);
+        }
+    }
+
+    result $exit_code;
+}
+
+function build(libname type string) : result type int {
+    var func_addr type int;
+
+    $func_addr = hefesto.sys.get_func_addr("build_" + $libname);
+
+    if ($func_addr == 0) {
+        hefesto.sys.echo("BUILD ERROR: Unknown lib '" + $libname + "'.\n");
+        result 1;
+    }
+
+    result hefesto.sys.call_func_addr($func_addr);
+}
+
+local function get_toolset() : result type string {
+    var option type list;
+    var return type string;
+
+    $option = hefesto.sys.get_option("toolset");
+
+    if ($option.count() > 0) {
+        $return = $option.item(0);
+        $return.replace("-.*$", "");
+        result $return;
+    }
+
+    if (has_gcc()) {
+        $return = "gcc";
+    } else if (has_clang()) {
+        $return = "clang";
+    } else {
+        hefesto.sys.echo("ERROR: You must have gcc or clang well installed in your system.\n" +
+                         "       Install one of them and try again later.\n");
+        hefesto.project.abort(1);
+    }
+
+    result $return;
+}
+
+local function has_gcc() : result type int {
+    result (execbkcmd("gcc --version") == 0);
+}
+
+local function has_clang() : result type int {
+    result (execbkcmd("clang --version") == 0);
+}
+
+local function execbkcmd(cmdline type string) : result type int {
+    if (hefesto.sys.os_name() != "windows") {
+        $cmdline = $cmdline + " > /dev/null 2>&1";
+    } else {
+        $cmdline = $cmdline + " >  nul 2>&1";
+    }
+
+    result hefesto.sys.run($cmdline);
+}
+
+function mkclean_modules(modules type list) : result type none {
+    var rootpath type string;
+
+    $rootpath = hefesto.sys.pwd();
+
+    var m type int;
+
+    $m = 0;
+    while ($m < $modules.count()) {
+        var moddir type string;
+        $moddir = hefesto.sys.make_path($rootpath, $modules.item($m));
+
+        if (hefesto.sys.cd($moddir)) {
+            var depchain_rec type list;
+            var d type int;
+
+            $depchain_rec.ls(".*\\.Forgefile-.*-hefesto-src-chsum-base$");
+
+            $d = 0;
+
+            while ($d < $depchain_rec.count()) {
+                hefesto.sys.rm($depchain_rec.item($d));
+                $d = $d + 1;
+            }
+
+            $depchain_rec.clear();
+
+            var obj_dirpath type string;
+            $obj_dirpath = hefesto.sys.make_path($moddir, "o");
+
+            if (hefesto.sys.cd($obj_dirpath)) {
+                var objs type list;
+                $objs.ls(".*\\.o$");
+
+                var o type int;
+                $o = 0;
+                while ($o < $objs.count()) {
+                    hefesto.sys.echo("*** removing '" + $objs.item($o) + "'... ");
+
+                    if (hefesto.sys.rm($objs.item($o)) == 0) {
+                        hefesto.sys.echo("done.\n");
+                    } else {
+                        hefesto.sys.echo("failed.\n");
+                    }
+
+                    $o = $o + 1;
+                }
+
+                $objs.clear();
+            }
+        }
+
+        $m = $m + 1;
+    }
+
+    hefesto.sys.cd($rootpath);
+}
+
+function has_bad_funcs(func_signatures type list, srcs type list, incs type list, cflags type list) : result type int {
+    var option type list;
+    $option = hefesto.sys.get_option("allow-bad-funcs");
+
+    if ($option.count() > 0) {
+        hefesto.sys.echo("\nWARN: Bad functions are being allowed.\n");
+        result 0;
+    }
+
+    var cmdline type string;
+    $cmdline = get_toolset();
+
+    var i type int;
+    $i = 0;
+    while ($i < $incs.count()) {
+        $cmdline = $cmdline + " -I\"" + $incs.item($i) + "\"";
+        $i = $i + 1;
+    }
+
+    var c type int;
+    $c = 0;
+    while ($c < $cflags.count()) {
+        $cmdline = $cmdline + " " + $cflags.item($c);
+        $c = $c + 1;
+    }
+
+    $cmdline = $cmdline + " -S -o .asm-out.s";
+
+    hefesto.sys.echo("\nBUILD INFO: Searching for direct references to bad functions...\n");
+
+    var founds type list;
+
+    var s type int;
+    $s = 0;
+    while ($s < $srcs.count() && $founds.count() == 0) {
+        hefesto.sys.echo("\t*** " + $srcs.item($s) + ": ");
+
+        if (hefesto.sys.run($cmdline + " \"" + $srcs.item($s) + "\"") != 0) {
+            hefesto.sys.echo("\nERROR: Unable to generate assembly file.\n");
+            result 1;
+        }
+
+        var f type int;
+        $f = 0;
+        while ($f < $func_signatures.count()) {
+            var regex type string;
+            $regex = "(call|mov).*[ \t]" + $func_signatures.item($f);
+            var bad_lines type list;
+            $bad_lines = hefesto.sys.lines_from_file(".asm-out.s", $regex);
+            if ($bad_lines.count() > 0 && $founds.index_of($func_signatures.item($f)) == -1) {
+                $founds.add_item($func_signatures.item($f));
+            }
+            $f = $f + 1;
+        }
+
+        if ($founds.count() > 0) {
+            hefesto.sys.echo("dirty.\n*** error.\n\n");
+            hefesto.sys.echo("ERROR: Calls to bad functions found in '" + $srcs.item($s) + "'\n" +
+                             "       Bad functions referenced:");
+
+            $f = 0;
+            while ($f < $founds.count()) {
+                if ($f > 0) {
+                    hefesto.sys.echo(", " + $founds.item($f));
+                } else {
+                    hefesto.sys.echo(" " + $founds.item($f));
+                }
+
+                $f = $f + 1;
+            }
+
+            hefesto.sys.echo("\n       Take a look at '" + hefesto.sys.pwd() + "/.asm-out.s'.\n\n");
+        } else {
+            hefesto.sys.rm(".asm-out.s");
+            hefesto.sys.echo("clean.\n");
+        }
+
+        $s = $s + 1;
+    }
+
+    if ($founds.count() == 0) {
+        hefesto.sys.echo("*** all clean.\n");
+    }
+
+    result ($founds.count() > 0);
+}
