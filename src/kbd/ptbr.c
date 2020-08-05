@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
-kryptos_u8_t *pt_br_latin1_demuxer(kryptos_u8_t *input, const size_t input_size, size_t *output_size) {
+kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input_size, size_t *output_size) {
     static struct {
         kryptos_u8_t symbol;
         kryptos_u8_t *key_sequence;
@@ -17,7 +17,7 @@ kryptos_u8_t *pt_br_latin1_demuxer(kryptos_u8_t *input, const size_t input_size,
         { 0, NULL    } // INFO(Rafael): This is the sentinel. Do not remove it.
     }, *dm, *dm_end;
     static size_t demux_passes_nr = sizeof(demux_passes) / sizeof(demux_passes[0]);
-    kryptos_u8_t *ip, *ip_end;
+    const kryptos_u8_t *ip, *ip_end;
     kryptos_u8_t sentinel_sequence[3];
     kryptos_u8_t *output = NULL, *op, *op_end, temp_size;
 

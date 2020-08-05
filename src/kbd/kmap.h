@@ -4,7 +4,7 @@
 #include <kryptos.h>
 #include <kbd/ptbr.h>
 
-typedef kryptos_u8_t *(*key_demux_func_t)(kryptos_u8_t *input, const size_t input_size, size_t *output_size);
+typedef kryptos_u8_t *(*key_demux_func_t)(const kryptos_u8_t *input, const size_t input_size, size_t *output_size);
 
 typedef struct {
     char *name;
