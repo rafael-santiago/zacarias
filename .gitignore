@@ -1,2 +1,4 @@
 *.o
 *.a
+*.Forgefile-*
+src/*/test/bin/*

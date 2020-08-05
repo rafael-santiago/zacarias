@@ -78,7 +78,7 @@ int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, cons
             goto zacarias_sendkeys_epilogue;
         }
 
-        keycode = XKeysymToKeycode(display, (KeySym)*input);
+        keycode = XKeysymToKeycode(display, (KeySym)*ip);
 
         if (hold_sh) {
             XTestFakeKeyEvent(display, shiftcode, 1, 0);
@@ -124,11 +124,16 @@ zacarias_sendkeys_epilogue:
 int zacarias_set_kbd_layout(const char *name) {
     zacarias_kmap_t *kp = &gZacariasKmap[0], *kp_end = &gZacariasKmap[0] + gZacariasKmapNr;
 
+    if (name == NULL) {
+        return 0;
+    }
+
     while (kp != kp_end) {
         if (strcmp(kp->layout.name, name) == 0) {
             gZacariasCurrKbdLayout = &kp->layout;
             return 1;
         }
+        kp++;
     }
 
     return 0;
