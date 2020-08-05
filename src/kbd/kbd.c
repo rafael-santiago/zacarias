@@ -48,6 +48,11 @@ int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, cons
 
     if (gZacariasCurrKbdLayout->key_demuxer != NULL) {
         input = gZacariasCurrKbdLayout->key_demuxer(buffer, buffer_size, &input_size);
+        if (input == NULL) {
+            fprintf(stderr, "error: Unable to demux keys from input buffer.\n");
+            err = 1;
+            goto zacarias_sendkeys_epilogue;
+        }
     } else {
         input = (kryptos_u8_t *)buffer;
         input_size = buffer_size;
