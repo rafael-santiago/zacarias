@@ -15,6 +15,7 @@
 #endif
 #include <signal.h>
 #include <unistd.h>
+#include <kbd/kmap.h>
 
 #if !defined(_WIN32)
 static struct termios old, new;
@@ -23,6 +24,19 @@ static DWORD con_mode;
 #endif
 
 static void getuserkey_sigint_watchdog(int signo);
+
+int zacarias_set_kbd_layout(const char *name) {
+    zacarias_kmap_t *kp = &gZacariasKmap[0], *kp_end = &gZacariasKmap[0] + gZacariasKmapNr;
+
+    while (kp != kp_end) {
+        if (strcmp(kp->layout.name, name) == 0) {
+            gZacariasCurrKbdLayout = &kp->layout;
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 #if defined(_WIN32)
 

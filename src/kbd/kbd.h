@@ -14,4 +14,6 @@
 
 kryptos_u8_t *zacarias_getuserkey(size_t *key_size);
 
+int zacarias_set_kbd_layout(const char *name);
+
 #endif
