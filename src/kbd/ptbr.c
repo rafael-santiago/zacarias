@@ -41,7 +41,6 @@ kryptos_u8_t *pt_br_latin1_demuxer(kryptos_u8_t *input, const size_t input_size,
     ip = input;
     ip_end = input + input_size;
 
-
     dm_end = &demux_passes[0] + demux_passes_nr;
 
     while (ip != ip_end && op < op_end) {
@@ -50,7 +49,7 @@ kryptos_u8_t *pt_br_latin1_demuxer(kryptos_u8_t *input, const size_t input_size,
         (dm_end - 1)->key_sequence = &sentinel_sequence[0];
 
         dm = &demux_passes[0];
-        while (dm != dm_end && *ip == dm->symbol) {
+        while (dm != dm_end && *ip != dm->symbol) {
             dm++;
         }
 
