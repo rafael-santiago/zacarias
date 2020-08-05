@@ -21,7 +21,6 @@ kryptos_u8_t *pt_br_latin1_demuxer(kryptos_u8_t *input, const size_t input_size,
     kryptos_u8_t sentinel_sequence[3];
     kryptos_u8_t *output = NULL, *op, *op_end, temp_size;
 
-
     if (input == NULL || input_size == 0 || output_size == NULL) {
         return NULL;
     }
@@ -66,6 +65,7 @@ kryptos_u8_t *pt_br_latin1_demuxer(kryptos_u8_t *input, const size_t input_size,
     }
 
     temp_size = 0;
+    memset(sentinel_sequence, 0, sizeof(sentinel_sequence));
 
     return output;
 }
