@@ -8,7 +8,7 @@ local var ldflags type list;
 local var deps type string;
 local var curr_toolset type string;
 
-project libzckbd : toolset $curr_toolset : $src, $includes, $cflags, $libraries, $ldflags, "libzckbd.a";
+project libzckbd : toolset $curr_toolset : dependencies $deps : $src, $includes, $cflags, $libraries, $ldflags, "libzckbd.a";
 
 libzckbd.preloading() {
     $curr_toolset = get_lib_toolset();
