@@ -31,7 +31,7 @@ static void getuserkey_sigint_watchdog(int signo);
 int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs) {
     kryptos_u8_t *input = NULL, *ip = NULL, *ip_end = NULL;
     size_t input_size = 0;
-    int err = 0, hold_sh = 0;
+    int err = 0, hold_sh = 0, anulate_sh = 0;
     unsigned int keycode = 0, shiftcode = 0;
     Display *display = NULL;
     kryptos_u8_t abs_key = 0;
@@ -66,6 +66,12 @@ int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, cons
     sleep(timeout_in_secs);
 
     while (ip != ip_end) {
+        if (*ip == 0) {
+            anulate_sh = 1;
+            ip++;
+            continue;
+        }
+
         abs_key = gZacariasCurrKbdLayout->lower[*ip];
         if (abs_key == 0) {
             abs_key = gZacariasCurrKbdLayout->upper[*ip];
@@ -78,7 +84,11 @@ int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, cons
             goto zacarias_sendkeys_epilogue;
         }
 
-        keycode = XKeysymToKeycode(display, (KeySym)*ip);
+        keycode = XKeysymToKeycode(display, (KeySym)abs_key);
+
+        if (anulate_sh) {
+            hold_sh = anulate_sh = 0;
+        }
 
         if (hold_sh) {
             XTestFakeKeyEvent(display, shiftcode, 1, 0);
