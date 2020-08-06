@@ -63,7 +63,7 @@ local function runtests() : result type int {
     hefesto.sys.fwrite($buf, $buf.len(), $fp);
     hefesto.sys.fclose($fp);
     var exit_code type int;
-    $exit_code = hefesto.sys.run(hefesto.sys.make_path("bin", $appname) + "< .input");
+    $exit_code = hefesto.sys.run(hefesto.sys.make_path("bin", $appname) + " --cutest-leak-check=yes < .input");
     hefesto.sys.rm(".input");
     result $exit_code;
 }

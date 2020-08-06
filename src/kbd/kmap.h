@@ -18,7 +18,7 @@ typedef struct {
 }zacarias_kmap_t;
 
 static zacarias_kmap_t gZacariasKmap[] = {
-    { "pt-br", gZacariasKmapPtBrUpper, gZacariasKmapPtBrLower, NULL }
+    { "pt-br", gZacariasKmapPtBrUpper, gZacariasKmapPtBrLower, pt_br_latin1_demuxer }
 };
 
 static size_t gZacariasKmapNr = sizeof(gZacariasKmap) / sizeof(gZacariasKmap[0]);

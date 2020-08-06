@@ -7,13 +7,18 @@ kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input
         kryptos_u8_t symbol;
         kryptos_u8_t *key_sequence;
     } demux_passes[] = {
-        { 'á', "'a"  }, { 'Á', "'A"  }, { 'à', "`a"  }, { 'À', "`A"  }, { 'ä', "\"a" }, { 'Ä', "\"A" }, { 'ã', "~a"  }, { 'Ã', "~A"  },
-        { 'é', "'e"  }, { 'É', "'E"  }, { 'è', "`e"  }, { 'È', "`E"  }, { 'ë', "\"e" }, { 'Ë', "\"E" },
-        { 'í', "'i"  }, { 'Í', "'I"  }, { 'ì', "`i"  }, { 'Ì', "`I"  }, { 'ï', "\"i" }, { 'Ï', "\"I" },
-        { 'ó', "'o"  }, { 'Ó', "'O"  }, { 'ò', "`o"  }, { 'Ò', "`O"  }, { 'ö', "\"o" }, { 'Ö', "\"O" }, { 'õ', "~o"  }, { 'Õ', "~O"  },
-        { 'ú', "'u"  }, { 'Ú', "'U"  }, { 'ù', "`u"  }, { 'Ù', "`U"  }, { 'ü', "\"u" }, { 'Ü', "\"U" },
-        { 'ç', "'c"  }, { 'Ç', "'C"  },
+        { 'á', "`a"  }, { 'Á', "`A"  }, { 'à', "`a"  }, { 'À', "`A"  }, { 'ä', "\"a" }, { 'Ä', "\"A" }, { 'ã', "~a"  }, { 'Ã', "~A"  },
+        { 'é', "`e"  }, { 'É', "`E"  }, { 'è', "`e"  }, { 'È', "`E"  }, { 'ë', "\"e" }, { 'Ë', "\"E" },
+        { 'í', "`i"  }, { 'Í', "`I"  }, { 'ì', "`i"  }, { 'Ì', "`I"  }, { 'ï', "\"i" }, { 'Ï', "\"I" },
+        { 'ó', "`o"  }, { 'Ó', "`O"  }, { 'ò', "`o"  }, { 'Ò', "`O"  }, { 'ö', "\"o" }, { 'Ö', "\"O" }, { 'õ', "~o"  }, { 'Õ', "~O"  },
+        { 'ú', "`u"  }, { 'Ú', "`U"  }, { 'ù', "`u"  }, { 'Ù', "`U"  }, { 'ü', "\"u" }, { 'Ü', "\"U" },
+        { 'ç', "`c"  }, { 'Ç', "`C"  },
         { 'ý', "'y"  }, { 'Ý', "'Y"  }, { 'ÿ', "\"y" },
+        { 'â', "^a"  }, { 'Â', "^A"  },
+        { 'ê', "^e"  }, { 'Ê', "^E"  },
+        { 'î', "^i"  }, { 'Î', "^I"  },
+        { 'ô', "^o"  }, { 'Ô', "^O"  },
+        { 'û', "^u"  }, { 'Û', "^U"  },
         { 0, NULL    } // INFO(Rafael): This is the sentinel. Do not remove it.
     }, *dm, *dm_end;
     static size_t demux_passes_nr = sizeof(demux_passes) / sizeof(demux_passes[0]);
@@ -25,7 +30,7 @@ kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input
         return NULL;
     }
 
-    temp_size = input_size << 1;
+    temp_size = input_size << 3;
     output = (kryptos_u8_t *) kryptos_newseg(temp_size);
 
     if (output == NULL) {
@@ -65,6 +70,11 @@ kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input
 
     temp_size = 0;
     memset(sentinel_sequence, 0, sizeof(sentinel_sequence));
+
+    if (output != NULL) {
+        *output_size = op - output;
+        op = op_end = NULL;
+    }
 
     return output;
 }
