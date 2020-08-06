@@ -69,7 +69,11 @@ CUTE_TEST_CASE(zacarias_sendkeys_tests)
         { "ZACARIAS",     "pt-br", 0 },
         { "ZACARIAS1234", "pt-br", 0 },
         { "méé bode said","pt-br", 0 },
-        { "mèè bode said","pt-br", 0 }
+        { "âÂêÊîÎôÔûÛ",   "pt-br", 0 },
+        { "ãÃõÕ",         "pt-br", 0 },
+        { "çÇáÁéÉíÍóÓúÚ", "pt-br", 0 },
+        //{ "àÀèÈìÌòÒùÙ",   "pt-br", 0 },
+        //{ "äÄëËïÏöÖüÜ",   "pt-br", 0 }
     }, *test, *test_end;
     size_t test_vector_nr = sizeof(test_vector) / sizeof(test_vector[0]);
 
