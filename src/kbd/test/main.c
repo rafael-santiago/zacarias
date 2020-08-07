@@ -3,6 +3,7 @@
 #include <kryptos.h>
 #include <string.h>
 #include <stdio.h>
+#include <X11/Xlib.h>
 
 CUTE_DECLARE_TEST_CASE(kbd_tests);
 CUTE_DECLARE_TEST_CASE(zacarias_getuserkey_tests);
@@ -77,14 +78,22 @@ CUTE_TEST_CASE(zacarias_sendkeys_tests)
         { "!?:;,%$&@#\"'*<>().", "pt-br", 0 }
     }, *test, *test_end;
     size_t test_vector_nr = sizeof(test_vector) / sizeof(test_vector[0]);
+    Display *display = XOpenDisplay(NULL);
 
-    test = &test_vector[0];
-    test_end = test + test_vector_nr;
+    if (display != NULL) {
+        XCloseDisplay(display);
 
-    while (test != test_end) {
-        CUTE_ASSERT(zacarias_set_kbd_layout(test->layout) == 1);
-        CUTE_ASSERT(zacarias_sendkeys(test->buffer, (test->buffer != NULL) ? strlen(test->buffer) : 0, 1) == test->expected);
-        test++;
+        test = &test_vector[0];
+        test_end = test + test_vector_nr;
+
+        while (test != test_end) {
+            CUTE_ASSERT(zacarias_set_kbd_layout(test->layout) == 1);
+            CUTE_ASSERT(zacarias_sendkeys(test->buffer, (test->buffer != NULL) ? strlen(test->buffer) : 0,
+                                          1) == test->expected);
+            test++;
+        }
+    } else {
+        fprintf(stdout, "WARN: Test skipped. X Server seems to be down!\n");
     }
 CUTE_TEST_CASE_END
 

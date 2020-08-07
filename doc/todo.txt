@@ -1,3 +1,4 @@
-(A) Avoid execute X11 dependent tests when XServer is down. +Tests
 (A) Implement device driver code infrastructure. +Dev,+Sys
-(A) Write file from kernel space. +Dev,+Sys
+(A) Write file from kernel space Linux. +Dev,+Sys
+(A) Write file from kernel space FreeBSD. +Dev,+Sys
+x (A) Avoid executing X11 dependent tests when XServer is down. +Tests
