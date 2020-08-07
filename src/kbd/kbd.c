@@ -72,14 +72,10 @@ int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, cons
             continue;
         }
 
-        abs_key = gZacariasCurrKbdLayout->lower[*ip];
-        if (abs_key == 0) {
-            abs_key = gZacariasCurrKbdLayout->upper[*ip];
-            hold_sh = 1;
-        }
+        abs_key = gZacariasCurrKbdLayout->key_mapper(*ip, &hold_sh);
 
         if (abs_key == 0) {
-            fprintf(stderr, "error: Unsupported symbol. Aborted. Did you specified the right keyboard location?\n");
+            fprintf(stderr, "error: Unsupported symbol. Aborted. Did you specified the right keyboard location? (%c %d)\n", *ip, *ip);
             err = 1;
             goto zacarias_sendkeys_epilogue;
         }

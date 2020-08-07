@@ -6,11 +6,12 @@
 
 typedef kryptos_u8_t *(*key_demux_func_t)(const kryptos_u8_t *input, const size_t input_size, size_t *output_size);
 
+typedef kryptos_u8_t (*key_mapper_func_t)(const kryptos_u8_t k, int *hold_sh);
+
 typedef struct {
     char *name;
-    kryptos_u8_t *upper;
-    kryptos_u8_t *lower;
     key_demux_func_t key_demuxer;
+    key_mapper_func_t key_mapper;
 }zacarias_kbd_layout;
 
 typedef struct {
@@ -18,7 +19,7 @@ typedef struct {
 }zacarias_kmap_t;
 
 static zacarias_kmap_t gZacariasKmap[] = {
-    { "pt-br", gZacariasKmapPtBrUpper, gZacariasKmapPtBrLower, pt_br_latin1_demuxer }
+    { "pt-br", pt_br_latin1_demuxer, pt_br_key_mapper }
 };
 
 static size_t gZacariasKmapNr = sizeof(gZacariasKmap) / sizeof(gZacariasKmap[0]);

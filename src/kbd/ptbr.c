@@ -29,6 +29,7 @@ kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input
         { 'ç', "\000`c", 3  }, { 'Ç', "\000`C", 3  },
 
         { 'ı', "\000`y", 3  }, { 'İ', "\000`Y", 3  }, { 'ÿ', "\"y",  2 },
+        { '"', "\" ",    2  },
 
         { 0, NULL, 0   } // INFO(Rafael): This is the sentinel. Do not remove it.
     }, *dm, *dm_end;
@@ -89,4 +90,302 @@ kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input
     }
 
     return output;
+}
+
+kryptos_u8_t pt_br_key_mapper(const kryptos_u8_t k, int *hold_sh) {
+    // WARN(Rafael): In order to avoid tricky alignment issues, let's use a flat and straightforward switch.
+    switch (k) {
+        case '\'':
+            *hold_sh = 0;
+            return '\'';
+        case '1':
+            *hold_sh = 0;
+            return '1';
+        case '2':
+            *hold_sh = 0;
+            return '2';
+        case '3':
+            *hold_sh = 0;
+            return '3';
+        case '4':
+            *hold_sh = 0;
+            return '4';
+        case '5':
+            *hold_sh = 0;
+            return '5';
+        case '6':
+            *hold_sh = 0;
+            return '6';
+        case '7':
+            *hold_sh = 0;
+            return '7';
+        case '8':
+            *hold_sh = 0;
+            return '8';
+        case '9':
+            *hold_sh = 0;
+            return '9';
+        case '0':
+            *hold_sh = 0;
+            return '0';
+        case '-':
+            *hold_sh = 0;
+            return '-';
+        case '=':
+            *hold_sh = 0;
+            return '=';
+        case 'q':
+            *hold_sh = 0;
+            return 'q';
+        case 'w':
+            *hold_sh = 0;
+            return 'w';
+        case 'e':
+            *hold_sh = 0;
+            return 'e';
+        case 'r':
+            *hold_sh = 0;
+            return 'r';
+        case 't':
+            *hold_sh = 0;
+            return 't';
+        case 'y':
+            *hold_sh = 0;
+            return 'y';
+        case 'u':
+            *hold_sh = 0;
+            return 'u';
+        case 'i':
+            *hold_sh = 0;
+            return 'i';
+        case 'o':
+            *hold_sh = 0;
+            return 'o';
+        case 'p':
+            *hold_sh = 0;
+            return 'p';
+        case '[':
+            *hold_sh = 0;
+            return '[';
+        case 'a':
+            *hold_sh = 0;
+            return 'a';
+        case 's':
+            *hold_sh = 0;
+            return 's';
+        case 'd':
+            *hold_sh = 0;
+            return 'd';
+        case 'f':
+            *hold_sh = 0;
+            return 'f';
+        case 'g':
+            *hold_sh = 0;
+            return 'g';
+        case 'h':
+            *hold_sh = 0;
+            return 'h';
+        case 'j':
+            *hold_sh = 0;
+            return 'j';
+        case 'k':
+            *hold_sh = 0;
+            return 'k';
+        case 'l':
+            *hold_sh = 0;
+            return 'l';
+        case '~':
+            *hold_sh = 0;
+            return '~';
+        case ']':
+            *hold_sh = 0;
+            return ']';
+        case '\\':
+            *hold_sh = 0;
+            return '\\';
+        case 'z':
+            *hold_sh = 0;
+            return 'z';
+        case 'x':
+            *hold_sh = 0;
+            return 'x';
+        case 'c':
+            *hold_sh = 0;
+            return 'c';
+        case 'v':
+            *hold_sh = 0;
+            return 'v';
+        case 'b':
+            *hold_sh = 0;
+            return 'b';
+        case 'n':
+            *hold_sh = 0;
+            return 'n';
+        case 'm':
+            *hold_sh = 0;
+            return 'm';
+        case ',':
+            *hold_sh = 0;
+            return ',';
+        case '.':
+            *hold_sh = 0;
+            return '.';
+        case ';':
+            *hold_sh = 0;
+            return ';';
+        case '/':
+            *hold_sh = 0;
+            return '/';
+        case '`':
+            *hold_sh = 0;
+            return '`';
+        case ' ':
+            *hold_sh = 0;
+            return ' ';
+
+        //case '"':
+        //    *hold_sh = 1;
+        //    return '\'';
+        case '!':
+            *hold_sh = 1;
+            return '1';
+        case '@':
+            *hold_sh = 1;
+            return '2';
+        case '#':
+            *hold_sh = 1;
+            return '3';
+        case '$':
+            *hold_sh = 1;
+            return '4';
+        case '%':
+            *hold_sh = 1;
+            return '5';
+        case '"':
+            *hold_sh = 1;
+            return '6';
+        case '&':
+            *hold_sh = 1;
+            return '7';
+        case '*':
+            *hold_sh = 1;
+            return '8';
+        case '(':
+            *hold_sh = 1;
+            return '9';
+        case ')':
+            *hold_sh = 1;
+            return '0';
+        case '_':
+            *hold_sh = 1;
+            return '-';
+        case '+':
+            *hold_sh = 1;
+            return '=';
+        case 'Q':
+            *hold_sh = 1;
+            return 'q';
+        case 'W':
+            *hold_sh = 1;
+            return 'w';
+        case 'E':
+            *hold_sh = 1;
+            return 'e';
+        case 'R':
+            *hold_sh = 1;
+            return 'r';
+        case 'T':
+            *hold_sh = 1;
+            return 't';
+        case 'Y':
+            *hold_sh = 1;
+            return 'y';
+        case 'U':
+            *hold_sh = 1;
+            return 'u';
+        case 'I':
+            *hold_sh = 1;
+            return 'i';
+        case 'O':
+            *hold_sh = 1;
+            return 'o';
+        case 'P':
+            *hold_sh = 1;
+            return 'p';
+        case '{':
+            *hold_sh = 1;
+            return '[';
+        case 'A':
+            *hold_sh = 1;
+            return 'a';
+        case 'S':
+            *hold_sh = 1;
+            return 's';
+        case 'D':
+            *hold_sh = 1;
+            return 'd';
+        case 'F':
+            *hold_sh = 1;
+            return 'f';
+        case 'G':
+            *hold_sh = 1;
+            return 'g';
+        case 'H':
+            *hold_sh = 1;
+            return 'h';
+        case 'J':
+            *hold_sh = 1;
+            return 'j';
+        case 'K':
+            *hold_sh = 1;
+            return 'k';
+        case 'L':
+            *hold_sh = 1;
+            return 'l';
+        case '^':
+            *hold_sh = 1;
+            return '~';
+        case '}':
+            *hold_sh = 1;
+            return ']';
+        case '|':
+            *hold_sh = 1;
+            return '\\';
+        case 'Z':
+            *hold_sh = 1;
+            return 'z';
+        case 'X':
+            *hold_sh = 1;
+            return 'x';
+        case 'C':
+            *hold_sh = 1;
+            return 'c';
+        case 'V':
+            *hold_sh = 1;
+            return 'v';
+        case 'B':
+            *hold_sh = 1;
+            return 'b';
+        case 'N':
+            *hold_sh = 1;
+            return 'n';
+        case 'M':
+            *hold_sh = 1;
+            return 'm';
+        case '<':
+            *hold_sh = 1;
+            return ',';
+        case '>':
+            *hold_sh = 1;
+            return '.';
+        case ':':
+            *hold_sh = 1;
+            return ';';
+        case '?':
+            *hold_sh = 1;
+            return '/';
+
+        default:
+            return 0;
+    }
 }
