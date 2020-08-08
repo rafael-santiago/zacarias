@@ -1,0 +1,29 @@
+include ../build/toolsets.hsl
+
+local var includes type list;
+local var cflags type list;
+local var libraries type list;
+local var ldflags type list;
+
+local var curr_toolset type string;
+
+project zacarias-cdev : toolset $curr_toolset : "main.c", $includes, $cflags, $libraries, $ldflags, "zacarias";
+
+zacarias-cdev.preloading() {
+    $curr_toolset = get_lkm_toolset();
+}
+
+zacarias-cdev.prologue() {
+    var option type list;
+    $option = hefesto.sys.get_option("clean");
+
+    if ($option.count() > 0) {
+        mkclean();
+    }
+
+    $includes.add_item(hefesto.sys.pwd());
+    $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), hefesto.sys.os_name()));
+}
+
+zacarias-cdev.epilogue() {
+}

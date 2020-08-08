@@ -2,3 +2,8 @@
 *.a
 *.Forgefile-*
 src/*/test/bin/*
+*.cmd
+*.ko
+*.kmod
+*.mod.c
+
