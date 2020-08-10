@@ -11,6 +11,8 @@ typedef struct zacarias_profile {
     size_t user_size;
     kryptos_u8_t *pwdb;
     size_t pwdb_size;
+    kryptos_u8_t *plbuf;
+    size_t plbuf_size;
     struct zacarias_profile *next, *last;
 }zacarias_profile_ctx;
 

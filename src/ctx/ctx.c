@@ -5,7 +5,7 @@
 
 #define zacarias_profile_ctx_new(p) ( (p) = (zacarias_profile_ctx *) kryptos_newseg(sizeof(zacarias_profile_ctx)),\
                                       (p)->user = NULL, (p)->user_size = 0, (p)->pwdb = NULL, (p)->pwdb_size = 0,\
-                                      (p)->last = (p)->next = NULL )
+                                      (p)->plbuf = NULL, (p)->plbuf_size = 0, (p)->last = (p)->next = NULL )
 
 static void zacarias_profile_ctx_del(zacarias_profile_ctx *profile);
 
@@ -113,6 +113,10 @@ static void zacarias_profile_ctx_del(zacarias_profile_ctx *profile) {
         kryptos_freeseg(p->user, p->user_size);
         kryptos_freeseg(p->pwdb, p->pwdb_size);
         p->user_size = p->pwdb_size = 0;
+        if (p->plbuf != NULL) {
+            kryptos_freeseg(p->plbuf, p->plbuf_size);
+            p->plbuf_size = 0;
+        }
     }
 }
 
