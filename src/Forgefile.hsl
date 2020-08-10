@@ -12,6 +12,7 @@ zacarias.prologue() {
 
     if ($submodules.count() == 0) {
         $submodules.add_item("kbd");
+        $submodules.add_item("ctx");
         $submodules.add_item("dev");
         $submodules.add_item("cmd");
     }

@@ -3,9 +3,35 @@
 #include <linux/device.h>
 #include <linux/fs.h>
 
+#include <asm/segment.h>
+#include <asm/uaccess.h>
+#include <linux/buffer_head.h>
+
 static struct file_operations fops = {
     .owner = THIS_MODULE
 };
+
+void test(void) {
+    struct file *file;
+    char *data = "hello from supervisor";
+    loff_t pos = 0;
+    mm_segment_t old_fs;
+
+    //old_fs = get_fs();
+    //set_fs(get_fs());
+
+    file = filp_open("/root/src/zacarias/keys.txt", O_WRONLY|O_CREAT, 0664);
+
+    if (file != NULL) {
+        kernel_write(file, data, 21, pos);
+        //vfs_write(file, data, 21, &pos);
+        filp_close(file, NULL);
+    } else {
+        printk(KERN_INFO "/dev/zacarias: Unable to open file.\n");
+    }
+
+    //set_fs(old_fs);
+}
 
 int cdev_init(void) {
     cdev_mtx_init(&g_cdev()->lock);
@@ -33,6 +59,8 @@ int cdev_init(void) {
         printk(KERN_INFO "/dev/zacarias: Device file creation failure.\n");
         return PTR_ERR(g_cdev()->device);
     }
+
+    test();
 
     return 0;
 }
