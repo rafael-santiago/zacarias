@@ -97,6 +97,9 @@ int zacarias_encrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *pa
                                  ktask->out,
                                  ktask->out_size) == kKryptosSuccess) {
             err = 0;
+            kryptos_freeseg((*profile)->plbuf, (*profile)->plbuf_size);
+            (*profile)->plbuf = NULL;
+            (*profile)->plbuf_size = 0;
         } else {
             (*profile)->pwdb = old_pwdb;
             (*profile)->pwdb_size = old_pwdb_size;
