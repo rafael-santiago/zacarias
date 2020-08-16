@@ -4,6 +4,67 @@
 static const kryptos_u8_t *findalias(const kryptos_u8_t *haystack, const kryptos_u8_t *haystack_end,
                                      const kryptos_u8_t *needle, const kryptos_u8_t *needle_end);
 
+static kryptos_u8_t *random_plbuf_entry();
+
+int plbuf_edit_detach(kryptos_u8_t **plbuf, size_t *plbuf_size) {
+    int err = 1;
+    kryptos_u8_t *p = NULL, *p_end = NULL;
+    kryptos_u8_t *temp = NULL;
+    size_t temp_size = 0;
+
+    if (plbuf == NULL || (*plbuf) == NULL || plbuf_size == NULL || *plbuf_size == 0) {
+        goto plbuf_edit_detach_epilogue;
+    }
+
+    p = (*plbuf);
+    p_end = p + *plbuf_size;
+
+    while (p != p_end && *p != '\n') {
+        p++;
+    }
+
+    if (*p != '\n') {
+        goto plbuf_edit_detach_epilogue;
+    }
+
+    p += 1;
+
+    p_end -= (p_end[0] != '\n') + (p_end[-1] == '\n');
+
+    while (p_end != p && *p_end == '\n') {
+        p_end--;
+    }
+
+    temp_size = p_end - p;
+    if ((temp = (kryptos_u8_t *) kryptos_newseg(temp_size + 1)) == NULL) {
+        goto plbuf_edit_detach_epilogue;
+    }
+
+    memset(temp, 0, temp_size + 1);
+    memcpy(temp, p, temp_size);
+
+    err = 0;
+
+plbuf_edit_detach_epilogue:
+
+    if (temp != NULL && err == 0) {
+        kryptos_freeseg((*plbuf), *plbuf_size);
+        (*plbuf) = temp;
+        *plbuf_size = temp_size;
+        temp = NULL;
+        temp_size = 0;
+    } else if (temp != NULL) {
+        kryptos_freeseg(temp, temp_size);
+        temp = NULL;
+        temp_size = 0;
+    }
+
+    p = p_end = NULL;
+    temp_size = 0;
+
+    return err;
+}
+
 int plbuf_edit_shuffle(kryptos_u8_t **plbuf, size_t *plbuf_size) {
     int err = 1;
     kryptos_u8_t **plbuf_lines = NULL;
@@ -12,8 +73,20 @@ int plbuf_edit_shuffle(kryptos_u8_t **plbuf, size_t *plbuf_size) {
     int done = 0;
     kryptos_u8_t *temp = NULL, *tp = NULL;
     size_t temp_size = 0;
+    kryptos_u8_t *random_entries[2];
+    size_t random_entries_size[2];
+
+    random_entries[0] = random_entries[1] = NULL;
+    random_entries_size[0] = random_entries_size[1] = 0;
 
     if (plbuf == NULL || *plbuf == NULL || plbuf_size == NULL || *plbuf_size == 0) {
+        goto plbuf_edit_shuffle_epilogue;
+    }
+
+    random_entries[0] = random_plbuf_entry(&random_entries_size[0]);
+    random_entries[1] = random_plbuf_entry(&random_entries_size[1]);
+
+    if (random_entries[0] == NULL || random_entries[1] == NULL) {
         goto plbuf_edit_shuffle_epilogue;
     }
 
@@ -47,11 +120,12 @@ int plbuf_edit_shuffle(kryptos_u8_t **plbuf, size_t *plbuf_size) {
         p++;
     }
 
-    temp_size = *plbuf_size;
-    temp = (kryptos_u8_t *) kryptos_newseg(temp_size);
-    memset(temp, 0, temp_size);
+    temp_size = *plbuf_size + random_entries_size[0] + random_entries_size[1] + 1;
+    temp = (kryptos_u8_t *) kryptos_newseg(temp_size + 1);
+    memset(temp, 0, temp_size + 1);
 
-    tp = temp;
+    memcpy(temp, random_entries[0], random_entries_size[0]);
+    tp = temp + random_entries_size[0];
     done = 0;
     plbuf_n = 0;
 
@@ -90,6 +164,8 @@ int plbuf_edit_shuffle(kryptos_u8_t **plbuf, size_t *plbuf_size) {
 
 #undef random_plbuf_line_n
 
+    memcpy(tp, random_entries[1], random_entries_size[1]);
+
     err = 0;
 
 plbuf_edit_shuffle_epilogue:
@@ -99,11 +175,27 @@ plbuf_edit_shuffle_epilogue:
         (*plbuf) = temp;
         temp = NULL;
         temp_size = 0;
+    } else if (temp != NULL) {
+        kryptos_freeseg(temp, temp_size);
+        temp = NULL;
+        temp_size = 0;
     }
 
     if (plbuf_lines != NULL) {
         kryptos_freeseg(*plbuf_lines, sizeof(kryptos_u8_t *) * plbuf_lines_nr);
         plbuf_lines_nr = 0;
+    }
+
+    if (random_entries[0] != NULL) {
+        kryptos_freeseg(random_entries[0], random_entries_size[0]);
+        random_entries[0] = NULL;
+        random_entries_size[0] = 0;
+    }
+
+    if (random_entries[1] != NULL) {
+        kryptos_freeseg(random_entries[1], random_entries_size[1]);
+        random_entries[1] = NULL;
+        random_entries_size[1] = 0;
     }
 
     plbuf_lines = NULL;
@@ -278,4 +370,33 @@ static const kryptos_u8_t *findalias(const kryptos_u8_t *haystack, const kryptos
     }
 
     return NULL;
+}
+
+static kryptos_u8_t *random_plbuf_entry(size_t *size) {
+    static kryptos_u8_t *randcharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789=/<>.,%#@!*(){}[]+-\\";
+    static size_t randcharset_size = 82;
+    kryptos_u8_t *entry, *ep, *ep_end;
+
+    if (size == NULL) {
+        return NULL;
+    }
+
+    *size = kryptos_get_random_byte();
+    if ((entry = (kryptos_u8_t *) kryptos_newseg(*size + 2)) == NULL) {
+        return NULL;
+    }
+
+    memset(entry, 0, *size + 2);
+
+    ep = entry;
+    ep_end = ep - *size - 1;
+
+    while (ep != ep_end) {
+        *ep = randcharset[kryptos_get_random_byte() % randcharset_size];
+        ep++;
+    }
+
+    ep_end[1] = '\n';
+
+    return entry;
 }
