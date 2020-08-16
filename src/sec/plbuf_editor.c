@@ -4,6 +4,118 @@
 static const kryptos_u8_t *findalias(const kryptos_u8_t *haystack, const kryptos_u8_t *haystack_end,
                                      const kryptos_u8_t *needle, const kryptos_u8_t *needle_end);
 
+int plbuf_edit_shuffle(kryptos_u8_t **plbuf, size_t *plbuf_size) {
+    int err = 1;
+    kryptos_u8_t **plbuf_lines = NULL;
+    size_t plbuf_lines_nr = 0, plbuf_n = 0;
+    kryptos_u8_t *p = NULL, *p_end = NULL, *master_end = NULL;
+    int done = 0;
+    kryptos_u8_t *temp = NULL, *tp = NULL;
+    size_t temp_size = 0;
+
+    if (plbuf == NULL || *plbuf == NULL || plbuf_size == NULL || *plbuf_size == 0) {
+        goto plbuf_edit_shuffle_epilogue;
+    }
+
+    plbuf_lines_nr = 0;
+
+    p = (*plbuf);
+    master_end = p + *plbuf_size;
+    p_end = master_end;
+
+    while (p != p_end) {
+        if (*p == '\n') {
+            plbuf_lines_nr += 1;
+        }
+        p++;
+    }
+
+    plbuf_lines = (kryptos_u8_t **) kryptos_newseg(sizeof(kryptos_u8_t *) * plbuf_lines_nr);
+
+    if (plbuf_lines == NULL) {
+        goto plbuf_edit_shuffle_epilogue;
+    }
+
+    plbuf_n = 0;
+
+    p = (*plbuf);
+
+    while (p != p_end) {
+        if (*p == '\n') {
+            plbuf_lines[plbuf_n++] = p;
+        }
+        p++;
+    }
+
+    temp_size = *plbuf_size;
+    temp = (kryptos_u8_t *) kryptos_newseg(temp_size);
+    memset(temp, 0, temp_size);
+
+    tp = temp;
+    done = 0;
+    plbuf_n = 0;
+
+#define random_plbuf_line_n ( (size_t) kryptos_get_random_byte() << 24 |\
+                              (size_t) kryptos_get_random_byte() << 16 |\
+                              (size_t) kryptos_get_random_byte() <<  8 |\
+                              (size_t) kryptos_get_random_byte() )
+
+    while (!done) {
+        do {
+            plbuf_n = random_plbuf_line_n;
+        } while (plbuf_lines[plbuf_n] == NULL);
+
+        p = plbuf_lines[plbuf_n];
+
+        p_end = p;
+        while (p_end < master_end && *p_end != '\n') {
+            p_end++;
+        }
+        if (p_end == master_end) {
+            // WARN(Rafael): It seems screwed up. It is better not going ahead with this buffer.
+            goto plbuf_edit_shuffle_epilogue;
+        }
+        p_end += 1;
+
+        memcpy(tp, p, p_end - p);
+        tp += p_end - p;
+
+        plbuf_lines[plbuf_n] = NULL;
+
+        done = 1;
+        for (plbuf_n = 0; plbuf_n < plbuf_lines_nr && done; plbuf_n++) {
+            done = (plbuf_lines[plbuf_n] == NULL);
+        }
+    }
+
+#undef random_plbuf_line_n
+
+    err = 0;
+
+plbuf_edit_shuffle_epilogue:
+
+    if (temp != NULL && err == 0) {
+        kryptos_freeseg(*plbuf, *plbuf_size);
+        (*plbuf) = temp;
+        temp = NULL;
+        temp_size = 0;
+    }
+
+    if (plbuf_lines != NULL) {
+        kryptos_freeseg(*plbuf_lines, sizeof(kryptos_u8_t *) * plbuf_lines_nr);
+        plbuf_lines_nr = 0;
+    }
+
+    plbuf_lines = NULL;
+
+    tp = p = p_end = master_end = NULL;
+    done = 0;
+    plbuf_n = 0;
+    plbuf_lines_nr = 0;
+
+    return err;
+}
+
 int plbuf_edit_add(kryptos_u8_t **plbuf, size_t *plbuf_size,
                    const kryptos_u8_t *alias, const size_t alias_size,
                    const kryptos_u8_t *passwd, const size_t passwd_size) {
