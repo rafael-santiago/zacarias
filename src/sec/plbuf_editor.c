@@ -1,8 +1,8 @@
 #include <sec/plbuf_editor.h>
 #include <string.h>
 
-static const kryptos_u8_t *findstr(const kryptos_u8_t *haystack, const kryptos_u8_t *haystack_end,
-                                   const kryptos_u8_t *needle, const kryptos_u8_t *needle_end);
+static const kryptos_u8_t *findalias(const kryptos_u8_t *haystack, const kryptos_u8_t *haystack_end,
+                                     const kryptos_u8_t *needle, const kryptos_u8_t *needle_end);
 
 int plbuf_edit_add(kryptos_u8_t **plbuf, size_t *plbuf_size,
                    const kryptos_u8_t *alias, const size_t alias_size,
@@ -19,7 +19,7 @@ int plbuf_edit_add(kryptos_u8_t **plbuf, size_t *plbuf_size,
         goto plbuf_edit_add_epilogue;
     }
 
-    if (findstr(*plbuf, (*plbuf) + *plbuf_size, alias, alias + alias_size) != NULL) {
+    if (findalias(*plbuf, (*plbuf) + *plbuf_size, alias, alias + alias_size) != NULL) {
         goto plbuf_edit_add_epilogue;
     }
 
@@ -75,7 +75,7 @@ int plbuf_edit_del(kryptos_u8_t **plbuf, size_t *plbuf_size,
         goto plbuf_edit_del_epilogue;
     }
 
-    if ((entry = findstr(*plbuf, (*plbuf) + *plbuf_size, alias, alias + alias_size)) == NULL) {
+    if ((entry = findalias(*plbuf, (*plbuf) + *plbuf_size, alias, alias + alias_size)) == NULL) {
         goto plbuf_edit_del_epilogue;
     }
 
@@ -140,11 +140,11 @@ plbuf_edit_del_epilogue:
 
 int plbuf_edit_find(const kryptos_u8_t *plbuf, const size_t plbuf_size,
                     const kryptos_u8_t *alias, const size_t alias_size) {
-    return (findstr(plbuf, plbuf + plbuf_size, alias, alias + alias_size) != NULL);
+    return (findalias(plbuf, plbuf + plbuf_size, alias, alias + alias_size) != NULL);
 }
 
-static const kryptos_u8_t *findstr(const kryptos_u8_t *haystack, const kryptos_u8_t *haystack_end,
-                                   const kryptos_u8_t *needle, const kryptos_u8_t *needle_end) {
+static const kryptos_u8_t *findalias(const kryptos_u8_t *haystack, const kryptos_u8_t *haystack_end,
+                                     const kryptos_u8_t *needle, const kryptos_u8_t *needle_end) {
     const kryptos_u8_t *hp;
     size_t needle_size;
 
@@ -155,11 +155,14 @@ static const kryptos_u8_t *findstr(const kryptos_u8_t *haystack, const kryptos_u
     hp = haystack;
     needle_size = needle_end - needle;
 
-    while (hp != haystack_end && (haystack_end - hp) >= needle_size) {
+    while (hp < haystack_end && (haystack_end - hp) >= needle_size) {
         if (memcmp(hp, needle, needle_size) == 0) {
             return hp;
         }
-        hp++;
+        while (hp != haystack_end && *hp != '\n') {
+            hp++;
+        }
+        hp += (*hp == '\n');
     }
 
     return NULL;
