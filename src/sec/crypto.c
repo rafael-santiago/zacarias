@@ -126,7 +126,7 @@ zacarias_encrypt_pwdb_epilogue:
 
 static kryptos_u8_t *zacarias_key_crunching(const char *user, const size_t user_size,
                                             const kryptos_u8_t *passwd, const size_t passwd_size, size_t *key_size) {
-    kryptos_u32_t parallelism = 1, memory_size_kb = 512, iterations = 32;
+    kryptos_u32_t parallelism = 1, memory_size_kb = 512, iterations = 4;
     kryptos_u8_t *in = NULL, *key = NULL;
     size_t in_size;
 
