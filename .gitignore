@@ -6,4 +6,4 @@ src/*/test/bin/*
 *.ko
 *.kmod
 *.mod.c
-
+*/dev/.tmp_versions/*

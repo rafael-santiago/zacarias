@@ -103,20 +103,26 @@ zacarias_profile_ctx *zacarias_profiles_ctx_get(zacarias_profiles_ctx *profiles,
 }
 
 static void zacarias_profile_ctx_del(zacarias_profile_ctx *profile) {
-    zacarias_profile_ctx *p;
+    zacarias_profile_ctx *p, *t;
 
     if (profile == NULL) {
         return;
     }
 
-    for (p = profile; p != NULL; p = p->next) {
-        kryptos_freeseg(p->user, p->user_size);
-        kryptos_freeseg(p->pwdb, p->pwdb_size);
+    for (p = profile; p != NULL; p = t) {
+        t = p->next;
+        if (p->user != NULL) {
+            kryptos_freeseg(p->user, p->user_size);
+        }
+        if (p->pwdb != NULL) {
+            kryptos_freeseg(p->pwdb, p->pwdb_size);
+        }
         p->user_size = p->pwdb_size = 0;
         if (p->plbuf != NULL) {
             kryptos_freeseg(p->plbuf, p->plbuf_size);
             p->plbuf_size = 0;
         }
+        kryptos_freeseg(p, sizeof(zacarias_profile_ctx));
     }
 }
 

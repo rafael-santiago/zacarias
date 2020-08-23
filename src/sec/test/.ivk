@@ -1,0 +1,2 @@
+--forgefiles=Forgefile.hsl --Forgefile-projects=libzcsec-tests --ldflags=-lzcsec,-lzcctx,-lkryptos,-lcutest --libraries=../../lib,../../lib/cutest/src/lib,../../lib/kryptos/lib --includes=../../lib/cutest/src,../..,../../lib/kryptos/src --bin-output-dir=bin --obj-output-dir=o
+

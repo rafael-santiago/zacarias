@@ -35,7 +35,6 @@ int zacarias_decrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *pa
         goto zacarias_decrypt_pwdb_epilogue;
     }
 
-    kryptos_task_set_in(ktask, (*profile)->pwdb, (*profile)->pwdb_size);
     kryptos_task_set_decrypt_action(ktask);
     kryptos_run_cipher(aes256, ktask, key, key_size, kKryptosGCM);
 
@@ -43,17 +42,13 @@ int zacarias_decrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *pa
         err = 0;
         (*profile)->plbuf = ktask->out;
         (*profile)->plbuf_size = ktask->out_size;
+        ktask->out = NULL;
+        ktask->out_size = 0;
     }
 
 zacarias_decrypt_pwdb_epilogue:
 
-    if (key != NULL) {
-        kryptos_freeseg(key, key_size);
-        key_size = 0;
-        key = NULL;
-    }
-
-    kryptos_task_free(ktask, KRYPTOS_TASK_IN);
+    kryptos_task_free(ktask, KRYPTOS_TASK_IN | KRYPTOS_TASK_KEY | KRYPTOS_TASK_IV | KRYPTOS_TASK_OUT);
 
     return err;
 }
@@ -62,7 +57,7 @@ int zacarias_encrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *pa
     int err = 1;
     kryptos_task_ctx t, *ktask = &t;
     kryptos_u8_t *key = NULL, *old_pwdb = NULL;
-    size_t key_size, old_pwdb_size = 0;
+    size_t key_size = 0, old_pwdb_size = 0;
 
     kryptos_task_init_as_null(ktask);
 
@@ -88,6 +83,10 @@ int zacarias_encrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *pa
         old_pwdb_size = (*profile)->pwdb_size;
         (*profile)->pwdb = NULL;
         (*profile)->pwdb_size = 0;
+    } else {
+        if ((*profile)->pwdb_size != 0) {
+            (*profile)->pwdb_size = 0;
+        }
     }
 
     if (kryptos_last_task_succeed(ktask)) {
@@ -110,19 +109,16 @@ int zacarias_encrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *pa
 
 zacarias_encrypt_pwdb_epilogue:
 
-    if (key != NULL) {
-        kryptos_freeseg(key, key_size);
-        key_size = 0;
-        key = NULL;
-    }
-
     if (old_pwdb != NULL) {
         kryptos_freeseg(old_pwdb, old_pwdb_size);
         old_pwdb_size = 0;
         old_pwdb = NULL;
     }
 
-    kryptos_task_free(ktask, KRYPTOS_TASK_OUT);
+    kryptos_task_free(ktask, KRYPTOS_TASK_OUT | KRYPTOS_TASK_KEY | KRYPTOS_TASK_IV);
+
+    key = NULL;
+    key_size = 0;
 
     return err;
 
@@ -130,7 +126,7 @@ zacarias_encrypt_pwdb_epilogue:
 
 static kryptos_u8_t *zacarias_key_crunching(const char *user, const size_t user_size,
                                             const kryptos_u8_t *passwd, const size_t passwd_size, size_t *key_size) {
-    kryptos_u32_t parallelism = 1, memory_size_kb = 512, iterations = 128;
+    kryptos_u32_t parallelism = 1, memory_size_kb = 512, iterations = 32;
     kryptos_u8_t *in = NULL, *key = NULL;
     size_t in_size;
 

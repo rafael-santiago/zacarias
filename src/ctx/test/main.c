@@ -57,6 +57,9 @@ CUTE_TEST_CASE(ctx_general_tests)
             CUTE_ASSERT(memcmp(profiles->tail->user, user, user_size) == 0);
             CUTE_ASSERT(profiles->tail->pwdb_size == pwdb_size);
             CUTE_ASSERT(memcmp(profiles->tail->pwdb, pwdb, pwdb_size) == 0);
+        } else {
+            free(user);
+            free(pwdb);
         }
         test++;
     }

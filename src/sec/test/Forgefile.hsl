@@ -8,13 +8,13 @@ local var libraries type list;
 local var ldflags type list;
 local var appname type string;
 
-project libzcctx-tests : toolset $curr_toolset : $src, $includes, $cflags, $libraries, $ldflags, $appname;
+project libzcsec-tests : toolset $curr_toolset : $src, $includes, $cflags, $libraries, $ldflags, $appname;
 
-libzcctx-tests.preloading() {
+libzcsec-tests.preloading() {
     $curr_toolset = get_app_toolset();
 }
 
-libzcctx-tests.prologue() {
+libzcsec-tests.prologue() {
     if (build("libkryptos") != 0 || build("libcutest") != 0) {
         hefesto.project.abort(1);
     }
@@ -28,7 +28,7 @@ libzcctx-tests.prologue() {
     $cflags = hefesto.sys.get_option("cflags");
     $libraries = hefesto.sys.get_option("libraries");
     $ldflags = hefesto.sys.get_option("ldflags");
-    $appname = "libzcctx-tests";
+    $appname = "libzcsec-tests";
 
     if (hefesto.sys.os_name() == "linux") {
         $ldflags.add_item("-ldl");
@@ -43,7 +43,7 @@ libzcctx-tests.prologue() {
     }
 }
 
-libzcctx-tests.epilogue() {
+libzcsec-tests.epilogue() {
     if (hefesto.sys.last_forge_result() == 0) {
         if (runtests() != 0) {
             hefesto.project.abort(1);
