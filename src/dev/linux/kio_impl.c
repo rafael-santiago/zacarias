@@ -61,3 +61,27 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
 
     return 0;
 }
+
+/*
+void test(void) {
+    struct file *file;
+    char *data = "hello from supervisor";
+    loff_t pos = 0;
+    mm_segment_t old_fs;
+
+    //old_fs = get_fs();
+    //set_fs(get_fs());
+
+    file = filp_open("/root/src/zacarias/keys.txt", O_WRONLY|O_CREAT, 0664);
+
+    if (file != NULL) {
+        kernel_write(file, data, 21, pos);
+        //vfs_write(file, data, 21, &pos);
+        filp_close(file, NULL);
+    } else {
+        printk(KERN_INFO "/dev/zacarias: Unable to open file.\n");
+    }
+
+    //set_fs(old_fs);
+}
+*/

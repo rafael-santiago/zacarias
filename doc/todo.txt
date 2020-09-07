@@ -1,4 +1,5 @@
-(A) Write file from kernel space FreeBSD. +Dev,+Sys
+(A) Make the local libkryptos lightweight. +Dev,+Sys
+x (A) Write file from kernel space FreeBSD. +Dev,+Sys
 x (A) Finish up sec tests. +Tests
 x (A) Implement pwdb encryption. AES/256(GCM), KDF=argon2i. +Dev,+Sec
 x (A) Write file from kernel space Linux. +Dev,+Sys
