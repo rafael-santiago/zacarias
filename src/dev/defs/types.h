@@ -26,6 +26,8 @@
 #  define cdev_mtx_deinit(m) mutex_destroy((m))
 # endif
 
+#include <ctx/ctx.h>
+
 struct cdev_ctx {
 # if defined(__linux__)
     int major_nr;
@@ -35,6 +37,7 @@ struct cdev_ctx {
     struct cdev *device;
 # endif
     cdev_mtx lock;
+    zacarias_profiles_ctx *profiles;
 };
 
 struct cdev_ctx *g_cdev(void);

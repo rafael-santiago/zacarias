@@ -24,6 +24,11 @@ zacarias-cdev.prologue() {
     $includes.add_item(hefesto.sys.pwd());
     $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "defs"));
     $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), hefesto.sys.os_name()));
+    $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "ctx"));
+    $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "kryptos"));
+
+    $cflags.add_item("-DKRYPTOS_KERNEL_MODE=1");
+    $cflags.add_item("-DKRYPTOS_DATA_WIPING_WHEN_FREEING_MEMORY=1");
 }
 
 zacarias-cdev.epilogue() {

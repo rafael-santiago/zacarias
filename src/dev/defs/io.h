@@ -29,6 +29,8 @@ typedef enum {
     kProfileNotAttached,
     kAuthenticationFailure,
     kGeneralError,
+    kPWDBReadingError,
+    kPWDBWritingError,
     kUnknownDeviceCommand,
     kZcDeviceStatusNr,
 }zc_device_status_t;

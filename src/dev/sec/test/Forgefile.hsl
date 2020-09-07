@@ -1,4 +1,4 @@
-include ../../build/toolsets.hsl
+include ../../../build/toolsets.hsl
 
 local var curr_toolset type string;
 local var src type list;

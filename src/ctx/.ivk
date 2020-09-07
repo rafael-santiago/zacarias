@@ -1,1 +1,0 @@
---forgefiles=Forgefile.hsl --Forgefile-projects=libzcctx --includes=../lib/kryptos/src,../ --libraries=../lib/kryptos/lib --ldflags=-lkryptos --obj-output-dir=o --bin-output-dir=../lib
