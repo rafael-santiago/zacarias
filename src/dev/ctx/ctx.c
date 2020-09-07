@@ -50,7 +50,7 @@ zacarias_profiles_ctx_add_epilogue:
 
 int zacarias_profiles_ctx_del(zacarias_profiles_ctx **profiles,
                               const char *user, const size_t user_size) {
-    zacarias_profile_ctx *profile, *p;
+    zacarias_profile_ctx *profile;
     int err = 0;
 
     if (profiles == NULL || user == NULL || user_size == 0) {
@@ -67,10 +67,10 @@ int zacarias_profiles_ctx_del(zacarias_profiles_ctx **profiles,
 
     if (profile == (*profiles)->head) {
         if ((*profiles)->tail == (*profiles)->head) {
-            (*profiles)->tail = p->next;
+            (*profiles)->tail = NULL;
         }
-            (*profiles)->head = profile->next;
-            profile->last = NULL;
+        (*profiles)->head = profile->next;
+        profile->last = NULL;
     } else if (profile == (*profiles)->tail) {
         (*profiles)->tail = profile->last;
         profile->last->next = NULL;
