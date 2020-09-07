@@ -1,6 +1,8 @@
 #include <defs/io.h>
 #include <defs/types.h>
 #include <linux/slab.h>
+#include <asm/uaccess.h>
+#include <kio.h>
 #include <ctx/ctx.h>
 
 int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
@@ -13,7 +15,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
     char *pwdb = NULL;
     size_t pwdb_size;
 
-    if (!cdev_mtx_lock(&g_cdev()->lock)) {
+    if (!cdev_mtx_trylock(&g_cdev()->lock)) {
         return -EBUSY;
     }
 
@@ -57,7 +59,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         goto zc_dev_act_attach_profile_epilogue;
     }
 
-    err = zacarias_profiles_ctx_add(g_cdev()->profiles, user, user_size, pwdb, pwdb_size);
+    err = zacarias_profiles_ctx_add(&g_cdev()->profiles, user, user_size, pwdb, pwdb_size);
     if (err != 0) {
         err = -err;
         d->status = kGeneralError;
@@ -83,7 +85,7 @@ zc_dev_act_attach_profile_epilogue:
 
     user_size = pwdb_path_size = pwdb_size = 0;
 
-    cdev_unlock(&g_cdev()->lock);
+    cdev_mtx_unlock(&g_cdev()->lock);
 
     return err;
 }

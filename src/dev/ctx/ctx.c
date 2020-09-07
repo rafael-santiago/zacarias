@@ -1,5 +1,7 @@
 #include <ctx/ctx.h>
-#include <string.h>
+#ifndef KRYPTOS_KERNEL_MODE
+# include <string.h>
+#endif
 
 // WARN(Rafael): Avoid using str functions from string.h (it can be able to run inside kernel too).
 
