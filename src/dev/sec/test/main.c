@@ -7,12 +7,58 @@
 CUTE_DECLARE_TEST_CASE(sec_tests);
 CUTE_DECLARE_TEST_CASE(crypto_tests);
 CUTE_DECLARE_TEST_CASE(plbuf_editor_tests);
+CUTE_DECLARE_TEST_CASE(unbiased_rand_mod_tests);
+CUTE_DECLARE_TEST_CASE(zacarias_gen_userkey_tests);
 
 CUTE_MAIN(sec_tests);
 
 CUTE_TEST_CASE(sec_tests)
     CUTE_RUN_TEST(crypto_tests);
     CUTE_RUN_TEST(plbuf_editor_tests);
+    CUTE_RUN_TEST(unbiased_rand_mod_tests);
+    CUTE_RUN_TEST(zacarias_gen_userkey_tests);
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(unbiased_rand_mod_tests)
+    unsigned int random = unbiased_rand_mod(20);
+    CUTE_ASSERT(random < 20);
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(zacarias_gen_userkey_tests)
+    struct test_ctx {
+        size_t size;
+    } test_vector[] = {
+        { 1 },
+        { 2 },
+        { 3 },
+        { 4 },
+        { 5 },
+        { 6 },
+        { 7 },
+    }, *test, *test_end;
+    size_t test_vector_nr = sizeof(test_vector) / sizeof(test_vector[0]);
+    kryptos_u8_t *key;
+    size_t key_size;
+
+    CUTE_ASSERT(zacarias_gen_userkey(NULL) == NULL);
+    key_size = 1000;
+    CUTE_ASSERT(zacarias_gen_userkey(&key_size) == NULL);
+    key_size = 0;
+    key = zacarias_gen_userkey(&key_size);
+    CUTE_ASSERT(key != NULL);
+    kryptos_freeseg(key, key_size);
+
+    test = &test_vector[0];
+    test_end = test + test_vector_nr;
+
+    while (test != test_end) {
+        key_size = test->size;
+        key = zacarias_gen_userkey(&key_size);
+        CUTE_ASSERT(key_size == test->size);
+        CUTE_ASSERT(key != NULL);
+        kryptos_freeseg(key, key_size);
+        test++;
+    }
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(plbuf_editor_tests)

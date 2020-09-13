@@ -2,6 +2,8 @@
 
 #define ZACARIAS_PWDB "ZACARIAS PWDB"
 
+#define ZACARIAS_MAX_USERKEY_SIZE 32
+
 static kryptos_u8_t *zacarias_key_crunching(const char *user, const size_t user_size,
                                             const kryptos_u8_t *passwd, const size_t passwd_size, size_t *key_size);
 
@@ -192,8 +194,6 @@ static kryptos_u8_t *zacarias_key_crunching(const char *user, const size_t user_
         *key_size = 0;
     }
 
-zacarias_key_crunching_epilogue:
-
     if (in != NULL) {
         kryptos_freeseg(in, in_size);
         in = NULL;
@@ -203,4 +203,60 @@ zacarias_key_crunching_epilogue:
     return key;
 }
 
+unsigned int unbiased_rand_mod(const unsigned n) {
+    unsigned int r = 0;
+
+    do {
+        do {
+            r = kryptos_get_random_byte() << 24 |
+                kryptos_get_random_byte() << 16 |
+                kryptos_get_random_byte() <<  8 |
+                kryptos_get_random_byte();
+        } while (r >= 0xFFFFFFFF - (0xFFFFFFFF % n));
+        r = r % n;
+    } while (r == 0);
+
+    return r;
+}
+
+kryptos_u8_t *zacarias_gen_userkey(size_t *size) {
+    kryptos_u8_t *key = NULL, *kp, *kp_end;
+    static kryptos_u8_t gZacariasUserKeyCharset[] = {
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
+        'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+        'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '"', '\'', '!', '@', '#', '$', '%',
+        '&', '*', '(', ')', '-', '_', '=', '+', '`', '{', '[', '^', '~', '}', ']', ',', '<', '>', '.', ':', ';', '?', '/',
+        '\\', '|'
+    };
+    static size_t gZacariasUserKeyCharsetNr = sizeof(gZacariasUserKeyCharset) / sizeof(gZacariasUserKeyCharset[0]);
+
+    if (size == NULL) {
+        return NULL;
+    }
+
+    if (*size == 0) {
+        *size = unbiased_rand_mod(ZACARIAS_MAX_USERKEY_SIZE);
+    } else if (*size > ZACARIAS_MAX_USERKEY_SIZE) {
+        return NULL;
+    }
+
+    key = (kryptos_u8_t *) kryptos_newseg(*size);
+    if (key == NULL) {
+        return NULL;
+    }
+
+    kp = key;
+    kp_end = kp + *size;
+
+    while (kp != kp_end) {
+        *kp = gZacariasUserKeyCharset[unbiased_rand_mod(gZacariasUserKeyCharsetNr)];
+        kp++;
+    }
+
+    kp = kp_end = NULL;
+
+    return key;
+}
+
 #undef ZACARIAS_PWDB
+#undef ZACARIAS_MAX_USERKEY_SIZE

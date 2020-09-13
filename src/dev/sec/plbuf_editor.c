@@ -1,10 +1,13 @@
 #include <sec/plbuf_editor.h>
-#include <string.h>
+#include <sec/crypto.h>
+#ifndef KRYPTOS_KERNEL_MODE
+# include <string.h>
+#endif
 
 static const kryptos_u8_t *findalias(const kryptos_u8_t *haystack, const kryptos_u8_t *haystack_end,
                                      const kryptos_u8_t *needle, const kryptos_u8_t *needle_end);
 
-static kryptos_u8_t *random_plbuf_entry();
+static kryptos_u8_t *random_plbuf_entry(size_t *size);
 
 kryptos_u8_t *plbuf_edit_passwd(const kryptos_u8_t *plbuf, const size_t plbuf_size,
                                 const kryptos_u8_t *alias, const size_t alias_size,
@@ -473,7 +476,7 @@ static kryptos_u8_t *random_plbuf_entry(size_t *size) {
     ep_end = ep + *size - 1;
 
     while (ep != ep_end) {
-        *ep = randcharset[kryptos_get_random_byte() % randcharset_size];
+        *ep = randcharset[unbiased_rand_mod(randcharset_size)];
         ep++;
     }
 

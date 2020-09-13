@@ -24,6 +24,7 @@ typedef enum {
     kNoError = 0,
     kInvalidParams,
     kAliasNotFound,
+    kAliasAlreadyUsed,
     kProfileNotFound,
     kProfilePreviouslyAttached,
     kProfileNotAttached,
