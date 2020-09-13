@@ -43,6 +43,14 @@ long cdev_ioctl(struct file *fp, unsigned int cmd, unsigned long user_param) {
             error = zc_dev_act_get_password(&dev_p);
             break;
 
+        case ZACARIAS_IS_SESSIONED_PROFILE:
+            error = zc_dev_act_is_sessioned_profile(&dev_p);
+            break;
+
+        case ZACARIAS_SETKEY:
+            error = zc_dev_act_setkey(&dev_p);
+            break;
+
         default:
             devio.status = kUnknownDeviceCommand;
             break;

@@ -8,4 +8,7 @@ int zacarias_decrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *pa
 
 int zacarias_encrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *passwd, const size_t passwd_size);
 
+int zacarias_setkey_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *passwd, const size_t passwd_size,
+                         const kryptos_u8_t *new_passwd, const size_t new_passwd_size);
+
 #endif

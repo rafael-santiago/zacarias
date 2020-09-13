@@ -7,3 +7,5 @@ src/*/test/bin/*
 *.kmod
 *.mod.c
 */dev/.tmp_versions/*
+*/dev/ctx/test/bin/*
+*/dev/sec/test/bin/*

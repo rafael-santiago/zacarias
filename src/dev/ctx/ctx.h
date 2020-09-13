@@ -9,10 +9,13 @@
 typedef struct zacarias_profile {
     char *user;
     size_t user_size;
+    char *pwdb_path;
+    size_t pwdb_path_size;
     kryptos_u8_t *pwdb;
     size_t pwdb_size;
     kryptos_u8_t *plbuf;
     size_t plbuf_size;
+    unsigned char sessioned;
     struct zacarias_profile *next, *last;
 }zacarias_profile_ctx;
 
@@ -22,6 +25,7 @@ typedef struct {
 
 int zacarias_profiles_ctx_add(zacarias_profiles_ctx **profiles,
                               char *user, const size_t user_size,
+                              char *pwdb_path, const size_t pwdb_path_size,
                               kryptos_u8_t *pwdb, const size_t pwdb_size);
 
 int zacarias_profiles_ctx_del(zacarias_profiles_ctx **profiles,

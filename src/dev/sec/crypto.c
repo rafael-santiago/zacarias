@@ -5,6 +5,37 @@
 static kryptos_u8_t *zacarias_key_crunching(const char *user, const size_t user_size,
                                             const kryptos_u8_t *passwd, const size_t passwd_size, size_t *key_size);
 
+
+int zacarias_setkey_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *passwd, const size_t passwd_size,
+                         const kryptos_u8_t *new_passwd, const size_t new_passwd_size) {
+    int err = 1, do_decrypt = 0;
+
+    if (profile == NULL || passwd == NULL || passwd_size == 0 || new_passwd == NULL || new_passwd_size == 0) {
+        goto zacarias_setkey_pwdb_epilogue;
+    }
+
+    do_decrypt = ((*profile)->plbuf != NULL);
+
+    // WARN(Rafael): We will always decrypt pwdb, even it being already decrypted.
+    if ((err = zacarias_decrypt_pwdb(profile, passwd, passwd_size)) != 0) {
+        goto zacarias_setkey_pwdb_epilogue;
+    }
+
+    if ((err = zacarias_encrypt_pwdb(profile, new_passwd, new_passwd_size)) != 0) {
+        goto zacarias_setkey_pwdb_epilogue;
+    }
+
+    if (do_decrypt) {
+        err = zacarias_decrypt_pwdb(profile, new_passwd, new_passwd_size);
+    }
+
+zacarias_setkey_pwdb_epilogue:
+
+    do_decrypt = 0;
+
+    return err;
+}
+
 int zacarias_decrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *passwd, const size_t passwd_size) {
     int err = 1;
     kryptos_task_ctx t, *ktask = &t;

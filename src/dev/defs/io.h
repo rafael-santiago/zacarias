@@ -65,14 +65,17 @@ struct zc_devio_ctx {
     size_t passwd_size;
     char *alias;
     size_t alias_size;
+    unsigned char sessioned;
 };
 
 #define ZACARIAS_IOC_MAGIC 'Z'
 
-#define ZACARIAS_ATTACH_PROFILE _IOWR(ZACARIAS_IOC_MAGIC, 0, struct zc_devio_ctx *)
-#define ZACARIAS_DETACH_PROFILE _IOWR(ZACARIAS_IOC_MAGIC, 1, struct zc_devio_ctx *)
-#define ZACARIAS_ADD_PASSWORD   _IOWR(ZACARIAS_IOC_MAGIC, 2, struct zc_devio_ctx *)
-#define ZACARIAS_DEL_PASSWORD   _IOWR(ZACARIAS_IOC_MAGIC, 3, struct zc_devio_ctx *)
-#define ZACARIAS_GET_PASSWORD   _IOWR(ZACARIAS_IOC_MAGIC, 4, struct zc_devio_ctx *)
+#define ZACARIAS_ATTACH_PROFILE         _IOWR(ZACARIAS_IOC_MAGIC, 0, struct zc_devio_ctx *)
+#define ZACARIAS_DETACH_PROFILE         _IOWR(ZACARIAS_IOC_MAGIC, 1, struct zc_devio_ctx *)
+#define ZACARIAS_ADD_PASSWORD           _IOWR(ZACARIAS_IOC_MAGIC, 2, struct zc_devio_ctx *)
+#define ZACARIAS_DEL_PASSWORD           _IOWR(ZACARIAS_IOC_MAGIC, 3, struct zc_devio_ctx *)
+#define ZACARIAS_GET_PASSWORD           _IOWR(ZACARIAS_IOC_MAGIC, 4, struct zc_devio_ctx *)
+#define ZACARIAS_IS_SESSIONED_PROFILE   _IOWR(ZACARIAS_IOC_MAGIC, 5, struct zc_devio_ctx *)
+#define ZACARIAS_SETKEY                 _IOWR(ZACARIAS_IOC_MAGIC, 6, struct zc_devio_ctx *)
 
 #endif

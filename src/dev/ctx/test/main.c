@@ -15,25 +15,27 @@ CUTE_TEST_CASE(ctx_general_tests)
     zacarias_profiles_ctx *profiles;
     struct {
         char *user;
+        char *pwdb_path;
         kryptos_u8_t *pwdb;
         int expected;
     } test_vector[] = {
-        { "foo", "<foo's data>", 0 },
-        { "rs",  "<rs' data>", 0 },
-        { "godofredo", "<godofredo's data>", 0 },
-        { "lobato", "<lobato's data>", 0 },
-        { "foo", "<foo's data>", 1 },
-        { "rs",  "<rs' data>", 1 },
-        { "godofredo", "<godofredo's data>", 1 },
-        { "lobato", "<lobato's data>", 1 }
+        { "foo", "foo.db", "<foo's data>", 0 },
+        { "rs", "rs.db", "<rs' data>", 0 },
+        { "godofredo", "godofredo.db", "<godofredo's data>", 0 },
+        { "lobato", "lobato.db", "<lobato's data>", 0 },
+        { "foo", "foo.db", "<foo's data>", 1 },
+        { "rs", "rs.db",  "<rs' data>", 1 },
+        { "godofredo", "godofredo.db", "<godofredo's data>", 1 },
+        { "lobato", "lobato.db", "<lobato's data>", 1 }
     }, *test, *test_end;
     size_t test_vector_nr = sizeof(test_vector) / sizeof(test_vector[0]);
     char *user;
     size_t user_size;
+    char *pwdb_path;
+    size_t pwdb_path_size;
     kryptos_u8_t *pwdb;
     size_t pwdb_size;
     zacarias_profile_ctx *profile;
-
 
     zacarias_profiles_ctx_init(profiles);
     CUTE_ASSERT(profiles != NULL);
@@ -46,19 +48,28 @@ CUTE_TEST_CASE(ctx_general_tests)
         user = (char *) kryptos_newseg(user_size + 1);
         CUTE_ASSERT(user != NULL);
         memcpy(user, test->user, user_size);
+        pwdb_path_size = strlen(test->pwdb_path);
+        pwdb_path = (char *) kryptos_newseg(pwdb_path_size + 1);
+        CUTE_ASSERT(pwdb_path != NULL);
+        memcpy(pwdb_path, test->pwdb_path, pwdb_path_size);
         pwdb_size = strlen(test->pwdb);
         pwdb = (kryptos_u8_t *) kryptos_newseg(pwdb_size + 1);
         CUTE_ASSERT(pwdb != NULL);
         memcpy(pwdb, test->pwdb, pwdb_size);
-        CUTE_ASSERT(zacarias_profiles_ctx_add(&profiles, user, user_size, pwdb, pwdb_size) == test->expected);
+        CUTE_ASSERT(zacarias_profiles_ctx_add(&profiles, user, user_size, pwdb_path, pwdb_path_size,
+                                              pwdb, pwdb_size) == test->expected);
         if (test->expected == 0) {
             CUTE_ASSERT(profiles->tail != NULL && profiles->head != NULL);
             CUTE_ASSERT(profiles->tail->user_size == user_size);
             CUTE_ASSERT(memcmp(profiles->tail->user, user, user_size) == 0);
+            CUTE_ASSERT(profiles->tail->pwdb_path_size == pwdb_path_size);
+            CUTE_ASSERT(memcmp(profiles->tail->pwdb_path, pwdb_path, pwdb_path_size) == 0);
             CUTE_ASSERT(profiles->tail->pwdb_size == pwdb_size);
             CUTE_ASSERT(memcmp(profiles->tail->pwdb, pwdb, pwdb_size) == 0);
+            CUTE_ASSERT(profiles->tail->sessioned == 0);
         } else {
             free(user);
+            free(pwdb_path);
             free(pwdb);
         }
         test++;
@@ -72,9 +83,12 @@ CUTE_TEST_CASE(ctx_general_tests)
         user_size = strlen(test->user);
         profile = zacarias_profiles_ctx_get(profiles, test->user, user_size);
         CUTE_ASSERT(profile != NULL);
+        pwdb_path_size = strlen(test->pwdb_path);
         pwdb_size = strlen(test->pwdb);
         CUTE_ASSERT(profile->user_size == user_size);
         CUTE_ASSERT(memcmp(profile->user, test->user, user_size) == 0);
+        CUTE_ASSERT(profile->pwdb_path_size == pwdb_path_size);
+        CUTE_ASSERT(memcmp(profile->pwdb_path, test->pwdb_path, pwdb_path_size) == 0);
         CUTE_ASSERT(profile->pwdb_size == pwdb_size);
         CUTE_ASSERT(memcmp(profile->pwdb, test->pwdb, pwdb_size) == 0);
         test++;

@@ -7,18 +7,21 @@
 
 #define zacarias_profile_ctx_new(p) ( (p) = (zacarias_profile_ctx *) kryptos_newseg(sizeof(zacarias_profile_ctx)),\
                                       (p)->user = NULL, (p)->user_size = 0, (p)->pwdb = NULL, (p)->pwdb_size = 0,\
-                                      (p)->plbuf = NULL, (p)->plbuf_size = 0, (p)->last = (p)->next = NULL )
+                                      (p)->pwdb_path_size = 0,\
+                                      (p)->pwdb_path = (p)->plbuf = NULL, (p)->plbuf_size = 0,\
+                                      (p)->last = (p)->next = NULL )
 
 static void zacarias_profile_ctx_del(zacarias_profile_ctx *profile);
 
 int zacarias_profiles_ctx_add(zacarias_profiles_ctx **profiles,
                               char *user, const size_t user_size,
+                              char *pwdb_path, const size_t pwdb_path_size,
                               kryptos_u8_t *pwdb, const size_t pwdb_size) {
     int err = 0;
     zacarias_profile_ctx *new_profile = NULL;
 
     if (profiles == NULL || user == NULL || user_size == 0 || pwdb == NULL || pwdb_size == 0 ||
-        zacarias_profiles_ctx_get(*profiles, user, user_size) != NULL) {
+        pwdb_path == NULL || pwdb_path_size == 0 || zacarias_profiles_ctx_get(*profiles, user, user_size) != NULL) {
         err = 1;
         goto zacarias_profiles_ctx_add_epilogue;
     }
@@ -32,8 +35,11 @@ int zacarias_profiles_ctx_add(zacarias_profiles_ctx **profiles,
 
     new_profile->user = user;
     new_profile->user_size = user_size;
+    new_profile->pwdb_path = pwdb_path;
+    new_profile->pwdb_path_size = pwdb_path_size;
     new_profile->pwdb = pwdb;
     new_profile->pwdb_size = pwdb_size;
+    new_profile->sessioned = 0;
 
     if ((*profiles)->head == NULL) {
         (*profiles)->head = (*profiles)->tail = new_profile;
@@ -116,10 +122,13 @@ static void zacarias_profile_ctx_del(zacarias_profile_ctx *profile) {
         if (p->user != NULL) {
             kryptos_freeseg(p->user, p->user_size);
         }
+        if (p->pwdb_path != NULL) {
+            kryptos_freeseg(p->pwdb_path, p->pwdb_path_size);
+        }
         if (p->pwdb != NULL) {
             kryptos_freeseg(p->pwdb, p->pwdb_size);
         }
-        p->user_size = p->pwdb_size = 0;
+        p->user_size = p->pwdb_path_size = p->pwdb_size = 0;
         if (p->plbuf != NULL) {
             kryptos_freeseg(p->plbuf, p->plbuf_size);
             p->plbuf_size = 0;
