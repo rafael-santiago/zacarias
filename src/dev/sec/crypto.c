@@ -203,22 +203,6 @@ static kryptos_u8_t *zacarias_key_crunching(const char *user, const size_t user_
     return key;
 }
 
-unsigned int unbiased_rand_mod(const unsigned n) {
-    unsigned int r = 0;
-
-    do {
-        do {
-            r = kryptos_get_random_byte() << 24 |
-                kryptos_get_random_byte() << 16 |
-                kryptos_get_random_byte() <<  8 |
-                kryptos_get_random_byte();
-        } while (r >= 0xFFFFFFFF - (0xFFFFFFFF % n));
-        r = r % n;
-    } while (r == 0);
-
-    return r;
-}
-
 kryptos_u8_t *zacarias_gen_userkey(size_t *size) {
     kryptos_u8_t *key = NULL, *kp, *kp_end;
     static kryptos_u8_t gZacariasUserKeyCharset[] = {
@@ -235,7 +219,7 @@ kryptos_u8_t *zacarias_gen_userkey(size_t *size) {
     }
 
     if (*size == 0) {
-        *size = unbiased_rand_mod(ZACARIAS_MAX_USERKEY_SIZE);
+        *size = kryptos_unbiased_rand_mod_u8(ZACARIAS_MAX_USERKEY_SIZE);
     } else if (*size > ZACARIAS_MAX_USERKEY_SIZE) {
         return NULL;
     }
@@ -249,7 +233,7 @@ kryptos_u8_t *zacarias_gen_userkey(size_t *size) {
     kp_end = kp + *size;
 
     while (kp != kp_end) {
-        *kp = gZacariasUserKeyCharset[unbiased_rand_mod(gZacariasUserKeyCharsetNr)];
+        *kp = gZacariasUserKeyCharset[kryptos_unbiased_rand_mod_u8(gZacariasUserKeyCharsetNr)];
         kp++;
     }
 

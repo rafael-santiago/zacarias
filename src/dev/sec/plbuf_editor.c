@@ -476,7 +476,7 @@ static kryptos_u8_t *random_plbuf_entry(size_t *size) {
     ep_end = ep + *size - 1;
 
     while (ep != ep_end) {
-        *ep = randcharset[unbiased_rand_mod(randcharset_size)];
+        *ep = randcharset[kryptos_unbiased_rand_mod_u8(randcharset_size)];
         ep++;
     }
 
