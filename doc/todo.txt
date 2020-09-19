@@ -1,7 +1,7 @@
-(A) Implement get password ioctl. +Dev,+Sys
-(A) Implement del password ioctl. +Dev,+Sys
-(A) Implement add password ioctl. +Dev,+Sys
 (A) Make the local libkryptos lightweight. +Dev,+Sys
+x (A) Implement get password ioctl. +Dev,+Sys
+x (A) Implement del password ioctl. +Dev,+Sys
+x (A) Implement add password ioctl. +Dev,+Sys
 x (A) Write file from kernel space FreeBSD. +Dev,+Sys
 x (A) Finish up sec tests. +Tests
 x (A) Implement pwdb encryption. AES/256(GCM), KDF=argon2i. +Dev,+Sec
