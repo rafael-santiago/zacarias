@@ -7,7 +7,6 @@
 CUTE_DECLARE_TEST_CASE(sec_tests);
 CUTE_DECLARE_TEST_CASE(crypto_tests);
 CUTE_DECLARE_TEST_CASE(plbuf_editor_tests);
-CUTE_DECLARE_TEST_CASE(unbiased_rand_mod_tests);
 CUTE_DECLARE_TEST_CASE(zacarias_gen_userkey_tests);
 
 CUTE_MAIN(sec_tests);
@@ -15,14 +14,9 @@ CUTE_MAIN(sec_tests);
 CUTE_TEST_CASE(sec_tests)
     CUTE_RUN_TEST(crypto_tests);
     CUTE_RUN_TEST(plbuf_editor_tests);
-    CUTE_RUN_TEST(unbiased_rand_mod_tests);
     CUTE_RUN_TEST(zacarias_gen_userkey_tests);
 CUTE_TEST_CASE_END
 
-CUTE_TEST_CASE(unbiased_rand_mod_tests)
-    unsigned int random = unbiased_rand_mod(20);
-    CUTE_ASSERT(random < 20);
-CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(zacarias_gen_userkey_tests)
     struct test_ctx {

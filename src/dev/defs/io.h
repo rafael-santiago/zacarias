@@ -10,6 +10,16 @@
 # error Some code wanted.
 #endif
 
+#if defined(__linux__)
+# define kcpy(t, f, l) copy_from_user((t), (f), (l))
+# define ucpy(t, f, l) copy_to_user((t), (f), (l))
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
+# define kcpy(t, f, l) copyin((f), (t), (l))
+# define ucpy(t, f, l) copyout((f), (t), (l))
+#else
+# error Some code wanted.
+#endif
+
 typedef enum {
     kAttachProfile   = 0x00000001,
     kWithSessionKey  = 0x00000002,

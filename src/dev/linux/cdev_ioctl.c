@@ -11,12 +11,12 @@ long cdev_ioctl(struct file *fp, unsigned int cmd, unsigned long user_param) {
     if ((void *)user_param == NULL ||
         !access_ok(VERIFY_WRITE, (void __user *)user_param, _IOC_SIZE(cmd))) {
         // INFO(Rafael): Verifying for writing includes verifying for reading.
-        error = -EFAULT;
+        error = EFAULT;
         goto cdev_ioctl_epilogue;
     }
 
-    if (copy_from_user(&devio, (struct zc_devio_ctx *)user_param, sizeof(struct zc_devio_ctx)) != 0) {
-        error = -EFAULT;
+    if (kcpy(&devio, (struct zc_devio_ctx *)user_param, sizeof(struct zc_devio_ctx)) != 0) {
+        error = EFAULT;
         goto cdev_ioctl_epilogue;
     }
 
@@ -56,12 +56,12 @@ long cdev_ioctl(struct file *fp, unsigned int cmd, unsigned long user_param) {
             break;
     }
 
-    if (copy_to_user((void __user *)user_param, &devio, sizeof(struct zc_devio_ctx)) != 0) {
-        error = -EFAULT;
+    if (ucpy((void __user *)user_param, &devio, sizeof(struct zc_devio_ctx)) != 0) {
+        error = EFAULT;
         goto cdev_ioctl_epilogue;
     }
 
 cdev_ioctl_epilogue:
 
-    return error;
+    return (error == 0) ? error : -error;
 }
