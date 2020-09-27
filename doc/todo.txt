@@ -1,5 +1,5 @@
-(A) Implement detach action. +Dev,+Sys
 (A) Make the local libkryptos lightweight. +Dev,+Sys
+x (A) Implement detach action. +Dev,+Sys
 x (A) Make device driver's actions implementation totally cross-platform. +Dev,+Sys
 x (A) Implement get password ioctl. +Dev,+Sys
 x (A) Implement del password ioctl. +Dev,+Sys

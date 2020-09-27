@@ -58,7 +58,6 @@ long cdev_ioctl(struct file *fp, unsigned int cmd, unsigned long user_param) {
 
     if (ucpy((void __user *)user_param, &devio, sizeof(struct zc_devio_ctx)) != 0) {
         error = EFAULT;
-        goto cdev_ioctl_epilogue;
     }
 
 cdev_ioctl_epilogue:
