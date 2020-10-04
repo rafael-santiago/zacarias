@@ -1,0 +1,37 @@
+include ../build/toolsets.hsl
+
+local var src type list;
+local var includes type list;
+local var cflags type list;
+local var libraries type list;
+local var ldflags type list;
+local var appname type string;
+
+local var curr_toolset type string;
+local var deps type string;
+
+project zc : toolset $curr_toolset : dependencies $deps : $src, $includes, $cflags, $libraries, $ldflags, $appname;
+
+zc.preloading() {
+    $curr_toolset = get_app_toolset();
+}
+
+zc.prologue() {
+    $includes = hefesto.sys.get_option("includes");
+    $cflags = hefesto.sys.get_option("cflags");
+    $libraries = hefesto.sys.get_option("libraries");
+    $ldflags = hefesto.sys.get_option("ldflags");
+    var dirlist type list;
+    $dirlist.add_item(".");
+    $src = get_codes($dirlist, $deps);
+    $appname = "zc";
+    if (hefesto.sys.os_name() == "windows") {
+        $appname = $appname + ".exe";
+    }
+}
+
+zc.epilogue() {
+    if (hefesto.sys.last_forge_result() == 0) {
+        hefesto.sys.echo("Done.\n");
+    }
+}
