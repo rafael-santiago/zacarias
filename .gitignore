@@ -9,3 +9,4 @@ src/*/test/bin/*
 */dev/.tmp_versions/*
 */dev/ctx/test/bin/*
 */dev/sec/test/bin/*
+*bin/*
