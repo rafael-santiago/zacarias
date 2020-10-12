@@ -67,7 +67,7 @@ int zc_attach(void) {
                        session_passwd[0], session_passwd_size[0], &status);
 
 
-    if (err == 0 && status != 0) {
+    if (err == 0 && status != kNoError) {
         zcdev_perror(status);
         err = 1;
     }
@@ -85,6 +85,8 @@ zc_attach_epilogue:
     if (session_passwd[1] != NULL) {
         kryptos_freeseg(session_passwd[1], session_passwd_size[1]);
     }
+
+    zcdev_close(zcd);
 
     return err;
 }

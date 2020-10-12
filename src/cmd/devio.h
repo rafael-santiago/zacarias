@@ -20,6 +20,10 @@ int zcdev_attach(const int zcd,
                  const unsigned char *session_passwd, const size_t session_passwd_size,
                  zc_device_status_t *status);
 
+int zcdev_detach(const int zcd, const char *user, const size_t user_size,
+                 const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
+                 zc_device_status_t *status);
+
 void zcdev_perror(const zc_device_status_t status);
 
 #endif

@@ -55,6 +55,30 @@ int zcdev_attach(const int zcd,
     return err;
 }
 
+int zcdev_detach(const int zcd, const char *user, const size_t user_size,
+                 const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
+                 zc_device_status_t *status) {
+    struct zc_devio_ctx ioctx;
+    int err;
+
+    memset(&ioctx, 0, sizeof(ioctx));
+
+    ioctx.action = kDetachProfile;
+    ioctx.user = (char *) user;
+    ioctx.user_size = user_size;
+    ioctx.pwdb_passwd = (unsigned char *) pwdb_passwd;
+    ioctx.pwdb_passwd_size = pwdb_passwd_size;
+
+    if ((err = zcdev_ioctl(zcd, ZACARIAS_DETACH_PROFILE, &ioctx)) == 0) {
+        *status = ioctx.status;
+    }
+
+    memset(&ioctx, 0, sizeof(ioctx));
+
+    return err;
+}
+
+
 void zcdev_perror(const zc_device_status_t status) {
     if (status >= kZcDeviceStatusNr) {
         fprintf(stderr, "ERROR: Device status out of range.\n");
