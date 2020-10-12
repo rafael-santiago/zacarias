@@ -42,7 +42,6 @@ struct cdev_ctx {
 
 struct cdev_ctx *g_cdev(void);
 
-#define CDEVNAME "zacarias"
 #define CDEVCLASS "zcs"
 
 #endif

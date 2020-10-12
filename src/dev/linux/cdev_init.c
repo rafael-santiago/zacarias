@@ -1,8 +1,8 @@
 #include <linux/cdev_init.h>
 #include <defs/types.h>
+#include <defs/io.h>
 #include <linux/device.h>
 #include <linux/fs.h>
-
 #include <asm/segment.h>
 #include <asm/uaccess.h>
 #include <linux/buffer_head.h>

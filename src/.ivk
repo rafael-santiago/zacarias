@@ -1,1 +1,1 @@
---forgefiles=Forgefile.hsl --Forgefile-projects=zacarias
+--forgefiles=Forgefile.hsl --Forgefile-projects=zacarias --cflags=-DZC_CMD=1

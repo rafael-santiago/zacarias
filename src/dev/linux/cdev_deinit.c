@@ -1,5 +1,6 @@
 #include <linux/cdev_deinit.h>
 #include <defs/types.h>
+#include <defs/io.h>
 #include <linux/module.h>
 #include <linux/device.h>
 #include <linux/kernel.h>

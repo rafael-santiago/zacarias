@@ -1,6 +1,8 @@
 #ifndef ZACARIAS_DEV_DEFS_IO_H
 #define ZACARIAS_DEV_DEFS_IO_H 1
 
+#if !defined(ZC_CMD)
+
 #if defined(__linux__)
 # include <linux/ioctl.h>
 # include <linux/kernel.h>
@@ -19,6 +21,12 @@
 #else
 # error Some code wanted.
 #endif
+
+#else
+# include <stdlib.h>
+#endif // !defined(ZC_CMD)
+
+#define CDEVNAME "zacarias"
 
 typedef enum {
     kAttachProfile   = 0x00000001,
