@@ -30,7 +30,7 @@ int zc_detach(void) {
 
     err = zcdev_detach(zcd, user, user_size, pwdb_passwd, pwdb_passwd_size, &status);
 
-    if (err == 0 && status == kNoError) {
+    if (err == 0 && status != kNoError) {
         err = 1;
         zcdev_perror(status);
     }
