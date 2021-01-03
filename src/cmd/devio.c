@@ -78,6 +78,86 @@ int zcdev_detach(const int zcd, const char *user, const size_t user_size,
     return err;
 }
 
+int zcdev_add_password(const int zcd, const char *user, const size_t user_size,
+                       const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
+                       const char *alias, const size_t alias_size,
+                       const unsigned char *password, const size_t password_size,
+                       zc_device_status_t *status) {
+    int err;
+    struct zc_devio_ctx ioctx;
+
+    ioctx.action = kAddPassword;
+    ioctx.user = (char *)user;
+    ioctx.user_size = user_size;
+    ioctx.pwdb_passwd = (unsigned char *)pwdb_passwd;
+    ioctx.pwdb_passwd_size = pwdb_passwd_size;
+    ioctx.alias = (char *)alias;
+    ioctx.alias_size = alias_size;
+    ioctx.passwd = (unsigned char *)password;
+    ioctx.passwd_size = password_size;
+
+    if ((err = zcdev_ioctl(zcd, ZACARIAS_ADD_PASSWORD, &ioctx)) == 0) {
+        *status = ioctx.status;
+    }
+
+    memset(&ioctx, 0, sizeof(ioctx));
+
+    return err;
+}
+
+int zcdev_del_password(const int zcd, const char *user, const size_t user_size,
+                       const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
+                       const char *alias, const size_t alias_size,
+                       zc_device_status_t *status) {
+    int err;
+    struct zc_devio_ctx ioctx;
+
+    ioctx.action = kDelPassword;
+    ioctx.user = (char *)user;
+    ioctx.user_size = user_size;
+    ioctx.pwdb_passwd = (unsigned char *)pwdb_passwd;
+    ioctx.pwdb_passwd_size = pwdb_passwd_size;
+    ioctx.alias = (char *)alias;
+    ioctx.alias_size = alias_size;
+
+    if ((err = zcdev_ioctl(zcd, ZACARIAS_DEL_PASSWORD, &ioctx)) == 0) {
+        *status = ioctx.status;
+    }
+
+    memset(&ioctx, 0, sizeof(ioctx));
+
+    return err;
+}
+
+int zcdev_get_password(const int zcd, const char *user, const size_t user_size,
+                       const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
+                       const char *alias, const size_t alias_size,
+                       unsigned char **password, size_t *password_size,
+                       zc_device_status_t *status) {
+    int err;
+    struct zc_devio_ctx ioctx;
+
+    ioctx.action = kGetPassword;
+    ioctx.user = (char *)user;
+    ioctx.user_size = user_size;
+    ioctx.pwdb_passwd = (unsigned char *)pwdb_passwd;
+    ioctx.pwdb_passwd_size = pwdb_passwd_size;
+    ioctx.alias = (char *)alias;
+    ioctx.alias_size = alias_size;
+
+    if ((err = zcdev_ioctl(zcd, ZACARIAS_GET_PASSWORD, &ioctx)) == 0) {
+        *status = ioctx.status;
+    }
+
+    if (*status == kNoError) {
+        *password = ioctx.passwd;
+        *password_size = ioctx.passwd_size;
+    }
+
+    memset(&ioctx, 0, sizeof(ioctx));
+
+    return err;
+}
 
 void zcdev_perror(const zc_device_status_t status) {
     if (status >= kZcDeviceStatusNr) {

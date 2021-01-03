@@ -26,9 +26,13 @@ static struct termios old, new;
 static DWORD con_mode;
 #endif
 
+static void (*g_cancel_callout)(void *) = NULL;
+static void *g_cancel_callout_args = NULL;
+static int g_abort_kbd_rw = 0;
+
 static void getuserkey_sigint_watchdog(int signo);
 
-int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs) {
+int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs, void (*cancel_callout)(void *), void *cancel_callout_args) {
     kryptos_u8_t *input = NULL, *ip = NULL, *ip_end = NULL;
     size_t input_size = 0;
     int err = 0, hold_sh = 0, anulate_sh = 0;
@@ -58,6 +62,10 @@ int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, cons
         input_size = buffer_size;
     }
 
+    g_cancel_callout = cancel_callout;
+    g_cancel_callout_args = cancel_callout_args;
+    g_abort_kbd_rw = 0;
+
     shiftcode = XKeysymToKeycode(display, (KeySym)XK_Shift_L);
 
     ip = input;
@@ -65,7 +73,7 @@ int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, cons
 
     sleep(timeout_in_secs);
 
-    while (ip != ip_end) {
+    while (ip != ip_end && !g_abort_kbd_rw) {
         if (*ip == 0) {
             anulate_sh = 1;
             ip++;
@@ -163,7 +171,13 @@ static void getuserkey_sigint_watchdog(int signo) {
         stty_echo_on
     }
 #endif
-    exit(1);
+    if (g_cancel_callout != NULL) {
+        g_cancel_callout(g_cancel_callout_args);
+        g_cancel_callout = NULL;
+        g_cancel_callout_args = NULL;
+    }
+    g_abort_kbd_rw = 1;
+    //exit(1);
 }
 
 #if !defined(_WIN32)
@@ -185,6 +199,8 @@ kryptos_u8_t *zacarias_getuserkey(size_t *key_size) {
         goto zacarias_getuserkey_epilogue;
     }
 
+    g_abort_kbd_rw = 0;
+
     signal(SIGINT, getuserkey_sigint_watchdog);
     signal(SIGTERM, getuserkey_sigint_watchdog);
 
@@ -202,7 +218,7 @@ kryptos_u8_t *zacarias_getuserkey(size_t *key_size) {
     lp = &line[0];
     lp_end = lp + size;
 
-    while (lp < lp_end) {
+    while (lp < lp_end && !g_abort_kbd_rw) {
         if (*lp == '\\') {
             lp += 1;
             switch (*lp) {
@@ -283,6 +299,8 @@ kryptos_u8_t *zacarias_getuserkey(size_t *key_size) {
         stty_echo_off
     }
 
+    g_abort_kbd_rw = 0;
+
     signal(SIGINT, getuserkey_sigint_watchdog);
     signal(SIGTERM, getuserkey_sigint_watchdog);
 
@@ -300,7 +318,7 @@ kryptos_u8_t *zacarias_getuserkey(size_t *key_size) {
     lp = &line[0];
     lp_end = lp + size;
 
-    while (lp < lp_end) {
+    while (lp < lp_end && !g_abort_kbd_rw) {
         if (*lp == '\\') {
             lp += 1;
             switch (*lp) {

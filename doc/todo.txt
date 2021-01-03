@@ -1,6 +1,6 @@
-(A) Implement zc's password command. +Dev,+User
 (A) Implement zc's help command. +Dev,+User
 (A) Make the local libkryptos lightweight. +Dev,+Sys
+x (A) Implement zc's password command. +Dev,+User
 x (A) Implement zc's detach command. +Dev,+User
 x (A) Implement zc's attach command. +Dev,+User
 x (A) Starting up zc implementation. +Dev,+Usr

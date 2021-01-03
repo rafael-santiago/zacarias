@@ -1,0 +1,315 @@
+#include <cmd/password.h>
+#include <cmd/types.h>
+#include <cmd/options.h>
+#include <cmd/devio.h>
+#include <kbd/kbd.h>
+#include <kryptos.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdio.h>
+
+struct  zc_data_drain_ctx {
+    unsigned char *password;
+    size_t password_size;
+    unsigned char *pwdb_passwd;
+    size_t pwdb_passwd_size;
+};
+
+static int zc_password_add(void);
+static int zc_password_del(void);
+static int zc_password_get(void);
+static int zc_password_unk(void);
+
+static void zc_drain_out_data(void *args);
+
+static struct zc_exec_table_ctx g_zc_password_subcommands[] = {
+    { "add", zc_password_add, NULL },
+    { "del", zc_password_del, NULL },
+    { "get", zc_password_get, NULL },
+};
+
+static size_t g_zc_password_subcommands_nr = sizeof(g_zc_password_subcommands) / sizeof(g_zc_password_subcommands[0]);
+
+int zc_password(void) {
+    zc_cmd_func sb_cmd = NULL;
+    struct zc_exec_table_ctx *zc_pscmd = NULL;
+    struct zc_exec_table_ctx *zc_pscmd_end = NULL;
+    char *subcommand = NULL;
+
+    subcommand = zc_get_subcommand();
+
+    if (subcommand == NULL) {
+        fprintf(stderr, "ERROR: subcommand not informed.\n");
+        return 1;
+    }
+
+    sb_cmd = zc_password_unk;
+    zc_pscmd = &g_zc_password_subcommands[0];
+    zc_pscmd_end = zc_pscmd + g_zc_password_subcommands_nr;
+
+    while (zc_pscmd != zc_pscmd_end && sb_cmd == zc_password_unk) {
+        if (strcmp(zc_pscmd->cmd_name, subcommand) == 0) {
+            sb_cmd = zc_pscmd->cmd_do;
+        }
+    }
+
+    return sb_cmd();
+}
+
+int zc_password_help(void) {
+    fprintf(stdout, "use: zacarias password add --user=<name> --alias=<name>\n"
+                    "     zacarias password del --user=<name> --alias=<name>\n"
+                    "     zacarias password get --user=<name> --alias=<name> [--timeout=<seconds>]\n");
+    return 0;
+}
+
+static int zc_password_unk(void) {
+    fprintf(stderr, "ERROR: unknown password subcommand.\n");
+    return 1;
+}
+
+static int zc_password_add(void) {
+    int zcd = zcdev_open();
+    char *user = NULL, *alias = NULL;
+    int err = 0;
+    size_t user_size = 0, alias_size = 0;
+    unsigned char *pwdb_passwd = NULL;
+    size_t pwdb_passwd_size = 0;
+    unsigned char *password[2] = { NULL, NULL };
+    size_t password_size[2] = { 0, 0 };
+    zc_device_status_t status;
+
+    if (zcd == -1) {
+        err = errno;
+        goto zc_password_add_epilogue;
+    }
+
+    ZC_GET_OPTION_OR_DIE(user, "user", zc_password_add_epilogue);
+    user_size = strlen(user);
+
+    ZC_GET_OPTION_OR_DIE(alias, "alias", zc_password_add_epilogue);
+    alias_size = strlen(alias);
+
+    fprintf(stdout, "Pwdb password: ");
+    pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+
+    if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
+        fprintf(stderr, "ERROR: Null pwdb password.\n");
+        goto zc_password_add_epilogue;
+    }
+
+    if (zc_get_bool_option("generate", 0)) {
+        fprintf(stdout, "Password: ");
+        password[0] = zacarias_getuserkey(&password_size[0]);
+
+        if (password[0] == NULL || password_size[0] == 0) {
+            fprintf(stderr, "ERROR: Null password.\n");
+            goto zc_password_add_epilogue;
+        }
+
+        fprintf(stdout, "Confirm your password choice by re-typing it: ");
+        password[1] = zacarias_getuserkey(&password_size[1]);
+
+        if (password[1] == NULL || password_size[1] == 0) {
+            fprintf(stderr, "ERROR: Null password confirmation.\n");
+            goto zc_password_add_epilogue;
+        }
+
+        if (password_size[0] != password_size[1] || memcmp(password[0], password[1], password_size[0]) != 0) {
+            fprintf(stderr, "ERROR: Informed passwords do not match.\n");
+            goto zc_password_add_epilogue;
+        }
+    }
+
+    err = zcdev_add_password(zcd, user, user_size, pwdb_passwd, pwdb_passwd_size,
+                             alias, alias_size, password[0], password_size[0], &status);
+
+    if (err == 0 && status != kNoError) {
+        zcdev_perror(status);
+        err = 1;
+    }
+
+zc_password_add_epilogue:
+
+    zcdev_close(zcd);
+
+    user = alias = NULL;
+    user_size = alias_size = 0;
+
+    if (pwdb_passwd != NULL) {
+        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
+        pwdb_passwd_size = 0;
+    }
+
+    if (password[0] != NULL) {
+        kryptos_freeseg(password[0], password_size[0]);
+        password_size[0] = 0;
+    }
+
+    if (password[1] != NULL) {
+        kryptos_freeseg(password[1], password_size[1]);
+        password_size[1] = 0;
+    }
+
+    return err;
+}
+
+static int zc_password_del(void) {
+    int zcd = zcdev_open();
+    char *user = NULL, *alias = NULL;
+    unsigned char *pwdb_passwd = NULL;
+    size_t user_size = 0, alias_size = 0, pwdb_passwd_size = 0;
+    int err = 0;
+    zc_device_status_t status;
+
+    if (zcd == - 1) {
+        err = errno;
+        goto zc_password_del_epilogue;
+    }
+
+    ZC_GET_OPTION_OR_DIE(user, "user", zc_password_del_epilogue);
+    user_size = strlen(user);
+
+    ZC_GET_OPTION_OR_DIE(alias, "alias", zc_password_del_epilogue);
+    alias_size = strlen(alias);
+
+    fprintf(stdout, "Pwdb password: ");
+    pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+
+    if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
+        fprintf(stderr, "ERROR: Null pwdb password.\n");
+        goto zc_password_del_epilogue;
+    }
+
+    err = zcdev_del_password(zcd, user, user_size, pwdb_passwd, pwdb_passwd_size, alias, alias_size, &status);
+
+    if (err == 0 && status != kNoError) {
+        zcdev_perror(status);
+        err = 1;
+    }
+
+zc_password_del_epilogue:
+
+    zcdev_close(zcd);
+
+    user = alias = NULL;
+    user_size = alias_size = 0;
+
+    if (pwdb_passwd != NULL) {
+        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
+        pwdb_passwd_size = 0;
+    }
+
+    return err;
+}
+
+static int zc_password_get(void) {
+    int zcd = zcdev_open();
+    char *user = NULL, *alias = NULL, *timeout = NULL, *tp, *tp_end;
+    unsigned char *password = NULL, *pwdb_passwd = NULL;
+    size_t user_size = 0, alias_size = 0, password_size = 0, pwdb_passwd_size = 0;
+    int err = 0;
+    zc_device_status_t status;
+    struct zc_data_drain_ctx zc_drain = { 0 };
+
+    if (zcd == -1) {
+        err = errno;
+        goto zc_password_get_epilogue;
+    }
+
+    ZC_GET_OPTION_OR_DIE(user, "user", zc_password_get_epilogue);
+    user_size = strlen(user);
+
+    ZC_GET_OPTION_OR_DIE(alias, "alias", zc_password_get_epilogue);
+    alias_size = strlen(alias);
+
+    timeout = zc_get_option("timeout", "5");
+    tp = &timeout[0];
+    tp_end = tp + strlen(tp);
+    if (tp == tp_end) {
+        fprintf(stdout, "ERROR: Null timeout.\n");
+        err = 1;
+        goto zc_password_get_epilogue;
+    }
+
+    while (tp != tp_end) {
+        if (!isdigit(*tp)) {
+            fprintf(stdout, "ERROR: Invalid timeout : '%s'.\n", timeout);
+            err = 1;
+            goto zc_password_get_epilogue;
+        }
+        tp++;
+    }
+
+    fprintf(stdout, "Pwdb password: ");
+    pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+
+    if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
+        fprintf(stderr, "ERROR: Null pwdb password.\n");
+        goto zc_password_get_epilogue;
+    }
+
+    err = zcdev_get_password(zcd, user, user_size, pwdb_passwd, pwdb_passwd_size,
+                             alias, alias_size, &password, &password_size, &status);
+
+    if (err == 0 && status != kNoError) {
+        zcdev_perror(status);
+        err = 1;
+        goto zc_password_get_epilogue;
+    }
+
+    if (password == NULL || password_size == 0) {
+        fprintf(stderr, "PANIC: Ohhhh... Hey Beavis, Huh! Password must not be null but it seems to be!!! "
+                        "Huh-huh... \"- Nulllll\" he-he-he yeah-yeah huh-huh-huh! It smells like developer team shitspirt! "
+                        "he-he-huh-huh yeah-yeah!\n");
+        err = 1;
+        goto zc_password_get_epilogue;
+    }
+
+    // INFO(Rafael): Pretty important step. Otherwise we could leak passwords when attending impatient users.
+    zc_drain.password = password;
+    zc_drain.password_size = password_size;
+    zc_drain.pwdb_passwd = pwdb_passwd;
+    zc_drain.pwdb_passwd_size = pwdb_passwd_size;
+
+    fprintf(stdout, "INFO: Now put your cursor focus where your password must be typed and wait.");
+    err = zacarias_sendkeys(password, password_size, atoi(timeout), zc_drain_out_data, &zc_drain);
+
+    if (err != 0) {
+        fprintf(stderr, "ERROR: While trying to automagically type your password at the area where you put your cursor.\n");
+    }
+
+    memset(&zc_drain, 0, sizeof(zc_drain));
+
+zc_password_get_epilogue:
+
+    user = alias = timeout = NULL;
+    user_size = alias_size = 0;
+
+    if (pwdb_passwd != NULL) {
+        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
+        pwdb_passwd_size = 0;
+    }
+
+    if (password != NULL) {
+        kryptos_freeseg(password, password_size);
+        password_size = 0;
+    }
+
+    signal(SIGINT | SIGTERM, NULL);
+
+    return err;
+}
+
+static void zc_drain_out_data(void *args) {
+    struct zc_data_drain_ctx *zc_drain = (struct zc_data_drain_ctx *)args;
+    if (zc_drain != NULL) {
+        kryptos_freeseg(zc_drain->pwdb_passwd, zc_drain->pwdb_passwd_size);
+        zc_drain->pwdb_passwd_size = 0;
+        kryptos_freeseg(zc_drain->password, zc_drain->password_size);
+        zc_drain->password_size = 0;
+    }
+    fprintf(stdout, "\r                                                                          "
+                    "\r-- Aborted by the user. Anyway, all sensitive data was cleared.\n");
+    exit(1);
+}

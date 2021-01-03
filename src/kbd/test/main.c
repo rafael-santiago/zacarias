@@ -89,7 +89,7 @@ CUTE_TEST_CASE(zacarias_sendkeys_tests)
         while (test != test_end) {
             CUTE_ASSERT(zacarias_set_kbd_layout(test->layout) == 1);
             CUTE_ASSERT(zacarias_sendkeys(test->buffer, (test->buffer != NULL) ? strlen(test->buffer) : 0,
-                                          1) == test->expected);
+                                          1, NULL, NULL) == test->expected);
             test++;
         }
     } else {

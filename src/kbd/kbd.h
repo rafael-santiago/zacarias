@@ -16,6 +16,6 @@ kryptos_u8_t *zacarias_getuserkey(size_t *key_size);
 
 int zacarias_set_kbd_layout(const char *name);
 
-int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs);
+int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs, void (*cancel_callout)(void *), void *cancel_callout_args);
 
 #endif
