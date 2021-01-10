@@ -3,6 +3,7 @@
 #include <cmd/attach.h>
 #include <cmd/detach.h>
 #include <cmd/password.h>
+#include <cmd/help.h>
 
 #define ZC_REGISTER_COMMAND(name) { #name, zc_ ##name, zc_ ##name ##_help }
 
@@ -10,7 +11,7 @@ struct zc_exec_table_ctx g_command_table[] = {
     ZC_REGISTER_COMMAND(attach),
     ZC_REGISTER_COMMAND(detach),
     ZC_REGISTER_COMMAND(password),
-//    ZC_REGISTER_COMMAND(help),
+    ZC_REGISTER_COMMAND(help),
     ZC_REGISTER_COMMAND(version),
 };
 

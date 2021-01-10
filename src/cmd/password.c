@@ -2,6 +2,7 @@
 #include <cmd/types.h>
 #include <cmd/options.h>
 #include <cmd/devio.h>
+#include <cmd/didumean.h>
 #include <kbd/kbd.h>
 #include <kryptos.h>
 #include <ctype.h>
@@ -35,6 +36,9 @@ int zc_password(void) {
     struct zc_exec_table_ctx *zc_pscmd = NULL;
     struct zc_exec_table_ctx *zc_pscmd_end = NULL;
     char *subcommand = NULL;
+    const char **avail_subcommands = NULL;
+    char **suggestions = NULL, **psug = NULL, **psug_end = NULL;
+    size_t avail_subcommands_nr = 0;
 
     subcommand = zc_get_subcommand();
 
@@ -43,7 +47,6 @@ int zc_password(void) {
         return 1;
     }
 
-    sb_cmd = zc_password_unk;
     zc_pscmd = &g_zc_password_subcommands[0];
     zc_pscmd_end = zc_pscmd + g_zc_password_subcommands_nr;
 
@@ -53,13 +56,47 @@ int zc_password(void) {
         }
     }
 
+    if (sb_cmd == NULL) {
+        fprintf(stderr, "ERROR: unknown password subcommand.\n");
+        avail_subcommands = (const char **) malloc(sizeof(char **) * g_zc_password_subcommands_nr);
+        suggestions = (char **) malloc(sizeof(char **) * g_zc_password_subcommands_nr);
+
+        if (avail_subcommands != NULL && suggestions != NULL) {
+            while (avail_subcommands_nr < g_zc_password_subcommands_nr) {
+                avail_subcommands[avail_subcommands_nr] = g_zc_password_subcommands[avail_subcommands_nr].cmd_name;
+                avail_subcommands_nr++;
+            }
+
+            didumean(subcommand, suggestions, avail_subcommands_nr, avail_subcommands, avail_subcommands_nr, 2);
+
+            if (suggestions[0] != NULL) {
+                fprintf(stderr, "\nDid you mean ");
+                psug = suggestions;
+                psug_end = psug + avail_subcommands_nr;
+                while (psug != psug_end && *psug != NULL) {
+                    fprintf(stderr, "'%s'%s", *psug, (((psug + 1) == psug_end || *(psug + 1) == NULL) ? "?\n" : ", "));
+                    psug++;
+                }
+            }
+        }
+
+        if (avail_subcommands != NULL) {
+            free(avail_subcommands);
+        }
+
+        if (suggestions != NULL) {
+            free(suggestions);
+        }
+        return 1;
+    }
+
     return sb_cmd();
 }
 
 int zc_password_help(void) {
-    fprintf(stdout, "use: zacarias password add --user=<name> --alias=<name>\n"
-                    "     zacarias password del --user=<name> --alias=<name>\n"
-                    "     zacarias password get --user=<name> --alias=<name> [--timeout=<seconds>]\n");
+    fprintf(stdout, "use: zc password add --user=<name> --alias=<name>\n"
+                    "     zc password del --user=<name> --alias=<name>\n"
+                    "     zc password get --user=<name> --alias=<name> [--timeout=<seconds>]\n");
     return 0;
 }
 
