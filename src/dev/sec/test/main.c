@@ -166,7 +166,7 @@ CUTE_TEST_CASE(plbuf_editor_tests)
         test++;
     }
 
-    CUTE_ASSERT(plbuf_edit_shuffle(&plbuf, &plbuf_size) == 0); // TODO(Rafael): memory corruption inspect this.
+    CUTE_ASSERT(plbuf_edit_shuffle(&plbuf, &plbuf_size) == 0);
     CUTE_ASSERT(plbuf_edit_detach(&plbuf, &plbuf_size) == 0);
 
     test = &test_vector[0];

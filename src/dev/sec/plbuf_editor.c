@@ -465,7 +465,11 @@ static kryptos_u8_t *random_plbuf_entry(size_t *size) {
         return NULL;
     }
 
-    *size = kryptos_get_random_byte();
+    *size = 0;
+    while (*size == 0) {
+        *size = kryptos_get_random_byte();
+    }
+
     if ((entry = (kryptos_u8_t *) kryptos_newseg(*size + 2)) == NULL) {
         return NULL;
     }
