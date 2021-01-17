@@ -15,6 +15,7 @@ zacarias.prologue() {
         $submodules.add_item("dev/ctx");
         $submodules.add_item("dev/sec");
         $submodules.add_item("dev");
+        $submodules.add_item("test/kernel");
         $submodules.add_item("cmd");
     }
 
