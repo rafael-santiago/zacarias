@@ -1,0 +1,54 @@
+include ../../../../build/toolsets.hsl
+
+local var curr_toolset type string;
+local var includes type list;
+local var cflags type list;
+local var libraries type list;
+local var ldflags type list;
+local var modname type string;
+
+project libzcsec-kernel-tests : toolset $curr_toolset : "main.c", $includes, $cflags, $libraries, $ldflags, $modname;
+
+libzcsec-kernel-tests.preloading() {
+    $curr_toolset = get_lkm_toolset();
+}
+
+libzcsec-kernel-tests.prologue() {
+    $modname = "libzcsec-kernel-tests";
+#    $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "../../../"));
+    $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "ctx"));
+    $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "sec"));
+    $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "kryptos"));
+    $includes.add_item(hefesto.sys.pwd());
+    if (hefesto.sys.os_name() == "linux") {
+        $includes.add_item("/usr/include");
+        $cflags.add_item("-std=gnu99");
+    } else if (hefesto.sys.os_name() == "freebsd") {
+        $modname = $modname + ".ko";
+    } else if (hefesto.sys.os_name() == "netbsd") {
+        $modname = $modname + ".kmod";
+    } else if (hefesto.sys.os_name() == "windows") {
+        $modname = $modname + ".sys";
+    }
+    $cflags.add_item("-DKRYPTOS_KERNEL_MODE=1");
+    $cflags.add_item("-DKRYPTOS_DATA_WIPING_WHEN_FREEING_MEMORY=1");
+    mklocal("ctx");
+    mklocal("sec");
+    mklocal("kryptos");
+    mklocal("kutest");
+}
+
+libzcsec-tests.epilogue() {
+    if (hefesto.sys.last_forge_result() == 0) {
+        if (runtests() != 0) {
+            hefesto.project.abort(1);
+        }
+    }
+}
+
+local function runtests() : result type int {
+#    var exit_code type int;
+#    $exit_code = hefesto.sys.run(hefesto.sys.make_path("bin", $appname) + " --cutest-leak-check=yes");
+#    result $exit_code;
+    result 1;
+}

@@ -10,3 +10,8 @@ src/*/test/bin/*
 */dev/ctx/test/bin/*
 */dev/sec/test/bin/*
 *bin/*
+*/dev/sec/test/kernel/.tmp_versions/*
+*/dev/sec/test/kernel/ctx/*
+*/dev/sec/test/kernel/sec/*
+*/dev/sec/test/kernel/kryptos/*
+*/dev/sec/test/kernel/kutest.h
