@@ -1,4 +1,5 @@
-include ../../build/toolsets.hsl
+include 
+../../build/toolsets.hsl
 
 local var curr_toolset type string;
 local var includes type list;
@@ -15,7 +16,6 @@ libzcsec-kernel-tests.preloading() {
 
 libzcsec-kernel-tests.prologue() {
     $modname = "libzcsec-kernel-tests";
-#    $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "../../../"));
     $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "ctx"));
     $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "sec"));
     $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "kryptos"));
@@ -40,15 +40,22 @@ libzcsec-kernel-tests.prologue() {
 
 libzcsec-tests.epilogue() {
     if (hefesto.sys.last_forge_result() == 0) {
-        if (runtests() != 0) {
+        if (runtests($modname) != 0) {
             hefesto.project.abort(1);
         }
     }
 }
 
-local function runtests() : result type int {
-#    var exit_code type int;
-#    $exit_code = hefesto.sys.run(hefesto.sys.make_path("bin", $appname) + " --cutest-leak-check=yes");
-#    result $exit_code;
-    result 1;
+local function runtests(modname type string) : result type int {
+    var exit_code type int;
+    $exit_code = 1;
+    var os_name type string;
+    $os_name = hefesto.sys.os_name();
+    if ($os_name == "linux") {
+        $exit_code = hefesto.sys.run("insmod ./" + $modname);
+        if ($exit_code == 0) {
+            hefesto.sys.run("rmmod sec_tests");
+        }
+    }
+    result $exit_code;
 }
