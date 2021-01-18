@@ -220,6 +220,9 @@ kryptos_u8_t *zacarias_gen_userkey(size_t *size) {
 
     if (*size == 0) {
         *size = kryptos_unbiased_rand_mod_u8(ZACARIAS_MAX_USERKEY_SIZE);
+        while (*size == 0) {
+            *size = kryptos_unbiased_rand_mod_u8(ZACARIAS_MAX_USERKEY_SIZE);
+        }
     } else if (*size > ZACARIAS_MAX_USERKEY_SIZE) {
         return NULL;
     }

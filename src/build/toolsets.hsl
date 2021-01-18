@@ -37,23 +37,29 @@ function mklocal(libname type string) : result type none {
 }
 
 local function mklocal_kryptos() : result type none {
-    var src type string;
-    $src = hefesto.sys.make_path(zacarias_rootdir(), "lib/kryptos/src");
-    do_mklocal($src, "kryptos");
+    if (isdir("kryptos") == 0 || is_clean_build()) {
+        var src type string;
+        $src = hefesto.sys.make_path(zacarias_rootdir(), "lib/kryptos/src");
+        do_mklocal($src, "kryptos");
+    }
 }
 
 local function mklocal_ctx() : result type none {
-    var src type string;
-    $src = hefesto.sys.make_path(zacarias_rootdir(), "dev/ctx");
-    do_mklocal($src, "ctx");
+    if (isdir("ctx") == 0 || is_clean_build()) {
+        var src type string;
+        $src = hefesto.sys.make_path(zacarias_rootdir(), "dev/ctx");
+        do_mklocal($src, "ctx");
+    }
 }
 
 local function mklocal_sec() : result type none {
-    var src type string;
-    $src = hefesto.sys.make_path(zacarias_rootdir(), "dev/sec");
-    hefesto.sys.run("rm -rf sec");
-    hefesto.sys.run("mkdir sec");
-    hefesto.sys.run("cp "+ $src +"/*.[ch] sec");
+    if (isdir("dev/sec") == 0 || is_clean_build()) {
+        var src type string;
+        $src = hefesto.sys.make_path(zacarias_rootdir(), "dev/sec");
+        hefesto.sys.run("rm -rf sec");
+        hefesto.sys.run("mkdir sec");
+        hefesto.sys.run("cp "+ $src +"/*.[ch] sec");
+    }
 }
 
 local function mklocal_kutest() : result type none {
@@ -66,6 +72,12 @@ local function do_mklocal(src type string, dest type string) : result type none 
     hefesto.sys.run("rm -rf " + $dest);
     hefesto.sys.run("mkdir " + $dest);
     hefesto.sys.run("cp " + $src + "/*.[ch] " + $dest);
+}
+
+function is_clean_build() : result type int {
+    var clean type list;
+    $clean = hefesto.sys.get_option("clean");
+    result ($clean.count() > 0);
 }
 
 function get_app_toolset() : result type string {
