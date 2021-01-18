@@ -196,6 +196,7 @@ CUTE_TEST_CASE(crypto_tests)
     kryptos_u8_t *pwdb = NULL;
     kryptos_u8_t *user = NULL;
     char *pwdb_path = NULL;
+    size_t pwdb_size;
 
     zacarias_profiles_ctx_init(profiles);
 
@@ -209,14 +210,16 @@ CUTE_TEST_CASE(crypto_tests)
 
     user = (kryptos_u8_t *) kryptos_newseg(4);
     CUTE_ASSERT(user != NULL);
+    memcpy(user, "abc\0", 4);
     pwdb_path = (char *) kryptos_newseg(4);
     CUTE_ASSERT(pwdb_path != NULL);
-    pwdb = (kryptos_u8_t *) kryptos_newseg(strlen("passwd\tZm9vYmFy\n"));
+    pwdb_size = strlen("passwd\tZm9vYmFy\n");
+    pwdb = (kryptos_u8_t *) kryptos_newseg(pwdb_size + 1);
     CUTE_ASSERT(pwdb != NULL);
-    memcpy(pwdb, "passwd\tZm9vYmFy\n", strlen("passwd\tZm9vYmFy\n"));
+    memcpy(pwdb, "passwd\tZm9vYmFy\n\0", pwdb_size + 1);
 
     CUTE_ASSERT(zacarias_profiles_ctx_add(&profiles, user, 4, pwdb_path, 4, pwdb, strlen(pwdb)) == 0);
-    profiles->head->plbuf_size = strlen(pwdb);
+    profiles->head->plbuf_size = pwdb_size;
     profiles->head->plbuf = (kryptos_u8_t *) kryptos_newseg(profiles->head->plbuf_size + 1);
     CUTE_ASSERT(profiles->head->plbuf != NULL);
     memcpy(profiles->head->plbuf, pwdb, profiles->head->plbuf_size);
@@ -226,7 +229,7 @@ CUTE_TEST_CASE(crypto_tests)
     CUTE_ASSERT(profiles->head->plbuf_size == 0);
     CUTE_ASSERT(profiles->head->pwdb != NULL);
     CUTE_ASSERT(profiles->head->pwdb_size != 0);
-    CUTE_ASSERT(memcmp(profiles->head->pwdb, "passwd\tZm9vYmFy\n", strlen("passwd\tZm9vYmFy\n")) != 0);
+    CUTE_ASSERT(memcmp(profiles->head->pwdb, "passwd\tZm9vYmFy\n", pwdb_size) != 0);
 
     CUTE_ASSERT(zacarias_decrypt_pwdb(&profiles->head, "Boo", 3) != 0);
     CUTE_ASSERT(profiles->head->plbuf == NULL);
@@ -239,7 +242,7 @@ CUTE_TEST_CASE(crypto_tests)
     CUTE_ASSERT(profiles->head->pwdb_size != 0);
     CUTE_ASSERT(profiles->head->plbuf != NULL);
     CUTE_ASSERT(profiles->head->plbuf_size != 0);
-    CUTE_ASSERT(memcmp(profiles->head->plbuf, "passwd\tZm9vYmFy\n", strlen("passwd\tZm9vYmFy\n")) == 0);
+    CUTE_ASSERT(memcmp(profiles->head->plbuf, "passwd\tZm9vYmFy\n", pwdb_size) == 0);
 
     CUTE_ASSERT(zacarias_setkey_pwdb(NULL, "boo", 3, "foobar", 6) != 0);
     CUTE_ASSERT(zacarias_setkey_pwdb(&profiles->head, NULL, 3, "foobar", 6) != 0);
@@ -252,7 +255,7 @@ CUTE_TEST_CASE(crypto_tests)
     CUTE_ASSERT(profiles->head->pwdb_size != 0);
     CUTE_ASSERT(profiles->head->plbuf != NULL);
     CUTE_ASSERT(profiles->head->plbuf_size != 0);
-    CUTE_ASSERT(memcmp(profiles->head->plbuf, "passwd\tZm9vYmFy\n", strlen("passwd\tZm9vYmFy\n")) == 0);
+    CUTE_ASSERT(memcmp(profiles->head->plbuf, "passwd\tZm9vYmFy\n", pwdb_size) == 0);
 
     CUTE_ASSERT(zacarias_decrypt_pwdb(&profiles->head, "boo", 3) != 0);
 
@@ -261,7 +264,7 @@ CUTE_TEST_CASE(crypto_tests)
     CUTE_ASSERT(profiles->head->pwdb_size != 0);
     CUTE_ASSERT(profiles->head->plbuf != NULL);
     CUTE_ASSERT(profiles->head->plbuf_size != 0);
-    CUTE_ASSERT(memcmp(profiles->head->plbuf, "passwd\tZm9vYmFy\n", strlen("passwd\tZm9vYmFy\n")) == 0);
+    CUTE_ASSERT(memcmp(profiles->head->plbuf, "passwd\tZm9vYmFy\n", pwdb_size) == 0);
 
     CUTE_ASSERT(zacarias_setkey_pwdb(&profiles->head, "FOOBAR", 6, "boo", 3) != 0);
 
