@@ -7,7 +7,7 @@
 static int zcdev_ioctl(const int zcd, const int cmd, struct zc_devio_ctx *ioctx);
 
 int zcdev_open(void) {
-    int zcd = open(CDEVNAME, O_RDWR);
+    int zcd = open("/dev/"CDEVNAME, O_RDWR);
     int ntry = 10;
 
     while (zcd == -1 && ntry-- > 0) {

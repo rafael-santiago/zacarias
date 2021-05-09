@@ -1,4 +1,6 @@
 #include <linux/cdev_init.h>
+#include <linux/cdev_ioctl.h>
+#include <linux/cdev_open.h>
 #include <defs/types.h>
 #include <defs/io.h>
 #include <linux/device.h>
@@ -8,7 +10,9 @@
 #include <linux/buffer_head.h>
 
 static struct file_operations fops = {
-    .owner = THIS_MODULE
+    .owner = THIS_MODULE,
+    .open = cdev_open,
+    .unlocked_ioctl = cdev_ioctl,
 };
 
 int cdev_init(void) {
@@ -39,6 +43,8 @@ int cdev_init(void) {
         printk(KERN_INFO "/dev/zacarias: Device file creation failure.\n");
         return PTR_ERR(g_cdev()->device);
     }
+
+    printk(KERN_INFO "/dev/zacarias: Device initialized.\n");
 
     return 0;
 }

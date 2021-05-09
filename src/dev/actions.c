@@ -23,7 +23,7 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
     char *alias = NULL;
     size_t alias_size = 0;
 
-    if (cdev_mtx_trylock(&g_cdev()->lock)) {
+    if (!cdev_mtx_trylock(&g_cdev()->lock)) {
         return EBUSY;
     }
 
@@ -258,7 +258,7 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
     int err = EFAULT;
     zacarias_profile_ctx *profile = NULL;
 
-    if (cdev_mtx_trylock(&g_cdev()->lock)) {
+    if (!cdev_mtx_trylock(&g_cdev()->lock)) {
         return EBUSY;
     }
 
@@ -440,7 +440,7 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
     size_t pwdb_passwd_size;
     zacarias_profile_ctx *profile;
 
-    if (cdev_mtx_trylock(&g_cdev()->lock)) {
+    if (!cdev_mtx_trylock(&g_cdev()->lock)) {
         return EBUSY;
     }
 
@@ -559,7 +559,7 @@ int zc_dev_act_setkey(struct zc_devio_ctx **devio) {
     size_t new_passwd_size;
     zacarias_profile_ctx *profile;
 
-    if (cdev_mtx_trylock(&g_cdev()->lock)) {
+    if (!cdev_mtx_trylock(&g_cdev()->lock)) {
         return EBUSY;
     }
 
@@ -644,7 +644,7 @@ int zc_dev_act_is_sessioned_profile(struct zc_devio_ctx **devio) {
     struct zc_devio_ctx *d = *devio;
     zacarias_profile_ctx *profile = NULL;
 
-    if (cdev_mtx_trylock(&g_cdev()->lock)) {
+    if (!cdev_mtx_trylock(&g_cdev()->lock)) {
         return EBUSY;
     }
 
