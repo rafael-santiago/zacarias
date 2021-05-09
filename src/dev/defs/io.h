@@ -69,20 +69,22 @@ static char *gZacariasDeviceStatusVerbose[kZcDeviceStatusNr] = {
 #define zc_dev_decode_status(s) ( ((s) >= 0 && (s) < kZcDeviceStatusNr) ?\
                                         gZacariasDeviceStatusVerbos[(s)] : "Bad device status provided" )
 
+#define ZC_STR_NR 1024
+
 struct zc_devio_ctx {
     zc_device_action_t action;
     zc_device_status_t status;
-    char *pwdb_path;
+    char pwdb_path[ZC_STR_NR];
     size_t pwdb_path_size;
-    char *user;
+    char user[ZC_STR_NR];
     size_t user_size;
-    unsigned char *session_passwd;
+    unsigned char session_passwd[ZC_STR_NR];
     size_t session_passwd_size;
-    unsigned char *pwdb_passwd;
+    unsigned char pwdb_passwd[ZC_STR_NR];
     size_t pwdb_passwd_size;
-    unsigned char *passwd;
+    unsigned char passwd[ZC_STR_NR];
     size_t passwd_size;
-    char *alias;
+    char alias[ZC_STR_NR];
     size_t alias_size;
     unsigned char sessioned;
 };

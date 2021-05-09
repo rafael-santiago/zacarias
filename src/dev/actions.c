@@ -439,6 +439,8 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
     unsigned char *pwdb_passwd = NULL;
     size_t pwdb_passwd_size;
     zacarias_profile_ctx *profile;
+    unsigned char *passwd = NULL;
+    size_t passwd_size = 0;
 
     if (!cdev_mtx_trylock(&g_cdev()->lock)) {
         return EBUSY;
@@ -514,8 +516,13 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
         goto zc_dev_act_get_password_epilogue;
     }
 
-    d->passwd = plbuf_edit_passwd(profile->plbuf, profile->plbuf_size, alias, alias_size, &d->passwd_size);
-    d->status = (d->passwd != NULL) ? kNoError : kAliasNotFound;
+    passwd = plbuf_edit_passwd(profile->plbuf, profile->plbuf_size, alias, alias_size, &passwd_size);
+    d->status = (passwd != NULL) ? kNoError : kAliasNotFound;
+
+    if (d->status == kNoError) {
+        d->passwd_size = (passwd_size > ZC_STR_NR) ? ZC_STR_NR : passwd_size;
+        memcpy(d->passwd, passwd, d->passwd_size);
+    }
 
     if (plbuf_edit_shuffle(&profile->plbuf, &profile->plbuf_size) != 0) {
         err = 0;
@@ -542,7 +549,11 @@ zc_dev_act_get_password_epilogue:
         kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
     }
 
-    user_size = alias_size = pwdb_passwd_size = 0;
+    if (passwd != NULL) {
+        kryptos_freeseg(passwd, passwd_size);
+    }
+
+    user_size = alias_size = pwdb_passwd_size = passwd_size = 0;
     profile = NULL;
 
     return err;
