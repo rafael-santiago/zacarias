@@ -24,6 +24,7 @@ long cdev_ioctl(struct file *fp, unsigned int cmd, unsigned long user_param) {
 
     switch (cmd) {
         case ZACARIAS_ATTACH_PROFILE:
+            printk(KERN_INFO "-- ZACARIAS_ATTACH_PROFILE IOCTL\n");
             error = zc_dev_act_attach_profile(&dev_p);
             break;
 

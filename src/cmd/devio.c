@@ -168,10 +168,10 @@ void zcdev_perror(const zc_device_status_t status) {
 }
 
 static int zcdev_ioctl(const int zcd, const int cmd, struct zc_devio_ctx *ioctx) {
-    int ntry = 10, retval = ioctl(zcd, cmd, &ioctx);
+    int ntry = 10, retval = ioctl(zcd, cmd, ioctx);
 
     while (retval == -1 && ntry-- > 0) {
-        retval = ioctl(zcd, cmd, &ioctx);
+        retval = ioctl(zcd, cmd, ioctx);
     }
 
     if (retval == -1) {

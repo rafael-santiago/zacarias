@@ -712,19 +712,11 @@ zc_dev_act_is_sessioned_profile:
 }
 
 int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
-    char *pwdb_path = NULL;
-    size_t pwdb_path_size;
-    char *user = NULL;
-    size_t user_size;
     struct zc_devio_ctx *d = *devio;
     int err = EFAULT;
     char *pwdb = NULL;
     size_t pwdb_size;
-    unsigned char *session_passwd = NULL;
-    size_t session_passwd_size;
     zacarias_profile_ctx *profile = NULL;
-    unsigned char *pwdb_passwd = NULL;
-    size_t pwdb_passwd_size;
 
     if (!cdev_mtx_trylock(&g_cdev()->lock)) {
         return EBUSY;
@@ -734,72 +726,51 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         goto zc_dev_act_attach_profile_epilogue;
     }
 
-    pwdb_path_size = d->pwdb_path_size;
-    pwdb_path = (char *) kryptos_newseg(pwdb_path_size + 1);
-    if (pwdb_path == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_attach_profile_epilogue; 
-    }
-    memset(pwdb_path, 0, pwdb_path_size + 1);
-
-    if ((err = kcpy(pwdb_path, d->pwdb_path, pwdb_path_size)) != 0) {
-        goto zc_dev_act_attach_profile_epilogue;
-    }
-
-    user_size = d->user_size;
-    user = (char *) kryptos_newseg(user_size);
-    if (user == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_attach_profile_epilogue;
-    }
-
-    if ((err = kcpy(user, d->user, user_size)) != 0) {
-        d->status = kGeneralError;
-        goto zc_dev_act_attach_profile_epilogue;
-    }
-
     err = 0;
 
-    if (zacarias_profiles_ctx_get(g_cdev()->profiles, user, user_size) != NULL) {
+    if (zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size) != NULL) {
         d->status = kProfilePreviouslyAttached;
         goto zc_dev_act_attach_profile_epilogue;
     }
 
+    printk(KERN_INFO "-- zc_dev_act_attach_profile: %X\n", d->action);
+
     if (d->action == kAttachProfile) {
-        if (kread(pwdb_path, &pwdb, &pwdb_size) != 0) {
+        printk(KERN_INFO "-- zc_dev_act_attach_profile [kAttachProfile].\n");
+        if (kread(d->pwdb_path, &pwdb, &pwdb_size) != 0) {
             d->status = kPWDBReadingError;
             goto zc_dev_act_attach_profile_epilogue;
         }
     } else if (d->action == kInitAndAttachProfile) {
+        printk(KERN_INFO "-- zc_dev_act_attach_profile [kInitAndAttachProfile].\n");
         if (plbuf_edit_add(&pwdb, &pwdb_size, "\n\n", 2, "\n\n", 2) != 0) {
             d->status = kPWDBWritingError;
             goto zc_dev_act_attach_profile_epilogue;
         }
+        printk(KERN_INFO "-- zc_dev_act_attach_profile stub pwdb created.\n");
     }
 
-    if (zacarias_profiles_ctx_add(&g_cdev()->profiles, user, user_size, pwdb_path, pwdb_path_size, pwdb, pwdb_size) != 0) {
+    if (zacarias_profiles_ctx_add(&g_cdev()->profiles, d->user, d->user_size, d->pwdb_path, d->pwdb_path_size, pwdb, pwdb_size) != 0) {
         d->status = kGeneralError;
         goto zc_dev_act_attach_profile_epilogue;
     }
 
     if (d->action == kInitAndAttachProfile) {
-        if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, user, user_size)) == NULL) {
+        if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size)) == NULL) {
             d->status = kProfileNotFound;
             goto zc_dev_act_attach_profile_epilogue;
         }
 
-        if (zacarias_encrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) == 0) {
+        if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) == 0) {
+            printk(KERN_INFO "-- zc_dev_act_attach_profile encrypted.\n");
             if (kwrite(profile->pwdb_path, profile->pwdb, profile->pwdb_size) != 0) {
                 d->status = kPWDBWritingError;
                 goto zc_dev_act_attach_profile_epilogue;
             }
+            printk(KERN_INFO "-- zc_dev_act_attach_profile written.\n");
         }
     }
 
-    user = NULL;
-    pwdb_path = NULL;
     pwdb = NULL;
 
     if (d->session_passwd != NULL) {
@@ -809,70 +780,25 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
             d->status = kInvalidParams;
             goto zc_dev_act_attach_profile_epilogue;
         }
-
-        session_passwd_size = d->session_passwd_size;
-        session_passwd = (unsigned char *) kryptos_newseg(session_passwd_size);
-        if (session_passwd == NULL) {
-            err = ENOMEM;
-            d->status = kGeneralError;
-            goto zc_dev_act_attach_profile_epilogue;
-        }
-
-        pwdb_passwd_size = d->pwdb_passwd_size;
-        pwdb_passwd = (unsigned char *) kryptos_newseg(pwdb_passwd_size);
-        if (pwdb_passwd == NULL) {
-            err = ENOMEM;
-            d->status = kGeneralError;
-            goto zc_dev_act_attach_profile_epilogue;
-        }
-
-        if (kcpy(session_passwd, d->session_passwd, session_passwd_size) != 0) {
-            d->status = kGeneralError;
-            goto zc_dev_act_attach_profile_epilogue;
-        }
-
-        if (kcpy(pwdb_passwd, d->pwdb_passwd, pwdb_passwd_size) != 0) {
-            d->status = kGeneralError;
-            goto zc_dev_act_attach_profile_epilogue;
-        }
-
-        profile = zacarias_profiles_ctx_get(g_cdev()->profiles, user, user_size);
-        if (zacarias_setkey_pwdb(&profile, pwdb_passwd, pwdb_passwd_size, session_passwd, session_passwd_size) == 0) {
+        profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size);
+        if (zacarias_setkey_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size, d->session_passwd, d->session_passwd_size) == 0) {
             d->status = kNoError;
             profile->sessioned = 1;
         } else {
             d->status = kAuthenticationFailure;
         }
-
-        memset(session_passwd, 0, session_passwd_size);
-        memset(pwdb_passwd, 0, pwdb_passwd_size);
     } else {
         d->status = kNoError;
     }
 
 zc_dev_act_attach_profile_epilogue:
 
-    if (pwdb_path != NULL) {
-        kryptos_freeseg(pwdb_path, pwdb_path_size);
-    }
-
-    if (user != NULL) {
-        kryptos_freeseg(user, user_size);
-    }
-
     if (pwdb != NULL) {
         kryptos_freeseg(pwdb, pwdb_size);
     }
 
-    if (session_passwd != NULL) {
-        kryptos_freeseg(session_passwd, session_passwd_size);
-    }
-
-    if (pwdb_passwd != NULL) {
-        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
-    }
-
-    user_size = pwdb_path_size = pwdb_size = session_passwd_size = pwdb_passwd_size = 0;
+    pwdb_size = 0;
+    pwdb = NULL;
 
     profile = NULL;
 
