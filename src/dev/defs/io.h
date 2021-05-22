@@ -29,13 +29,14 @@
 #define CDEVNAME "zacarias"
 
 typedef enum {
-    kAttachProfile   = 0x00000001,
-    kWithSessionKey  = 0x00000002,
-    kDetachProfile   = 0x00000004,
-    kAddPassword     = 0x00000008,
-    kDelPassword     = 0x00000010,
-    kGetPassword     = 0x00000020,
-    kWithRndPassword = 0x00000040,
+    kAttachProfile        = 0x00000001,
+    kWithSessionKey       = 0x00000002,
+    kDetachProfile        = 0x00000004,
+    kAddPassword          = 0x00000008,
+    kDelPassword          = 0x00000010,
+    kGetPassword          = 0x00000020,
+    kWithRndPassword      = 0x00000040,
+    kInitAndAttachProfile = 0x00000080,
 }zc_device_action_t;
 
 typedef enum {

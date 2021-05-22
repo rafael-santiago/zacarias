@@ -183,6 +183,12 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
         goto zc_dev_act_add_password_epilogue;
     }
 
+    if (kwrite(profile->pwdb_path, profile->pwdb, profile->pwdb_size) != 0) {
+        err = 0;
+        d->status = kPWDBWritingError;
+        goto zc_dev_act_add_password_epilogue;
+    }
+
     if (profile->sessioned) {
         if (zacarias_setkey_pwdb(&profile, pwdb_passwd, pwdb_passwd_size, session_passwd, session_passwd_size) != 0) {
             err = 0;
@@ -761,14 +767,35 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         goto zc_dev_act_attach_profile_epilogue;
     }
 
-    if (kread(pwdb_path, &pwdb, &pwdb_size) != 0) {
-        d->status = kPWDBReadingError;
-        goto zc_dev_act_attach_profile_epilogue;
+    if (d->action == kAttachProfile) {
+        if (kread(pwdb_path, &pwdb, &pwdb_size) != 0) {
+            d->status = kPWDBReadingError;
+            goto zc_dev_act_attach_profile_epilogue;
+        }
+    } else if (d->action == kInitAndAttachProfile) {
+        if (plbuf_edit_add(&pwdb, &pwdb_size, "\n\n", 2, "\n\n", 2) != 0) {
+            d->status = kPWDBWritingError;
+            goto zc_dev_act_attach_profile_epilogue;
+        }
     }
 
     if (zacarias_profiles_ctx_add(&g_cdev()->profiles, user, user_size, pwdb_path, pwdb_path_size, pwdb, pwdb_size) != 0) {
         d->status = kGeneralError;
         goto zc_dev_act_attach_profile_epilogue;
+    }
+
+    if (d->action == kInitAndAttachProfile) {
+        if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, user, user_size)) == NULL) {
+            d->status = kProfileNotFound;
+            goto zc_dev_act_attach_profile_epilogue;
+        }
+
+        if (zacarias_encrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) == 0) {
+            if (kwrite(profile->pwdb_path, profile->pwdb, profile->pwdb_size) != 0) {
+                d->status = kPWDBWritingError;
+                goto zc_dev_act_attach_profile_epilogue;
+            }
+        }
     }
 
     user = NULL;

@@ -64,7 +64,7 @@ int zc_attach(void) {
     err = zcdev_attach(zcd, pwdb_path, pwdb_path_size,
                        user, user_size,
                        pwdb_passwd, pwdb_passwd_size,
-                       session_passwd[0], session_passwd_size[0], &status);
+                       session_passwd[0], session_passwd_size[0], zc_get_bool_option("init", 0), &status);
 
 
     if (err == 0 && status != kNoError) {

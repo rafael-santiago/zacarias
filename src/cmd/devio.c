@@ -29,13 +29,13 @@ int zcdev_attach(const int zcd,
                  const char *user, const size_t user_size,
                  const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
                  const unsigned char *session_passwd, const size_t session_passwd_size,
-                 zc_device_status_t *status) {
+                 const int init, zc_device_status_t *status) {
     struct zc_devio_ctx ioctx;
     int err = 0;
 
     memset(&ioctx, 0, sizeof(ioctx));
 
-    ioctx.action = kAttachProfile;
+    ioctx.action = (!init) ? kAttachProfile : kInitAndAttachProfile;
     ioctx.pwdb_path_size = (pwdb_path_size > ZC_STR_NR) ? ZC_STR_NR : pwdb_path_size;
     memcpy(ioctx.pwdb_path, pwdb_path, ioctx.pwdb_path_size);
     ioctx.user_size = (user_size > ZC_STR_NR) ? ZC_STR_NR : user_size;
