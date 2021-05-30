@@ -1,15 +1,16 @@
 #ifndef ZACARIAS_CTX_CTX_H
 #define ZACARIAS_CTX_CTX_H 1
 
+#include <defs/io.h>
 #include <kryptos.h>
 
 #define zacarias_profiles_ctx_init(p) ( (p) = (zacarias_profiles_ctx *) kryptos_newseg(sizeof(zacarias_profiles_ctx)),\
                                         (p)->head = (p)->tail = NULL )
 
 typedef struct zacarias_profile {
-    char *user;
+    char user[ZC_STR_NR];
     size_t user_size;
-    char *pwdb_path;
+    char pwdb_path[ZC_STR_NR];
     size_t pwdb_path_size;
     kryptos_u8_t *pwdb;
     size_t pwdb_size;

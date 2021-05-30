@@ -37,7 +37,13 @@ int zacarias_profiles_ctx_add(zacarias_profiles_ctx **profiles,
                                                                                           sizeof(new_profile->pwdb_path) - 1;
     memcpy(new_profile->pwdb_path, pwdb_path, new_profile->pwdb_path_size);
 
-    new_profile->pwdb_size = (pwdb_size < sizeof(new_profile->pwdb) - 1) ? pwdb_size : sizeof(new_profile->pwdb) - 1;
+    new_profile->pwdb = (kryptos_u8_t *) kryptos_newseg(pwdb_size + 1);
+    if (new_profile->pwdb == NULL) {
+        err = 1;
+        goto zacarias_profiles_ctx_add_epilogue;
+    }
+    memset(new_profile->pwdb, 0, pwdb_size + 1);
+    new_profile->pwdb_size = pwdb_size;
     memcpy(new_profile->pwdb, pwdb, new_profile->pwdb_size);
 
     if ((*profiles)->head == NULL) {
@@ -120,7 +126,9 @@ static void zacarias_profile_ctx_del(zacarias_profile_ctx *profile) {
         t = p->next;
         memset(p->user, 0, sizeof(p->user));
         memset(p->pwdb_path, 0, sizeof(p->pwdb_path));
-        memset(p->pwdb, 0, sizeof(p->pwdb));
+        if (p->pwdb != NULL) {
+            kryptos_freeseg(p->pwdb, p->pwdb_size);
+        }
         p->user_size = p->pwdb_path_size = p->pwdb_size = 0;
         if (p->plbuf != NULL) {
             kryptos_freeseg(p->plbuf, p->plbuf_size);

@@ -1,5 +1,4 @@
-include 
-../../build/toolsets.hsl
+include ../../build/toolsets.hsl
 
 local var curr_toolset type string;
 local var includes type list;
@@ -20,6 +19,7 @@ libzcsec-kernel-tests.prologue() {
     $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "sec"));
     $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "kryptos"));
     $includes.add_item(hefesto.sys.pwd());
+
     if (hefesto.sys.os_name() == "linux") {
         $includes.add_item("/usr/include");
         $cflags.add_item("-std=gnu99");

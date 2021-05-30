@@ -2,6 +2,7 @@
 #include <sec/crypto.h>
 #include <sec/plbuf_editor.h>
 #include <ctx/ctx.h>
+#include <dev/defs/io.h>
 #include <string.h>
 
 CUTE_DECLARE_TEST_CASE(sec_tests);

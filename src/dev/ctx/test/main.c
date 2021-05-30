@@ -1,6 +1,7 @@
 #include <cutest.h>
 #include <kryptos.h>
 #include <ctx/ctx.h>
+#include <dev/defs/io.h>
 
 CUTE_DECLARE_TEST_CASE(ctx_tests);
 CUTE_DECLARE_TEST_CASE(ctx_general_tests);
