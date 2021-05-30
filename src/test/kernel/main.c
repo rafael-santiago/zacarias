@@ -193,9 +193,9 @@ KUTE_TEST_CASE_END
 
 KUTE_TEST_CASE(crypto_tests)
     zacarias_profiles_ctx *profiles;
-    kryptos_u8_t *pwdb = NULL;
-    kryptos_u8_t *user = NULL;
-    char *pwdb_path = NULL;
+    kryptos_u8_t pwdb[ZC_STR_NR];
+    kryptos_u8_t user[ZC_STR_NR];
+    char pwdb_path[ZC_STR_NR];
     size_t pwdb_size;
 
     zacarias_profiles_ctx_init(profiles);
@@ -208,17 +208,16 @@ KUTE_TEST_CASE(crypto_tests)
     KUTE_ASSERT(zacarias_decrypt_pwdb(&profiles->head, NULL, 3) != 0);
     KUTE_ASSERT(zacarias_decrypt_pwdb(&profiles->head, "boo", 0) != 0);
 
-    user = (kryptos_u8_t *) kryptos_newseg(4);
-    KUTE_ASSERT(user != NULL);
-    memcpy(user, "abc\0", 4);
-    pwdb_path = (char *) kryptos_newseg(4);
-    KUTE_ASSERT(pwdb_path != NULL);
+    memset(pwdb, 0, sizeof(pwdb));
+    memset(user, 0, sizeof(user));
+    memset(pwdb_path, 0, sizeof(pwdb_path));
+
+    memcpy(user, "abc", 3);
+    memcpy(pwdb_path, "/k/root", 7);
     pwdb_size = strlen("passwd\tZm9vYmFy\n");
-    pwdb = (kryptos_u8_t *) kryptos_newseg(pwdb_size + 1);
-    KUTE_ASSERT(pwdb != NULL);
     memcpy(pwdb, "passwd\tZm9vYmFy\n\0", pwdb_size + 1);
 
-    KUTE_ASSERT(zacarias_profiles_ctx_add(&profiles, user, 4, pwdb_path, 4, pwdb, strlen(pwdb)) == 0);
+    KUTE_ASSERT(zacarias_profiles_ctx_add(&profiles, user, strlen(user), pwdb_path, strlen(pwdb_path), pwdb, strlen(pwdb)) == 0);
     profiles->head->plbuf_size = pwdb_size;
     profiles->head->plbuf = (kryptos_u8_t *) kryptos_newseg(profiles->head->plbuf_size + 1);
     KUTE_ASSERT(profiles->head->plbuf != NULL);

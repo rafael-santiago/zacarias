@@ -715,7 +715,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
     struct zc_devio_ctx *d = *devio;
     int err = EFAULT;
     char *pwdb = NULL;
-    size_t pwdb_size;
+    size_t pwdb_size = 0;
     zacarias_profile_ctx *profile = NULL;
 
     if (!cdev_mtx_trylock(&g_cdev()->lock)) {
@@ -755,6 +755,8 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         goto zc_dev_act_attach_profile_epilogue;
     }
 
+    printk(KERN_INFO "-- zc_dev_act_attach_profile profile added.\n");
+
     if (d->action == kInitAndAttachProfile) {
         if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size)) == NULL) {
             d->status = kProfileNotFound;
@@ -768,6 +770,10 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
                 goto zc_dev_act_attach_profile_epilogue;
             }
             printk(KERN_INFO "-- zc_dev_act_attach_profile written.\n");
+        } else {
+            printk(KERN_INFO "-- zc_dev_act_attach_profile unable to encrypt.\n");
+            d->status = kPWDBWritingError;
+            goto zc_dev_act_attach_profile_epilogue;
         }
     }
 

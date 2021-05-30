@@ -3,13 +3,10 @@
 # include <string.h>
 #endif
 
-// WARN(Rafael): Avoid using str functions from string.h (it can be able to run inside kernel too).
+// WARN(Rafael): Avoid using str functions from string.h (it need to be able to run inside kernel too).
 
 #define zacarias_profile_ctx_new(p) ( (p) = (zacarias_profile_ctx *) kryptos_newseg(sizeof(zacarias_profile_ctx)),\
-                                      (p)->user = NULL, (p)->user_size = 0, (p)->pwdb = NULL, (p)->pwdb_size = 0,\
-                                      (p)->pwdb_path_size = 0,\
-                                      (p)->pwdb_path = (p)->plbuf = NULL, (p)->plbuf_size = 0,\
-                                      (p)->last = (p)->next = NULL )
+                                      memset(p, 0, sizeof(zacarias_profile_ctx)) )
 
 static void zacarias_profile_ctx_del(zacarias_profile_ctx *profile);
 
@@ -33,13 +30,15 @@ int zacarias_profiles_ctx_add(zacarias_profiles_ctx **profiles,
         goto zacarias_profiles_ctx_add_epilogue;
     }
 
-    new_profile->user = user;
-    new_profile->user_size = user_size;
-    new_profile->pwdb_path = pwdb_path;
-    new_profile->pwdb_path_size = pwdb_path_size;
-    new_profile->pwdb = pwdb;
-    new_profile->pwdb_size = pwdb_size;
-    new_profile->sessioned = 0;
+    new_profile->user_size = (user_size < sizeof(new_profile->user) - 1) ? user_size : sizeof(new_profile->user) - 1;
+    memcpy(new_profile->user, user, new_profile->user_size);
+
+    new_profile->pwdb_path_size = (pwdb_path_size < sizeof(new_profile->pwdb_path) - 1) ? pwdb_path_size :
+                                                                                          sizeof(new_profile->pwdb_path) - 1;
+    memcpy(new_profile->pwdb_path, pwdb_path, new_profile->pwdb_path_size);
+
+    new_profile->pwdb_size = (pwdb_size < sizeof(new_profile->pwdb) - 1) ? pwdb_size : sizeof(new_profile->pwdb) - 1;
+    memcpy(new_profile->pwdb, pwdb, new_profile->pwdb_size);
 
     if ((*profiles)->head == NULL) {
         (*profiles)->head = (*profiles)->tail = new_profile;
@@ -119,15 +118,9 @@ static void zacarias_profile_ctx_del(zacarias_profile_ctx *profile) {
 
     for (p = profile; p != NULL; p = t) {
         t = p->next;
-        if (p->user != NULL) {
-            kryptos_freeseg(p->user, p->user_size);
-        }
-        if (p->pwdb_path != NULL) {
-            kryptos_freeseg(p->pwdb_path, p->pwdb_path_size);
-        }
-        if (p->pwdb != NULL) {
-            kryptos_freeseg(p->pwdb, p->pwdb_size);
-        }
+        memset(p->user, 0, sizeof(p->user));
+        memset(p->pwdb_path, 0, sizeof(p->pwdb_path));
+        memset(p->pwdb, 0, sizeof(p->pwdb));
         p->user_size = p->pwdb_path_size = p->pwdb_size = 0;
         if (p->plbuf != NULL) {
             kryptos_freeseg(p->plbuf, p->plbuf_size);
