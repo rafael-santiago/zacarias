@@ -1,6 +1,7 @@
 #include <cmd/attach.h>
 #include <cmd/options.h>
 #include <cmd/devio.h>
+#include <cmd/utils.h>
 #include <kbd/kbd.h>
 #include <kryptos.h>
 #include <string.h>
@@ -28,9 +29,11 @@ int zc_attach(void) {
     pwdb_path_size = strlen(pwdb_path);
 
     ZC_GET_OPTION_OR_DIE(user, "user", zc_attach_epilogue);
+    user_size = strlen(user);
 
     fprintf(stdout, "Pwdb password: ");
     pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+    del_scr_line();
 
     if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
         fprintf(stderr, "ERROR: Null pwdb password.\n");
@@ -40,6 +43,7 @@ int zc_attach(void) {
     if (zc_get_bool_option("sessioned", 0)) {
         fprintf(stdout, "Session password: ");
         session_passwd[0] = zacarias_getuserkey(&session_passwd_size[0]);
+        del_scr_line();
 
         if (session_passwd[0] == NULL || session_passwd_size[0] == 0) {
             fprintf(stderr, "ERROR: Null session password.\n");
@@ -48,6 +52,7 @@ int zc_attach(void) {
 
         fprintf(stdout, "Confirm the session password: ");
         session_passwd[1] = zacarias_getuserkey(&session_passwd_size[1]);
+        del_scr_line();
 
         if (session_passwd[1] == NULL || session_passwd_size[1] == 0) {
             fprintf(stderr, "ERROR: Null session password confirmation.\n");

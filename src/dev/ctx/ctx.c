@@ -2,6 +2,7 @@
 #ifndef KRYPTOS_KERNEL_MODE
 # include <string.h>
 #endif
+#include <defs/io.h>
 
 // WARN(Rafael): Avoid using str functions from string.h (it need to be able to run inside kernel too).
 
@@ -34,7 +35,7 @@ int zacarias_profiles_ctx_add(zacarias_profiles_ctx **profiles,
     memcpy(new_profile->user, user, new_profile->user_size);
 
     new_profile->pwdb_path_size = (pwdb_path_size < sizeof(new_profile->pwdb_path) - 1) ? pwdb_path_size :
-                                                                                          sizeof(new_profile->pwdb_path) - 1;
+                                   sizeof(new_profile->pwdb_path) - 1;
     memcpy(new_profile->pwdb_path, pwdb_path, new_profile->pwdb_path_size);
 
     new_profile->pwdb = (kryptos_u8_t *) kryptos_newseg(pwdb_size + 1);
@@ -42,6 +43,7 @@ int zacarias_profiles_ctx_add(zacarias_profiles_ctx **profiles,
         err = 1;
         goto zacarias_profiles_ctx_add_epilogue;
     }
+
     memset(new_profile->pwdb, 0, pwdb_size + 1);
     new_profile->pwdb_size = pwdb_size;
     memcpy(new_profile->pwdb, pwdb, new_profile->pwdb_size);

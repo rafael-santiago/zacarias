@@ -733,21 +733,19 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         goto zc_dev_act_attach_profile_epilogue;
     }
 
-    printk(KERN_INFO "-- zc_dev_act_attach_profile: %X\n", d->action);
-
     if (d->action == kAttachProfile) {
-        printk(KERN_INFO "-- zc_dev_act_attach_profile [kAttachProfile].\n");
         if (kread(d->pwdb_path, &pwdb, &pwdb_size) != 0) {
             d->status = kPWDBReadingError;
             goto zc_dev_act_attach_profile_epilogue;
         }
     } else if (d->action == kInitAndAttachProfile) {
-        printk(KERN_INFO "-- zc_dev_act_attach_profile [kInitAndAttachProfile].\n");
-        if (plbuf_edit_add(&pwdb, &pwdb_size, "\n\n", 2, "\n\n", 2) != 0) {
-            d->status = kPWDBWritingError;
+        pwdb_size = 8;
+        pwdb = (char *) kryptos_newseg(pwdb_size);
+        if (pwdb == NULL) {
+            d->status = kGeneralError;
             goto zc_dev_act_attach_profile_epilogue;
         }
-        printk(KERN_INFO "-- zc_dev_act_attach_profile stub pwdb created.\n");
+        memset(pwdb, 0, pwdb_size);
     }
 
     if (zacarias_profiles_ctx_add(&g_cdev()->profiles, d->user, d->user_size, d->pwdb_path, d->pwdb_path_size, pwdb, pwdb_size) != 0) {
@@ -755,23 +753,21 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         goto zc_dev_act_attach_profile_epilogue;
     }
 
-    printk(KERN_INFO "-- zc_dev_act_attach_profile profile added.\n");
-
     if (d->action == kInitAndAttachProfile) {
         if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size)) == NULL) {
             d->status = kProfileNotFound;
             goto zc_dev_act_attach_profile_epilogue;
         }
-
+        if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, "\n\n", 2, "\n\n", 2) != 0) {
+            d->status = kPWDBWritingError;
+            goto zc_dev_act_attach_profile_epilogue;
+        }
         if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) == 0) {
-            printk(KERN_INFO "-- zc_dev_act_attach_profile encrypted.\n");
             if (kwrite(profile->pwdb_path, profile->pwdb, profile->pwdb_size) != 0) {
                 d->status = kPWDBWritingError;
                 goto zc_dev_act_attach_profile_epilogue;
             }
-            printk(KERN_INFO "-- zc_dev_act_attach_profile written.\n");
         } else {
-            printk(KERN_INFO "-- zc_dev_act_attach_profile unable to encrypt.\n");
             d->status = kPWDBWritingError;
             goto zc_dev_act_attach_profile_epilogue;
         }
@@ -779,7 +775,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
 
     pwdb = NULL;
 
-    if (d->session_passwd != NULL) {
+    if (d->sessioned) {
         // INFO(Rafael): The user asked for a session passwd. We need to patch pwdb in memory in order to deliver it.
         if (d->session_passwd_size == 0 || d->pwdb_passwd == NULL || d->pwdb_passwd_size == 0) {
             err = EINVAL;

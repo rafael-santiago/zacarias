@@ -18,7 +18,7 @@ static struct file_operations fops = {
 int cdev_init(void) {
     cdev_mtx_init(&g_cdev()->lock);
 
-    g_cdev()->profiles = NULL;
+    zacarias_profiles_ctx_init(g_cdev()->profiles);
 
     g_cdev()->major_nr = register_chrdev(0, CDEVNAME, &fops);
 

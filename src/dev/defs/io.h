@@ -59,11 +59,14 @@ static char *gZacariasDeviceStatusVerbose[kZcDeviceStatusNr] = {
     "No error",
     "Invalid parameters",
     "Alias not found",
+    "Alias already used",
     "Profile not found",
     "Profile previously attached",
     "Profile not attached",
     "Authentication failure",
     "General error",
+    "PWDB reading error",
+    "PWDB writing error",
     "Unknown device command",
 };
 
