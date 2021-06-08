@@ -15,8 +15,8 @@ int zc_attach(void) {
     size_t pwdb_path_size = 0;
     char *user = NULL;
     size_t user_size = 0;
-    unsigned char *pwdb_passwd = NULL;
-    size_t pwdb_passwd_size = 0;
+    unsigned char *pwdb_passwd[2] = { NULL, NULL };
+    size_t pwdb_passwd_size[2] = { 0, 0 };
     unsigned char *session_passwd[2] = { NULL, NULL };
     size_t session_passwd_size[2] = { 0, 0 };
     zc_device_status_t status;
@@ -42,12 +42,29 @@ int zc_attach(void) {
     user_size = strlen(user);
 
     fprintf(stdout, "Pwdb password: ");
-    pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+    pwdb_passwd[0] = zacarias_getuserkey(&pwdb_passwd_size[0]);
     del_scr_line();
 
-    if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
+    if (pwdb_passwd[0] == NULL || pwdb_passwd_size[0] == 0) {
         fprintf(stderr, "ERROR: Null pwdb password.\n");
         goto zc_attach_epilogue;
+    }
+
+    if (do_init) {
+        fprintf(stdout, "Confirm the pwdb password: ");
+        pwdb_passwd[1] = zacarias_getuserkey(&pwdb_passwd_size[1]);
+        del_scr_line();
+
+        if (pwdb_passwd[1] == NULL || pwdb_passwd_size[1] == 0) {
+            fprintf(stderr, "ERROR: Null pwdb password confirmation.\n");
+            goto zc_attach_epilogue;
+        }
+
+        if (pwdb_passwd_size[0] != pwdb_passwd_size[1] ||
+            memcmp(pwdb_passwd[0], pwdb_passwd[1], pwdb_passwd_size[0]) != 0) {
+            fprintf(stderr, "ERROR: Pwdb password does not match with its confirmation.\n");
+            goto zc_attach_epilogue;
+        }
     }
 
     if (zc_get_bool_option("sessioned", 0)) {
@@ -78,7 +95,7 @@ int zc_attach(void) {
 
     err = zcdev_attach(zcd, pwdb_path, pwdb_path_size,
                        user, user_size,
-                       pwdb_passwd, pwdb_passwd_size,
+                       pwdb_passwd[0], pwdb_passwd_size[0],
                        session_passwd[0], session_passwd_size[0], do_init, &status);
 
 
@@ -89,8 +106,12 @@ int zc_attach(void) {
 
 zc_attach_epilogue:
 
-    if (pwdb_passwd != NULL) {
-        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
+    if (pwdb_passwd[0] != NULL) {
+        kryptos_freeseg(pwdb_passwd[0], pwdb_passwd_size[0]);
+    }
+
+    if (pwdb_passwd[1] != NULL) {
+        kryptos_freeseg(pwdb_passwd[1], pwdb_passwd_size[1]);
     }
 
     if (session_passwd[0] != NULL) {

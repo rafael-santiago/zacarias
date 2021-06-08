@@ -3,6 +3,7 @@
 #include <linux/fs.h>
 #include <linux/stat.h>
 #include <linux/slab.h>
+#include <asm/uaccess.h>
 #include <kryptos.h>
 
 int kread_pwdb_impl(const char *filepath, unsigned char *password, const size_t password_size, void **buf, size_t *buf_size) {
@@ -29,16 +30,24 @@ int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
 }
 
 int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
-    struct kstat ks;
+    struct kstat ks = { 0 };
     char *data;
     size_t data_size;
     struct file *file;
+    mm_segment_t old_fs = get_fs();
+    int err = 0;
 
     if (filepath == NULL || buf == NULL || buf_size == NULL) {
         return -EINVAL;
     }
 
-    vfs_stat(filepath, &ks);
+    set_fs(KERNEL_DS);
+    err = vfs_stat(filepath, &ks);
+    set_fs(old_fs);
+
+    if (err != 0) {
+        return err;
+    }
 
     data_size = ks.size;
 

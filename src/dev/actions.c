@@ -753,11 +753,12 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         goto zc_dev_act_attach_profile_epilogue;
     }
 
-    if (d->action == kInitAndAttachProfile) {
-        if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size)) == NULL) {
-            d->status = kProfileNotFound;
-            goto zc_dev_act_attach_profile_epilogue;
-        }
+    if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size)) == NULL) {
+        d->status = kProfileNotFound;
+        goto zc_dev_act_attach_profile_epilogue;
+    }
+
+    if (d->action == kInitAndAttachProfile && profile != NULL) {
         if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, "\n\n", 2, "\n\n", 2) != 0) {
             d->status = kPWDBWritingError;
             goto zc_dev_act_attach_profile_epilogue;
@@ -771,9 +772,20 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
             d->status = kPWDBWritingError;
             goto zc_dev_act_attach_profile_epilogue;
         }
+    } else if (d->action == kAttachProfile && profile != NULL) {
+        if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
+            d->status = kAuthenticationFailure;
+            zacarias_profiles_ctx_del(&g_cdev()->profiles, d->user, d->user_size);
+            goto zc_dev_act_attach_profile_epilogue;
+        }
+        if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
+            d->status = kGeneralError;
+            zacarias_profiles_ctx_del(&g_cdev()->profiles, d->user, d->user_size);
+            goto zc_dev_act_attach_profile_epilogue;
+        }
     }
 
-    pwdb = NULL;
+    //pwdb = NULL;
 
     if (d->sessioned) {
         // INFO(Rafael): The user asked for a session passwd. We need to patch pwdb in memory in order to deliver it.
