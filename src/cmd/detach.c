@@ -21,7 +21,9 @@ int zc_detach(void) {
     ZC_GET_OPTION_OR_DIE(user, "user", zc_detach_epilogue);
     user_size = strlen(user);
 
+    fprintf(stdout, "Pwdb password: ");
     pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+    del_scr_line();
 
     if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
         fprintf(stderr, "ERROR: Null pwdb password.\n");

@@ -785,8 +785,6 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         }
     }
 
-    //pwdb = NULL;
-
     if (d->sessioned) {
         // INFO(Rafael): The user asked for a session passwd. We need to patch pwdb in memory in order to deliver it.
         if (d->session_passwd_size == 0 || d->pwdb_passwd == NULL || d->pwdb_passwd_size == 0) {
@@ -822,8 +820,6 @@ zc_dev_act_attach_profile_epilogue:
 }
 
 int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
-    char *user = NULL;
-    size_t user_size;
     unsigned char *pwdb_passwd = NULL;
     size_t pwdb_passwd_size;
     int err = EFAULT;
@@ -841,52 +837,24 @@ int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
         goto zc_dev_act_detach_profile_epilogue;
     }
 
-    user_size = d->user_size;
-    user = (char *) kryptos_newseg(user_size);
-    if (user == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_detach_profile_epilogue;
-    }
-
-    if (kcpy(user, d->user, user_size) != 0) {
-        err = EFAULT;
-        d->status = kGeneralError;
-        goto zc_dev_act_detach_profile_epilogue;
-    }
-
-    profile = zacarias_profiles_ctx_get(g_cdev()->profiles, user, user_size);
+    profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size);
     if (profile == NULL) {
         err = 0;
         d->status = kProfileNotAttached;
         goto zc_dev_act_detach_profile_epilogue;
     }
 
-    pwdb_passwd_size = d->pwdb_passwd_size;
-    pwdb_passwd = (unsigned char *) kryptos_newseg(pwdb_passwd_size);
-    if (pwdb_passwd == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_detach_profile_epilogue;
-    }
-
-    if (kcpy(pwdb_passwd, d->pwdb_passwd, pwdb_passwd_size) != 0) {
-        err = EFAULT;
-        d->status = kGeneralError;
-        goto zc_dev_act_detach_profile_epilogue;
-    }
-
     err = 0;
 
-    if (zacarias_decrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) != 0) {
+    if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         d->status = kAuthenticationFailure;
         goto zc_dev_act_detach_profile_epilogue;
     }
 
     // WARN(Rafael): Maybe it is so much paranoid. Maybe remove it in the future.
-    zacarias_encrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size);
+    zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size);
 
-    if (zacarias_profiles_ctx_del(&g_cdev()->profiles, user, user_size) != 0) {
+    if (zacarias_profiles_ctx_del(&g_cdev()->profiles, d->user, d->user_size) != 0) {
         d->status = kGeneralError;
         goto zc_dev_act_detach_profile_epilogue;
     }
@@ -894,16 +862,6 @@ int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
     d->status = kNoError;
 
 zc_dev_act_detach_profile_epilogue:
-
-    if (user != NULL) {
-        kryptos_freeseg(user, user_size);
-    }
-
-    if (pwdb_passwd != NULL) {
-        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
-    }
-
-    user_size = pwdb_passwd_size = 0;
 
     profile = NULL;
 
