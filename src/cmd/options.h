@@ -13,7 +13,7 @@ char *zc_get_subcommand(void);
 
 #define ZC_GET_OPTION_OR_DIE(var, opt, esc) {\
     if (((var) = zc_get_option((opt), NULL)) == NULL) {\
-        fprintf(stderr, "ERROR: --%s option is missing.", (opt));\
+        fprintf(stderr, "ERROR: --%s option is missing.\n", (opt));\
         goto esc;\
     }\
 }

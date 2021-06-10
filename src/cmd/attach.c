@@ -10,7 +10,7 @@
 
 int zc_attach(void) {
     int zcd = zcdev_open();
-    int err = 0;
+    int err = EXIT_FAILURE;
     char *pwdb_path = NULL;
     size_t pwdb_path_size = 0;
     char *user = NULL;
@@ -99,7 +99,7 @@ int zc_attach(void) {
                        session_passwd[0], session_passwd_size[0], do_init, &status);
 
 
-    if (err == 0 && status != kNoError) {
+    if (err == EXIT_SUCCESS && status != kNoError) {
         zcdev_perror(status);
         err = 1;
     }

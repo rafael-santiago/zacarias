@@ -1,6 +1,5 @@
 include ../../build/toolsets.hsl
 
-local var curr_toolset type string;
 local var src type list;
 local var includes type list;
 local var cflags type list;
@@ -8,27 +7,26 @@ local var libraries type list;
 local var ldflags type list;
 local var appname type string;
 
-project libzckbd-tests : toolset $curr_toolset : $src, $includes, $cflags, $libraries, $ldflags, $appname;
+local var curr_toolset type string;
 
-libzckbd-tests.preloading() {
+project cmd-tests : toolset $curr_toolset : $src, $includes, $cflags, $libraries, $ldflags, $appname;
+
+cmd-tests.preloading() {
     $curr_toolset = get_app_toolset();
 }
 
-libzckbd-tests.prologue() {
+cmd-tests.prologue() {
     if (build("libkryptos") != 0 || build("libcutest") != 0) {
         hefesto.project.abort(1);
     }
-    var dirlist type list;
-    $dirlist.add_item(".");
 
-    var dummy type string;
-    $src = get_codes($dirlist, $dummy);
+    $src.ls(".*c$");
 
     $includes = hefesto.sys.get_option("includes");
     $cflags = hefesto.sys.get_option("cflags");
     $libraries = hefesto.sys.get_option("libraries");
     $ldflags = hefesto.sys.get_option("ldflags");
-    $appname = "libzckbd-tests";
+    $appname = "cmd-tests";
 
     if (hefesto.sys.os_name() == "linux") {
         $ldflags.add_item("-ldl");
@@ -43,7 +41,7 @@ libzckbd-tests.prologue() {
     }
 }
 
-libzckbd-tests.epilogue() {
+cmd-tests.epilogue() {
     if (hefesto.sys.last_forge_result() == 0) {
         if (runtests() != 0) {
             hefesto.project.abort(1);
@@ -52,18 +50,7 @@ libzckbd-tests.epilogue() {
 }
 
 local function runtests() : result type int {
-    var fp type file;
-    $fp = hefesto.sys.fopen(".input", "wb");
-    if ($fp == 0) {
-        hefesto.sys.echo("PANIC: Unable to create '.input' file. Aborted.\n");
-        result 1;
-    }
-    var buf type string;
-    $buf = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.\n";
-    hefesto.sys.fwrite($buf, $buf.len(), $fp);
-    hefesto.sys.fclose($fp);
     var exit_code type int;
-    $exit_code = hefesto.sys.run(hefesto.sys.make_path("bin", $appname) + " --cutest-leak-check=yes < .input");
-    hefesto.sys.rm(".input");
+    $exit_code = hefesto.sys.run(hefesto.sys.make_path("bin", $appname) + " --cutest-leak-check=yes");
     result $exit_code;
 }
