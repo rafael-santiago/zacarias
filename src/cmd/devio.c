@@ -1,4 +1,5 @@
 #include <cmd/devio.h>
+#include <cmd/utils.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -37,9 +38,11 @@ int zcdev_attach(const int zcd,
 
     ioctx.action = (!init) ? kAttachProfile : kInitAndAttachProfile;
 
-    ioctx.pwdb_path_size = (pwdb_path_size > sizeof(ioctx.pwdb_path) - 1) ? sizeof(ioctx.pwdb_path) - 1
-                                                                          : pwdb_path_size;
-    memcpy(ioctx.pwdb_path, pwdb_path, ioctx.pwdb_path_size);
+    if (get_canonical_path(ioctx.pwdb_path, sizeof(ioctx.pwdb_path), pwdb_path, pwdb_path_size) == NULL) {
+        fprintf(stderr, "error: PWDB path does not exist.\n");
+        return EINVAL;
+    }
+    ioctx.pwdb_path_size = strlen(ioctx.pwdb_path);
 
     ioctx.user_size = (user_size > sizeof(ioctx.user) - 1) ? sizeof(ioctx.user) - 1 : user_size;
     memcpy(ioctx.user, user, ioctx.user_size);

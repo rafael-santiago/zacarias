@@ -1,7 +1,9 @@
+#include <cmd/utils.h>
 #include <cutest.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static int zc(const char *command, const char *args, const char *keyboard_data);
 static int zacarias_install(void);
@@ -9,14 +11,55 @@ static int zacarias_uninstall(void);
 
 
 CUTE_DECLARE_TEST_CASE(cmd_tests);
+CUTE_DECLARE_TEST_CASE(get_canonical_path_tests);
 CUTE_DECLARE_TEST_CASE(attach_tests);
 CUTE_DECLARE_TEST_CASE(detach_tests);
 
 CUTE_MAIN(cmd_tests);
 
 CUTE_TEST_CASE(cmd_tests)
+    CUTE_RUN_TEST(get_canonical_path_tests);
     CUTE_RUN_TEST(attach_tests);
     CUTE_RUN_TEST(detach_tests);
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(get_canonical_path_tests)
+    char cwd[4096];
+    char expected[4096];
+    char result[4096];
+    char input[4096];
+
+    rmdir("404");
+    CUTE_ASSERT(getcwd(cwd, sizeof(cwd) - 1) != NULL);
+
+    CUTE_ASSERT(get_canonical_path(NULL, sizeof(result) - 1, "passwd", 6) == NULL);
+    CUTE_ASSERT(get_canonical_path(result, 0, "passwd", 6) == NULL);
+    CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, NULL, 6) == NULL);
+    CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "passwd", 0) == NULL);
+
+    snprintf(expected, sizeof(expected) - 1, "%s/passwd", cwd);
+    CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "passwd", 6) == &result[0]);
+    CUTE_ASSERT(memcmp(result, expected, strlen(expected)) == 0);
+
+    CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "404/passwd", 10) == NULL);
+
+    snprintf(input, sizeof(input) - 1, "%s/404/passwd", cwd);
+    CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, input, strlen(input)) == NULL);
+
+    CUTE_ASSERT(mkdir("404", 0666) == EXIT_SUCCESS);
+    CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, input, strlen(input)) == &result[0]);
+    CUTE_ASSERT(memcmp(result, input, strlen(input)) == 0);
+
+    CUTE_ASSERT(chdir("404") == EXIT_SUCCESS);
+    CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "../404/passwd", 13) == &result[0]);
+    CUTE_ASSERT(memcmp(result, input, strlen(input)) == 0);
+
+    snprintf(expected, sizeof(expected) - 1, "%s/passwd", cwd);
+    CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "../passwd", 9) == &result[0]);
+    CUTE_ASSERT(memcmp(result, expected, strlen(expected)) == 0);
+
+    CUTE_ASSERT(chdir("..") == EXIT_SUCCESS);
+    rmdir("404");
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(attach_tests)
@@ -69,7 +112,6 @@ CUTE_TEST_CASE(attach_tests)
 
     sleep(3);
 
-
     remove("passwd");
 
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs --sessioned --init", cwd);
@@ -106,24 +148,38 @@ CUTE_TEST_CASE(detach_tests)
     struct stat st;
 
     remove("passwd");
+
     zacarias_uninstall();
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
+    sleep(3);
+
+    CUTE_ASSERT(getcwd(cwd, sizeof(cwd) - 1) != NULL);
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs --init", cwd);
     CUTE_ASSERT(zc("attach", args, "123mudar*\n123mudar*\n") == EXIT_SUCCESS);
+
+    sleep(3);
 
     CUTE_ASSERT(zc("detach", "--user=rs", "1234mudar*\n") != EXIT_SUCCESS);
     CUTE_ASSERT(zc("detach", "--user=rafael-santiago", "123mudar*\n") != EXIT_SUCCESS);
     CUTE_ASSERT(zc("detach", "--user=rs", "123mudar*\n") == EXIT_SUCCESS);
 
+    sleep(3);
+
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs", cwd);
     CUTE_ASSERT(zc("attach", args, "123mudar*\n") == EXIT_SUCCESS);
+
+    sleep(3);
 
     CUTE_ASSERT(zc("detach", "--user=rs", "123mudar*\n") == EXIT_SUCCESS);
 
 
+    sleep(3);
+
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs --sessioned", cwd);
     CUTE_ASSERT(zc("attach", args, "123mudar*\nabracadabra\nabracadabra\n") == EXIT_SUCCESS);
+
+    sleep(3);
 
     CUTE_ASSERT(zc("detach", "--user=rafael.santiago", "123mudar*\n") != EXIT_SUCCESS);
     CUTE_ASSERT(zc("detach", "--user=rs", "123mudar*\n") != EXIT_SUCCESS);

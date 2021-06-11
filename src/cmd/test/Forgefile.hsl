@@ -28,6 +28,12 @@ cmd-tests.prologue() {
     $ldflags = hefesto.sys.get_option("ldflags");
     $appname = "cmd-tests";
 
+    var oldcwd type string;
+    $oldcwd = hefesto.sys.pwd();
+    hefesto.sys.cd("../o");
+    $ldflags.ls(".*(utils).o$");
+    hefesto.sys.cd($oldcwd);
+
     if (hefesto.sys.os_name() == "linux") {
         $ldflags.add_item("-ldl");
         $ldflags.add_item("-lpthread");
