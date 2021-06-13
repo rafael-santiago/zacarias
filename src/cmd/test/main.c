@@ -142,6 +142,8 @@ CUTE_TEST_CASE(attach_tests)
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
+    sleep(3);
+
     CUTE_ASSERT(mkdir("tmp", 0666) == EXIT_SUCCESS);
     CUTE_ASSERT(chdir("tmp") == EXIT_SUCCESS);
     snprintf(args, sizeof(args) - 1, "--pwdb=../passwd --user=rs", cwd);

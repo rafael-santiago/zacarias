@@ -32,7 +32,7 @@ static struct zc_exec_table_ctx g_zc_password_subcommands[] = {
 static size_t g_zc_password_subcommands_nr = sizeof(g_zc_password_subcommands) / sizeof(g_zc_password_subcommands[0]);
 
 int zc_password(void) {
-    zc_cmd_func sb_cmd = NULL;
+    zc_cmd_func sb_cmd = zc_password_unk;
     struct zc_exec_table_ctx *zc_pscmd = NULL;
     struct zc_exec_table_ctx *zc_pscmd_end = NULL;
     char *subcommand = NULL;
