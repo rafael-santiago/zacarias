@@ -125,6 +125,7 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
         }
     }
 
+    err = 0;
     d->status = kNoError;
 
 zc_dev_act_add_password_epilogue:
