@@ -67,6 +67,7 @@ CUTE_TEST_CASE(attach_tests)
     char args[4096];
     struct stat st;
 
+    rmdir("tmp");
     remove("passwd");
     zacarias_uninstall();
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
@@ -138,6 +139,17 @@ CUTE_TEST_CASE(attach_tests)
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs --sessioned", cwd);
     CUTE_ASSERT(zc("attach", args, "123mudar*\n1#12\n1#12\n") == EXIT_SUCCESS);
 
+    CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
+    CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
+
+    CUTE_ASSERT(mkdir("tmp", 0666) == EXIT_SUCCESS);
+    CUTE_ASSERT(chdir("tmp") == EXIT_SUCCESS);
+    snprintf(args, sizeof(args) - 1, "--pwdb=../passwd --user=rs", cwd);
+    CUTE_ASSERT(zc("attach", args, "123mudar*\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(stat("../passwd", &st) == EXIT_SUCCESS);
+    CUTE_ASSERT(chdir("..") == EXIT_SUCCESS);
+
+    rmdir("tmp");
     remove("passwd");
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
 CUTE_TEST_CASE_END
@@ -193,7 +205,7 @@ CUTE_TEST_CASE_END
 
 static int zc(const char *command, const char *args, const char *keyboard_data) {
 #if defined(__unix__)
-    const char zc_binary[] = "../../../bin/zc";
+    const char zc_binary[] = "bin/zc";
 #else
 # error Some code wanted.
 #endif
@@ -201,6 +213,18 @@ static int zc(const char *command, const char *args, const char *keyboard_data) 
     FILE *fp;
     int exit_code = EXIT_FAILURE;
     char *kbd_input = "";
+    struct stat st;
+    char backbuf[4096] = "";
+
+#if defined(__unix__)
+    do {
+        if (strlen(backbuf) > 4000) {
+            break;
+        }
+        strcat(backbuf, "../");
+        snprintf(command_line, sizeof(command_line) - 1, "%s%s", backbuf, zc_binary);
+    } while (stat(command_line, &st) != EXIT_SUCCESS);
+#endif
 
     if (keyboard_data != NULL) {
         fp = fopen(".keybd_data", "wb");
@@ -212,7 +236,7 @@ static int zc(const char *command, const char *args, const char *keyboard_data) 
         kbd_input = "< .keybd_data";
     }
 
-    snprintf(command_line, sizeof(command_line) - 1, "%s %s %s %s", zc_binary, command, (args != NULL) ? args : "", kbd_input);
+    snprintf(command_line, sizeof(command_line) - 1, "%s%s %s %s %s", backbuf, zc_binary, command, (args != NULL) ? args : "", kbd_input);
 
     exit_code = system(command_line);
 
