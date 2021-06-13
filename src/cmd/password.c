@@ -2,6 +2,7 @@
 #include <cmd/types.h>
 #include <cmd/options.h>
 #include <cmd/devio.h>
+#include <cmd/utils.h>
 #include <cmd/didumean.h>
 #include <kbd/kbd.h>
 #include <kryptos.h>
@@ -54,6 +55,7 @@ int zc_password(void) {
         if (strcmp(zc_pscmd->cmd_name, subcommand) == 0) {
             sb_cmd = zc_pscmd->cmd_do;
         }
+        zc_pscmd++;
     }
 
     if (sb_cmd == NULL) {
@@ -129,15 +131,17 @@ static int zc_password_add(void) {
 
     fprintf(stdout, "Pwdb password: ");
     pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+    del_scr_line();
 
     if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
         fprintf(stderr, "ERROR: Null pwdb password.\n");
         goto zc_password_add_epilogue;
     }
 
-    if (zc_get_bool_option("generate", 0)) {
+    if (zc_get_bool_option("generate", 0) == 0) {
         fprintf(stdout, "Password: ");
         password[0] = zacarias_getuserkey(&password_size[0]);
+        del_scr_line();
 
         if (password[0] == NULL || password_size[0] == 0) {
             fprintf(stderr, "ERROR: Null password.\n");
@@ -146,6 +150,7 @@ static int zc_password_add(void) {
 
         fprintf(stdout, "Confirm your password choice by re-typing it: ");
         password[1] = zacarias_getuserkey(&password_size[1]);
+        del_scr_line();
 
         if (password[1] == NULL || password_size[1] == 0) {
             fprintf(stderr, "ERROR: Null password confirmation.\n");
