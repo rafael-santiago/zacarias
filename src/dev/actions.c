@@ -11,87 +11,38 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
     int err = EFAULT;
     struct zc_devio_ctx *d = *devio;
     zacarias_profile_ctx *profile;
-    char *user = NULL;
-    size_t user_size = 0;
-    unsigned char *pwdb_passwd = NULL;
-    size_t pwdb_passwd_size = 0;
-    unsigned char *session_passwd = NULL;
-    size_t session_passwd_size = 0;
     unsigned char *passwd = NULL;
     size_t passwd_size = 0;
     unsigned char detached = 0;
-    char *alias = NULL;
-    size_t alias_size = 0;
 
     if (!cdev_mtx_trylock(&g_cdev()->lock)) {
         return EBUSY;
     }
 
-    if (d->user == NULL || d->user_size == 0 || d->pwdb_passwd == NULL || d->pwdb_passwd_size == 0 || d->alias == NULL ||
-        d->alias_size == 0) {
+    if (d->user_size == 0 || d->pwdb_passwd_size == 0 || d->alias_size == 0) {
         d->status = kInvalidParams;
         err = EINVAL;
         goto zc_dev_act_add_password_epilogue;
     }
 
-    user_size = d->user_size;
-    user = (char *) kryptos_newseg(user_size);
-    if (user == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_add_password_epilogue;
-    }
-
-    if (kcpy(user, d->user, user_size) != 0) {
-        d->status = kGeneralError;
-        err = EFAULT;
-        goto zc_dev_act_add_password_epilogue;
-    }
-
-    if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, user, user_size)) == NULL) {
+    if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size)) == NULL) {
         d->status = kProfileNotAttached;
         err = 0;
         goto zc_dev_act_add_password_epilogue;
     }
 
-    pwdb_passwd_size = d->pwdb_passwd_size;
-    pwdb_passwd = (unsigned char *) kryptos_newseg(pwdb_passwd_size);
-    if (pwdb_passwd == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_add_password_epilogue;
-    }
-
-    if (kcpy(pwdb_passwd, d->pwdb_passwd, pwdb_passwd_size) != 0) {
-        d->status = kGeneralError;
-        err = EFAULT;
-        goto zc_dev_act_add_password_epilogue;
-    }
-
-    if (profile->sessioned && (d->session_passwd == NULL || d->session_passwd_size == 0)) {
+    if (profile->sessioned && d->session_passwd_size == 0) {
         d->status = kInvalidParams;
         err = EINVAL;
         goto zc_dev_act_add_password_epilogue;
     }
 
     if (profile->sessioned) {
-        session_passwd_size = d->session_passwd_size;
-        session_passwd = (unsigned char *) kryptos_newseg(session_passwd_size);
-        if (session_passwd == NULL) {
-            err = ENOMEM;
-            d->status = kGeneralError;
-            goto zc_dev_act_add_password_epilogue;
-        }
-
-        if (kcpy(session_passwd, d->session_passwd, session_passwd_size) != 0) {
-            d->status = kGeneralError;
-            err = EFAULT;
-            goto zc_dev_act_add_password_epilogue;
-        }
-
         // INFO(Rafael): Dirty trick. This setkey is only for validating the session key. We need to reload it
         //               from disk in order to validate the master key, too.
-        if (zacarias_setkey_pwdb(&profile, session_passwd, session_passwd_size, pwdb_passwd, pwdb_passwd_size) == 0) {
+        if (zacarias_setkey_pwdb(&profile,
+                                 d->session_passwd, d->session_passwd_size,
+                                 d->pwdb_passwd, d->pwdb_passwd_size) == 0) {
             kryptos_freeseg(profile->pwdb, profile->pwdb_size);
             profile->pwdb_size = 0;
             if (kread(profile->pwdb_path, profile->pwdb, &profile->pwdb_size) != 0) {
@@ -106,7 +57,7 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
         }
     }
 
-    if (zacarias_decrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) != 0) {
+    if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         d->status = kAuthenticationFailure;
         err = 0;
         goto zc_dev_act_add_password_epilogue;
@@ -120,50 +71,25 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
 
     detached = 1;
 
-    alias_size = d->alias_size;
-    alias = (char *) kryptos_newseg(alias_size);
-    if (alias == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_add_password_epilogue;
-    }
-
-    if (kcpy(alias, d->alias, alias_size) != 0) {
-        err = EFAULT;
-        d->status = kGeneralError;
-        goto zc_dev_act_add_password_epilogue;
-    }
-
-    if (plbuf_edit_find(profile->plbuf, profile->plbuf_size, alias, alias_size)) {
+    if (plbuf_edit_find(profile->plbuf, profile->plbuf_size, d->alias, d->alias_size)) {
         err = 0;
         d->status = kAliasAlreadyUsed;
         goto zc_dev_act_add_password_epilogue;
     }
 
-    if (d->passwd != NULL) {
-        passwd_size = d->passwd_size;
-        passwd = (unsigned char *) kryptos_newseg(passwd_size);
-        if (passwd == NULL) {
-            err = ENOMEM;
-            d->status = kGeneralError;
-            goto zc_dev_act_add_password_epilogue;
-        }
-
-        if (kcpy(passwd, d->passwd, passwd_size) != 0) {
-            err = EFAULT;
-            d->status = kGeneralError;
-            goto zc_dev_act_add_password_epilogue;
-        }
-    } else {
+    if (d->passwd_size == 0) {
         passwd = zacarias_gen_userkey(&passwd_size);
         if (passwd == NULL) {
             err = ENOMEM;
             d->status = kGeneralError;
             goto zc_dev_act_add_password_epilogue;
         }
+    } else {
+        passwd = &d->passwd[0];
+        passwd_size = d->passwd_size;
     }
 
-    if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, alias, alias_size, passwd, passwd_size) != 0) {
+    if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, d->alias, d->alias_size, passwd, passwd_size) != 0) {
         err = 0;
         d->status = kGeneralError;
         goto zc_dev_act_add_password_epilogue;
@@ -177,7 +103,7 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
 
     detached = 0;
 
-    if (zacarias_encrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) != 0) {
+    if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         err = 0;
         d->status = kGeneralError;
         goto zc_dev_act_add_password_epilogue;
@@ -190,7 +116,9 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
     }
 
     if (profile->sessioned) {
-        if (zacarias_setkey_pwdb(&profile, pwdb_passwd, pwdb_passwd_size, session_passwd, session_passwd_size) != 0) {
+        if (zacarias_setkey_pwdb(&profile,
+                                 d->pwdb_passwd, d->pwdb_passwd_size,
+                                 d->session_passwd, d->session_passwd_size) != 0) {
             err = 0;
             d->status = kGeneralError;
             goto zc_dev_act_add_password_epilogue;
@@ -204,46 +132,36 @@ zc_dev_act_add_password_epilogue:
     if (d->status != kNoError) {
         if (detached) {
             if (plbuf_edit_shuffle(&profile->plbuf, &profile->plbuf_size) == 0) {
-                if (zacarias_encrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) == 0) {
+                if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) == 0) {
                     if (profile->sessioned) {
-                        zacarias_setkey_pwdb(&profile, pwdb_passwd, pwdb_passwd_size, session_passwd, session_passwd_size);
+                        zacarias_setkey_pwdb(&profile,
+                                             d->pwdb_passwd, d->pwdb_passwd_size,
+                                             d->session_passwd, d->session_passwd_size);
                     }
                 }
             }
         } else {
-            if (pwdb_passwd != NULL && profile->plbuf != NULL) {
-                if (zacarias_encrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) == 0) {
-                    if (profile->sessioned && session_passwd != NULL) {
-                        zacarias_setkey_pwdb(&profile, pwdb_passwd, pwdb_passwd_size, session_passwd, session_passwd_size);
+            if (d->pwdb_passwd_size > 0 && profile->plbuf != NULL) {
+                if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) == 0) {
+                    if (profile->sessioned && d->session_passwd_size > 0) {
+                        zacarias_setkey_pwdb(&profile,
+                                             d->pwdb_passwd, d->pwdb_passwd_size,
+                                             d->session_passwd, d->session_passwd_size);
                     }
                 }
-            } else if (profile->sessioned && session_passwd != NULL && profile->plbuf != NULL) {
-                zacarias_encrypt_pwdb(&profile, session_passwd, session_passwd_size);
+            } else if (profile->sessioned && d->session_passwd_size > 0 && profile->plbuf != NULL) {
+                zacarias_encrypt_pwdb(&profile, d->session_passwd, d->session_passwd_size);
             }
         }
     }
 
-    if (user != NULL) {
-        kryptos_freeseg(user, user_size);
-    }
-
-    if (pwdb_passwd != NULL) {
-        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
-    }
-
-    if (session_passwd != NULL) {
-        kryptos_freeseg(session_passwd, session_passwd_size);
-    }
-
-    if (passwd != NULL) {
+    if (passwd != NULL && passwd != &d->passwd[0]) {
         kryptos_freeseg(passwd, passwd_size);
     }
 
-    if (alias != NULL) {
-        kryptos_freeseg(alias, alias_size);
-    }
+    passwd = NULL;
 
-    user_size = pwdb_passwd_size = session_passwd_size = passwd_size = alias_size = 0;
+    passwd_size = 0;
     profile = NULL;
 
     cdev_mtx_unlock(&g_cdev()->lock);
