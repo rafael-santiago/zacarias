@@ -678,7 +678,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
     }
 
     if (d->action == kInitAndAttachProfile && profile != NULL) {
-        if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, "\n\n", 2, "\n\n", 2) != 0) {
+        if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, "\x1B\n", 2, "\x1B\n", 2) != 0) {
             d->status = kPWDBWritingError;
             goto zc_dev_act_attach_profile_epilogue;
         }

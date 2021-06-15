@@ -189,13 +189,24 @@ int plbuf_edit_shuffle(kryptos_u8_t **plbuf, size_t *plbuf_size) {
 
     p = (*plbuf);
 
-    plbuf_lines[plbuf_n++] = p++;
-
-    while (p != p_end) {
-        if (*p == '\n' && p + 1 != p_end) {
-            plbuf_lines[plbuf_n++] = p + 1;
+    if (*p != 0x1B) {
+        plbuf_lines[plbuf_n++] = p++;
+        while (p != p_end) {
+            if (*p == '\n' && p + 1 < p_end && p + 1 < master_end && *(p + 1) != '\n') {
+                plbuf_lines[plbuf_n++] = p + 1;
+            }
+            p++;
         }
-        p++;
+    }
+
+    done = (plbuf_n == 0);
+
+    if (done) {
+        kryptos_freeseg(*plbuf, *plbuf_size);
+        *plbuf = NULL;
+        *plbuf_size = 0;
+        err = 0;
+        goto plbuf_edit_shuffle_epilogue;
     }
 
     temp_size = *plbuf_size + random_entries_size[0] + random_entries_size[1];
@@ -204,7 +215,7 @@ int plbuf_edit_shuffle(kryptos_u8_t **plbuf, size_t *plbuf_size) {
 
     memcpy(temp, random_entries[0], random_entries_size[0]);
     tp = temp + random_entries_size[0];
-    done = 0;
+
     plbuf_n = 0;
 
 #define random_plbuf_line_n ( ( (size_t) kryptos_get_random_byte() << 24 |\
@@ -228,6 +239,7 @@ int plbuf_edit_shuffle(kryptos_u8_t **plbuf, size_t *plbuf_size) {
             goto plbuf_edit_shuffle_epilogue;
         }
         p_end += 1;
+
         memcpy(tp, p, p_end - p);
         tp += p_end - p;
 

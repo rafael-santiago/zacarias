@@ -110,7 +110,7 @@ static int zc_password_unk(void) {
 static int zc_password_add(void) {
     int zcd = zcdev_open();
     char *user = NULL, *alias = NULL;
-    int err = 0;
+    int err = EXIT_FAILURE;
     size_t user_size = 0, alias_size = 0;
     unsigned char *pwdb_passwd = NULL;
     size_t pwdb_passwd_size = 0;
@@ -168,7 +168,7 @@ static int zc_password_add(void) {
 
     if (err == 0 && status != kNoError) {
         zcdev_perror(status);
-        err = 1;
+        err = EXIT_FAILURE;
     }
 
 zc_password_add_epilogue:

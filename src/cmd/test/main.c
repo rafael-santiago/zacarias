@@ -14,6 +14,7 @@ CUTE_DECLARE_TEST_CASE(cmd_tests);
 CUTE_DECLARE_TEST_CASE(get_canonical_path_tests);
 CUTE_DECLARE_TEST_CASE(attach_tests);
 CUTE_DECLARE_TEST_CASE(detach_tests);
+CUTE_DECLARE_TEST_CASE(password_add_tests);
 
 CUTE_MAIN(cmd_tests);
 
@@ -21,6 +22,7 @@ CUTE_TEST_CASE(cmd_tests)
     CUTE_RUN_TEST(get_canonical_path_tests);
     CUTE_RUN_TEST(attach_tests);
     CUTE_RUN_TEST(detach_tests);
+    CUTE_RUN_TEST(password_add_tests);
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(get_canonical_path_tests)
@@ -60,6 +62,31 @@ CUTE_TEST_CASE(get_canonical_path_tests)
 
     CUTE_ASSERT(chdir("..") == EXIT_SUCCESS);
     rmdir("404");
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(password_add_tests)
+    char args[4096];
+    struct stat st;
+
+    remove("passwd");
+    zacarias_uninstall();
+    CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
+    sleep(3);
+
+    CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --init", "123mudar*\n123mudar*\n") == EXIT_SUCCESS);
+    sleep(3);
+    CUTE_ASSERT(stat("passwd", &st) == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("password", "add --user=rs --alias=alpha.com", "123mudar\nabc\nabc\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "add", "123mudar*\n123mudar\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "add --user=rs", "123mudar*\n123mudar\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "add --user=rs --alias=alpha.com", "123mudar*\nabc\nabd\n") != EXIT_SUCCESS);
+    //CUTE_ASSERT(zc("password", "add --user=rs --alias=alpha.com", "123mudar*\nabc\nabc\n") == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("detach", "--user=rs", "123mudar*\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(remove("passwd") == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(attach_tests)
