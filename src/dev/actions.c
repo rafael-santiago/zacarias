@@ -172,14 +172,6 @@ zc_dev_act_add_password_epilogue:
 
 int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
     struct zc_devio_ctx *d = *devio;
-    char *alias = NULL;
-    size_t alias_size;
-    unsigned char *session_passwd = NULL;
-    size_t session_passwd_size = 0;
-    unsigned char *pwdb_passwd = NULL;
-    size_t pwdb_passwd_size;
-    char *user = NULL;
-    size_t user_size;
     int err = EFAULT;
     zacarias_profile_ctx *profile = NULL;
 
@@ -194,65 +186,16 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
         goto zc_dev_act_del_password_epilogue;
     }
 
-    alias_size = d->alias_size;
-    alias = (char *) kryptos_newseg(alias_size);
-    if (alias == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_del_password_epilogue;
-    }
-
-    if (kcpy(alias, d->alias, alias_size) != 0) {
-        err = EFAULT;
-        d->status = kGeneralError;
-        goto zc_dev_act_del_password_epilogue;
-    }
-
-    user_size = d->user_size;
-    user = (char *) kryptos_newseg(user_size);
-    if (user == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_del_password_epilogue;
-    }
-
-    if (kcpy(user, d->user, user_size) != 0) {
-        err = EFAULT;
-        d->status = kGeneralError;
-        goto zc_dev_act_del_password_epilogue;
-    }
-
-    profile = zacarias_profiles_ctx_get(g_cdev()->profiles, user, user_size);
+    profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size);
     if (profile == NULL) {
         err = 0;
         d->status = kProfileNotAttached;
         goto zc_dev_act_del_password_epilogue;
     }
 
-    pwdb_passwd_size = d->pwdb_passwd_size;
-    pwdb_passwd = (unsigned char *) kryptos_newseg(pwdb_passwd_size);
-    if (pwdb_passwd == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_del_password_epilogue;
-    }
-
-    if (kcpy(pwdb_passwd, d->pwdb_passwd, pwdb_passwd_size) != 0) {
-        err = EFAULT;
-        d->status = kGeneralError;
-        goto zc_dev_act_del_password_epilogue;
-    }
-
-    if (profile->sessioned && d->session_passwd != NULL && d->session_passwd_size != 0) {
-        session_passwd_size = d->session_passwd_size;
-        session_passwd = (unsigned char *) kryptos_newseg(session_passwd_size);
-        if (session_passwd == NULL) {
-            err = ENOMEM;
-            d->status = kGeneralError;
-            goto zc_dev_act_del_password_epilogue;
-        }
-
-        if (zacarias_setkey_pwdb(&profile, session_passwd, session_passwd_size, pwdb_passwd, pwdb_passwd_size) == 0) {
+    if (profile->sessioned && d->session_passwd_size > 0) {
+        if (zacarias_setkey_pwdb(&profile,
+                                 d->session_passwd, d->session_passwd_size, d->pwdb_passwd, d->pwdb_passwd_size) == 0) {
             kryptos_freeseg(profile->pwdb, profile->pwdb_size);
             profile->pwdb = NULL;
             profile->pwdb_size = 0;
@@ -266,13 +209,13 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
             d->status = kAuthenticationFailure;
             goto zc_dev_act_del_password_epilogue;
         }
-    } else if (profile->sessioned && (d->session_passwd == NULL || d->session_passwd_size == 0)) {
+    } else if (profile->sessioned && d->session_passwd_size == 0) {
         err = 0;
         d->status = kInvalidParams;
         goto zc_dev_act_del_password_epilogue;
     }
 
-    if (zacarias_decrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) != 0) {
+    if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         err = 0;
         d->status = kAuthenticationFailure;
         goto zc_dev_act_del_password_epilogue;
@@ -281,11 +224,11 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
     if (plbuf_edit_detach(&profile->plbuf, &profile->plbuf_size) != 0) {
         err = 0;
         d->status = kGeneralError;
-        zacarias_encrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size);
+        zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size);
         goto zc_dev_act_del_password_epilogue;
     }
 
-    if (plbuf_edit_del(&profile->plbuf, &profile->plbuf_size, alias, alias_size) != 0) {
+    if (plbuf_edit_del(&profile->plbuf, &profile->plbuf_size, d->alias, d->alias_size) != 0) {
         err = 0;
         d->status = kGeneralError;
         goto zc_dev_act_del_password_epilogue;
@@ -300,7 +243,7 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
         goto zc_dev_act_del_password_epilogue;
     }
 
-    if (zacarias_encrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) != 0) {
+    if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         err = 0;
         d->status = kGeneralError;
         goto zc_dev_act_del_password_epilogue;
@@ -312,8 +255,9 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
         goto zc_dev_act_del_password_epilogue;
     }
 
-    if (profile->sessioned && session_passwd != NULL && session_passwd_size > 0 &&
-        zacarias_setkey_pwdb(&profile, pwdb_passwd, pwdb_passwd_size, session_passwd, session_passwd_size) != 0) {
+    if (profile->sessioned && d->session_passwd_size > 0 && zacarias_setkey_pwdb(&profile,
+                                                      d->pwdb_passwd, d->pwdb_passwd_size,
+                                                d->session_passwd, d->session_passwd_size) != 0) {
         err = 0;
         d->status = kAuthenticationFailure;
         goto zc_dev_act_del_password_epilogue;
@@ -330,26 +274,9 @@ zc_dev_act_del_password_epilogue:
         profile->plbuf_size = 0;
     }
 
-    if (alias != NULL) {
-        kryptos_freeseg(alias, alias_size);
-    }
-
-    if (session_passwd != NULL) {
-        kryptos_freeseg(session_passwd, session_passwd_size);
-    }
-
-    if (pwdb_passwd != NULL) {
-        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
-    }
-
-    if (user != NULL) {
-        kryptos_freeseg(user, user_size);
-    }
-
     d = NULL;
-    user_size = alias_size = session_passwd_size = pwdb_passwd_size = 0;
-    cdev_mtx_unlock(&g_cdev()->lock);
     profile = NULL;
+    cdev_mtx_unlock(&g_cdev()->lock);
 
     return err;
 }
@@ -739,8 +666,6 @@ zc_dev_act_attach_profile_epilogue:
 }
 
 int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
-    unsigned char *pwdb_passwd = NULL;
-    size_t pwdb_passwd_size;
     int err = EFAULT;
     struct zc_devio_ctx *d = *devio;
     zacarias_profile_ctx *profile;
