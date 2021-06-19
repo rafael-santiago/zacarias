@@ -37,6 +37,7 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
     struct file *file;
     mm_segment_t old_fs = get_fs();
     int err = 0;
+    ssize_t bytes_total = 0;
 
     if (filepath == NULL || buf == NULL || buf_size == NULL) {
         return -EINVAL;
@@ -63,13 +64,13 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
         return -EFAULT;
     }
 
-    kernel_read(file, 0, data, data_size);
+    bytes_total = kernel_read(file, 0, data, data_size);
     filp_close(file, NULL);
 
     *(char **)buf = data;
     *buf_size = data_size;
 
-    return 0;
+    return (bytes_total == data_size) ? 0 : 1;
 }
 
 /*
