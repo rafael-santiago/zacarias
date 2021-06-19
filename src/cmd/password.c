@@ -96,8 +96,8 @@ int zc_password(void) {
 }
 
 int zc_password_help(void) {
-    fprintf(stdout, "use: zc password add --user=<name> --alias=<name>\n"
-                    "     zc password del --user=<name> --alias=<name>\n"
+    fprintf(stdout, "use: zc password add --user=<name> --alias=<name> [--sessioned]\n"
+                    "     zc password del --user=<name> --alias=<name> [--sessioned]\n"
                     "     zc password get --user=<name> --alias=<name> [--timeout=<seconds>]\n");
     return 0;
 }
@@ -114,6 +114,8 @@ static int zc_password_add(void) {
     size_t user_size = 0, alias_size = 0;
     unsigned char *pwdb_passwd = NULL;
     size_t pwdb_passwd_size = 0;
+    unsigned char *session_passwd = NULL;
+    size_t session_passwd_size = 0;
     unsigned char *password[2] = { NULL, NULL };
     size_t password_size[2] = { 0, 0 };
     zc_device_status_t status;
@@ -136,6 +138,16 @@ static int zc_password_add(void) {
     if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
         fprintf(stderr, "ERROR: Null pwdb password.\n");
         goto zc_password_add_epilogue;
+    }
+
+    if (zc_get_bool_option("sessioned", 0)) {
+        fprintf(stdout, "Session password: ");
+        session_passwd = zacarias_getuserkey(&session_passwd_size);
+        del_scr_line();
+        if (session_passwd == NULL || session_passwd_size == 0) {
+            fprintf(stderr, "ERROR: Null session password.\n");
+            goto zc_password_add_epilogue;
+        }
     }
 
     if (zc_get_bool_option("generate", 0) == 0) {
@@ -163,7 +175,7 @@ static int zc_password_add(void) {
         }
     }
 
-    err = zcdev_add_password(zcd, user, user_size, pwdb_passwd, pwdb_passwd_size,
+    err = zcdev_add_password(zcd, user, user_size, pwdb_passwd, pwdb_passwd_size, session_passwd, session_passwd_size,
                              alias, alias_size, password[0], password_size[0], &status);
 
     if (err == 0 && status != kNoError) {
@@ -183,6 +195,11 @@ zc_password_add_epilogue:
         pwdb_passwd_size = 0;
     }
 
+    if (session_passwd != NULL) {
+        kryptos_freeseg(session_passwd, session_passwd_size);
+        session_passwd_size = 0;
+    }
+
     if (password[0] != NULL) {
         kryptos_freeseg(password[0], password_size[0]);
         password_size[0] = 0;
@@ -200,7 +217,8 @@ static int zc_password_del(void) {
     int zcd = zcdev_open();
     char *user = NULL, *alias = NULL;
     unsigned char *pwdb_passwd = NULL;
-    size_t user_size = 0, alias_size = 0, pwdb_passwd_size = 0;
+    unsigned char *session_passwd = NULL;
+    size_t user_size = 0, alias_size = 0, pwdb_passwd_size = 0, session_passwd_size = 0;
     int err = 0;
     zc_device_status_t status;
 
@@ -217,13 +235,25 @@ static int zc_password_del(void) {
 
     fprintf(stdout, "Pwdb password: ");
     pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+    del_scr_line();
 
     if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
         fprintf(stderr, "ERROR: Null pwdb password.\n");
         goto zc_password_del_epilogue;
     }
 
-    err = zcdev_del_password(zcd, user, user_size, pwdb_passwd, pwdb_passwd_size, alias, alias_size, &status);
+    if (zc_get_bool_option("sessioned", 0)) {
+        fprintf(stdout, "Session password: ");
+        session_passwd = zacarias_getuserkey(&session_passwd_size);
+        del_scr_line();
+        if (session_passwd == NULL || session_passwd_size == 0) {
+            fprintf(stderr, "ERROR: Null session password.\n");
+            goto zc_password_del_epilogue;
+        }
+    }
+
+    err = zcdev_del_password(zcd, user, user_size, pwdb_passwd, pwdb_passwd_size, session_passwd, session_passwd_size,
+                             alias, alias_size, &status);
 
     if (err == 0 && status != kNoError) {
         zcdev_perror(status);
@@ -240,6 +270,11 @@ zc_password_del_epilogue:
     if (pwdb_passwd != NULL) {
         kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
         pwdb_passwd_size = 0;
+    }
+
+    if (session_passwd != NULL) {
+        kryptos_freeseg(session_passwd, session_passwd_size);
+        session_passwd_size = 0;
     }
 
     return err;

@@ -94,6 +94,7 @@ int zcdev_detach(const int zcd, const char *user, const size_t user_size,
 
 int zcdev_add_password(const int zcd, const char *user, const size_t user_size,
                        const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
+                       const unsigned char *session_passwd, const size_t session_passwd_size,
                        const char *alias, const size_t alias_size,
                        const unsigned char *password, const size_t password_size,
                        zc_device_status_t *status) {
@@ -108,6 +109,12 @@ int zcdev_add_password(const int zcd, const char *user, const size_t user_size,
     ioctx.pwdb_passwd_size = (pwdb_passwd_size > sizeof(ioctx.pwdb_passwd) - 1) ? sizeof(ioctx.pwdb_passwd) - 1
                                                                                 : pwdb_passwd_size;
     memcpy(ioctx.pwdb_passwd, pwdb_passwd, ioctx.pwdb_passwd_size);
+
+    if (session_passwd != NULL) {
+        ioctx.session_passwd_size = (session_passwd_size > sizeof(ioctx.session_passwd) - 1) ? sizeof(ioctx.session_passwd) - 1
+                                                                                             : session_passwd_size;
+        memcpy(ioctx.session_passwd, session_passwd, ioctx.session_passwd_size);
+    }
 
     ioctx.alias_size = (alias_size > sizeof(ioctx.alias) - 1) ? sizeof(ioctx.alias) - 1 : alias_size;
     memcpy(ioctx.alias, alias, ioctx.alias_size);
@@ -126,6 +133,7 @@ int zcdev_add_password(const int zcd, const char *user, const size_t user_size,
 
 int zcdev_del_password(const int zcd, const char *user, const size_t user_size,
                        const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
+                       const unsigned char *session_passwd, const size_t session_passwd_size,
                        const char *alias, const size_t alias_size,
                        zc_device_status_t *status) {
     int err;
@@ -139,6 +147,12 @@ int zcdev_del_password(const int zcd, const char *user, const size_t user_size,
     ioctx.pwdb_passwd_size = (pwdb_passwd_size > sizeof(ioctx.pwdb_passwd) - 1) ? sizeof(ioctx.pwdb_passwd) - 1
                                                                                 : pwdb_passwd_size;
     memcpy(ioctx.pwdb_passwd, pwdb_passwd, ioctx.pwdb_passwd_size);
+
+    if (session_passwd != NULL) {
+        ioctx.session_passwd_size = (session_passwd_size > sizeof(ioctx.session_passwd) - 1) ? sizeof(ioctx.session_passwd) - 1
+                                                                                             : session_passwd_size;
+        memcpy(ioctx.session_passwd, session_passwd, ioctx.session_passwd_size);
+    }
 
     ioctx.alias_size = (alias_size > sizeof(ioctx.alias) - 1) ? sizeof(ioctx.alias) - 1 : alias_size;
     memcpy(ioctx.alias, alias, ioctx.alias_size);
