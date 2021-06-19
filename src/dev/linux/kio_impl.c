@@ -12,21 +12,22 @@ int kread_pwdb_impl(const char *filepath, unsigned char *password, const size_t 
 
 int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
     struct file *file;
+    ssize_t res;
 
     if (filepath == NULL || buf == NULL || buf_size == 0) {
         return -EINVAL;
     }
 
-    file = filp_open(filepath, O_WRONLY | O_CREAT, 0664);
+    file = filp_open(filepath, O_WRONLY | O_CREAT | O_APPEND | O_LARGEFILE, 0664);
 
     if (file == NULL) {
         return -EFAULT;
     }
 
-    kernel_write(file, buf, buf_size, 0);
+    res = kernel_write(file, buf, buf_size, NULL);
     filp_close(file, NULL);
-
-    return 0;
+    //printk(KERN_INFO "res: %d == %d\n", res, buf_size);
+    return (res == buf_size) ? 0 : 1;
 }
 
 int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
