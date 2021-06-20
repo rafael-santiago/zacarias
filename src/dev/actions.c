@@ -130,7 +130,7 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
 
 zc_dev_act_add_password_epilogue:
 
-    if (d->status != kNoError) {
+    if (d->status != kNoError && profile != NULL) {
         if (detached) {
             if (plbuf_edit_shuffle(&profile->plbuf, &profile->plbuf_size) == 0) {
                 if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) == 0) {
