@@ -230,16 +230,20 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
 
     if (plbuf_edit_del(&profile->plbuf, &profile->plbuf_size, d->alias, d->alias_size) != 0) {
         err = 0;
-        d->status = kGeneralError;
+        d->status = kAliasNotFound;
         goto zc_dev_act_del_password_epilogue;
     }
 
-    if (plbuf_edit_shuffle(&profile->plbuf, &profile->plbuf_size) != 0) {
+    if (profile->plbuf_size > 0 && plbuf_edit_shuffle(&profile->plbuf, &profile->plbuf_size) != 0) {
         err = 0;
         d->status = kGeneralError;
         kryptos_freeseg(profile->plbuf, profile->plbuf_size);
         profile->plbuf = NULL;
         profile->plbuf_size = 0;
+        goto zc_dev_act_del_password_epilogue;
+    } else if (profile->plbuf_size == 0 && plbuf_edit_add(&profile->plbuf, &profile->plbuf_size,
+                                                          "\x1B\n", 2, "\x1B\n", 2) != 0) {
+        d->status = kPWDBWritingError;
         goto zc_dev_act_del_password_epilogue;
     }
 
