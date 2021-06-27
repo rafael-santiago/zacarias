@@ -288,13 +288,9 @@ zc_dev_act_del_password_epilogue:
 int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
     int err = EFAULT;
     struct zc_devio_ctx *d = *devio;
-    char *user = NULL;
-    size_t user_size;
-    char *alias = NULL;
-    size_t alias_size;
-    unsigned char *pwdb_passwd = NULL;
-    size_t pwdb_passwd_size;
     zacarias_profile_ctx *profile;
+    unsigned char *pwdb_passwd = NULL;
+    size_t pwdb_passwd_size = 0;
     unsigned char *passwd = NULL;
     size_t passwd_size = 0;
 
@@ -302,47 +298,25 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
         return EBUSY;
     }
 
-    if (d->alias == NULL || d->alias_size == 0 ||
-        d->user == NULL || d->user_size == 0) {
+    if (d->alias_size == 0 || d->user_size == 0) {
         err = 0;
         d->status = kInvalidParams;
         goto zc_dev_act_get_password_epilogue;
     }
 
-    user_size = d->user_size;
-    user = (char *) kryptos_newseg(user_size);
-    if (user == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_get_password_epilogue;
-    }
-
-    if (kcpy(user, d->user, user_size) != 0) {
-        err = EFAULT;
-        d->status = kGeneralError;
-        goto zc_dev_act_get_password_epilogue;
-    }
-
-    profile = zacarias_profiles_ctx_get(g_cdev()->profiles, user, user_size);
+    profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size);
     if (profile == NULL) {
         err = 0;
         d->status = kProfileNotAttached;
         goto zc_dev_act_get_password_epilogue;
     }
 
-    pwdb_passwd_size = (profile->sessioned) ? d->session_passwd_size : d->passwd_size;
-
-    pwdb_passwd = (unsigned char *) kryptos_newseg(pwdb_passwd_size);
-    if (pwdb_passwd == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_get_password_epilogue;
-    }
-
-    if (kcpy(pwdb_passwd, (profile->sessioned) ? d->session_passwd : d->pwdb_passwd, pwdb_passwd_size) != 0) {
-        err = EFAULT;
-        d->status = kGeneralError;
-        goto zc_dev_act_get_password_epilogue;
+    if (profile->sessioned) {
+        pwdb_passwd = d->session_passwd;
+        pwdb_passwd_size = d->session_passwd_size;
+    } else {
+        pwdb_passwd = d->pwdb_passwd;
+        pwdb_passwd_size = d->pwdb_passwd_size;
     }
 
     if (zacarias_decrypt_pwdb(&profile, pwdb_passwd, pwdb_passwd_size) != 0) {
@@ -358,21 +332,7 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
         goto zc_dev_act_get_password_epilogue;
     }
 
-    alias_size = d->alias_size;
-    alias = (char *) kryptos_newseg(alias_size);
-    if (alias == NULL) {
-        err = ENOMEM;
-        d->status = kGeneralError;
-        goto zc_dev_act_get_password_epilogue;
-    }
-
-    if (kcpy(alias, d->alias, alias_size) != 0) {
-        err = EFAULT;
-        d->status = kGeneralError;
-        goto zc_dev_act_get_password_epilogue;
-    }
-
-    passwd = plbuf_edit_passwd(profile->plbuf, profile->plbuf_size, alias, alias_size, &passwd_size);
+    passwd = plbuf_edit_passwd(profile->plbuf, profile->plbuf_size, d->alias, d->alias_size, &passwd_size);
     d->status = (passwd != NULL) ? kNoError : kAliasNotFound;
 
     if (d->status == kNoError) {
@@ -393,23 +353,12 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
 
 zc_dev_act_get_password_epilogue:
 
-    if (user != NULL) {
-        kryptos_freeseg(user, user_size);
-    }
-
-    if (alias != NULL) {
-        kryptos_freeseg(alias, alias_size);
-    }
-
-    if (pwdb_passwd != NULL) {
-        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
-    }
-
     if (passwd != NULL) {
         kryptos_freeseg(passwd, passwd_size);
     }
 
-    user_size = alias_size = pwdb_passwd_size = passwd_size = 0;
+    pwdb_passwd = NULL;
+    pwdb_passwd_size = passwd_size = 0;
     profile = NULL;
 
     return err;
