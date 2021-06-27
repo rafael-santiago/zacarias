@@ -1,5 +1,6 @@
 #include <cmd/detach.h>
 #include <cmd/options.h>
+#include <cmd/utils.h>
 #include <cmd/devio.h>
 #include <kbd/kbd.h>
 #include <kryptos.h>

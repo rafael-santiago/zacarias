@@ -285,12 +285,17 @@ static int zc_password_get(void) {
     char *user = NULL, *alias = NULL, *timeout = NULL, *tp, *tp_end;
     unsigned char *password = NULL, *pwdb_passwd = NULL;
     size_t user_size = 0, alias_size = 0, password_size = 0, pwdb_passwd_size = 0;
-    int err = 0;
+    int err = EXIT_FAILURE;
     zc_device_status_t status;
     struct zc_data_drain_ctx zc_drain = { 0 };
 
     if (zcd == -1) {
         err = errno;
+        goto zc_password_get_epilogue;
+    }
+
+    if (!zacarias_set_kbd_layout("pt-br")) {
+        fprintf(stderr, "ERROR: Unable to set internal keyboard layout.\n");
         goto zc_password_get_epilogue;
     }
 
@@ -304,14 +309,14 @@ static int zc_password_get(void) {
     tp = &timeout[0];
     tp_end = tp + strlen(tp);
     if (tp == tp_end) {
-        fprintf(stdout, "ERROR: Null timeout.\n");
+        fprintf(stderr, "ERROR: Null timeout.\n");
         err = 1;
         goto zc_password_get_epilogue;
     }
 
     while (tp != tp_end) {
         if (!isdigit(*tp)) {
-            fprintf(stdout, "ERROR: Invalid timeout : '%s'.\n", timeout);
+            fprintf(stderr, "ERROR: Invalid timeout : '%s'.\n", timeout);
             err = 1;
             goto zc_password_get_epilogue;
         }
@@ -320,6 +325,7 @@ static int zc_password_get(void) {
 
     fprintf(stdout, "Pwdb password: ");
     pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+    del_scr_line();
 
     if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
         fprintf(stderr, "ERROR: Null pwdb password.\n");
@@ -350,7 +356,10 @@ static int zc_password_get(void) {
     zc_drain.pwdb_passwd_size = pwdb_passwd_size;
 
     fprintf(stdout, "INFO: Now put your cursor focus where your password must be typed and wait.");
+    fflush(stdout);
     err = zacarias_sendkeys(password, password_size, atoi(timeout), zc_drain_out_data, &zc_drain);
+
+    del_scr_line();
 
     if (err != 0) {
         fprintf(stderr, "ERROR: While trying to automagically type your password at the area where you put your cursor.\n");

@@ -288,7 +288,7 @@ zc_dev_act_del_password_epilogue:
 int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
     int err = EFAULT;
     struct zc_devio_ctx *d = *devio;
-    zacarias_profile_ctx *profile;
+    zacarias_profile_ctx *profile = NULL;
     unsigned char *pwdb_passwd = NULL;
     size_t pwdb_passwd_size = 0;
     unsigned char *passwd = NULL;
@@ -360,6 +360,8 @@ zc_dev_act_get_password_epilogue:
     pwdb_passwd = NULL;
     pwdb_passwd_size = passwd_size = 0;
     profile = NULL;
+
+    cdev_mtx_unlock(&g_cdev()->lock);
 
     return err;
 }

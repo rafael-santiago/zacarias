@@ -1,5 +1,6 @@
 #include <cmd/devio.h>
 #include <cmd/utils.h>
+#include <kryptos.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -172,7 +173,8 @@ int zcdev_get_password(const int zcd, const char *user, const size_t user_size,
                        unsigned char **password, size_t *password_size,
                        zc_device_status_t *status) {
     int err;
-    struct zc_devio_ctx ioctx;
+    struct zc_devio_ctx ioctx = { 0 };
+    unsigned char *p = NULL, *p_end = NULL;
 
     ioctx.action = kGetPassword;
 
@@ -191,11 +193,23 @@ int zcdev_get_password(const int zcd, const char *user, const size_t user_size,
     }
 
     if (*status == kNoError) {
-        *password = ioctx.passwd;
         *password_size = ioctx.passwd_size;
+        *password = kryptos_newseg(*password_size);
+        if (*password != NULL) {
+            memcpy(*password, ioctx.passwd, *password_size);
+            p = ioctx.passwd;
+            p_end = p + *password_size;
+            while (p != p_end) {
+                *p = 0;
+                p++;
+            }
+        } else {
+            err = kGeneralError;
+        }
     }
 
     memset(&ioctx, 0, sizeof(ioctx));
+    p = p_end = NULL;
 
     return err;
 }

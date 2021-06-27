@@ -11,7 +11,7 @@ zacarias.prologue() {
     $submodules = hefesto.sys.get_option("modules");
 
     if ($submodules.count() == 0) {
-        #$submodules.add_item("kbd");
+        $submodules.add_item("kbd");
         $submodules.add_item("dev/ctx");
         $submodules.add_item("dev/sec");
         $submodules.add_item("dev");
