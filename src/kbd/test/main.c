@@ -78,22 +78,15 @@ CUTE_TEST_CASE(zacarias_sendkeys_tests)
         { "!?:;,%$&@#\"'*<>().", "pt-br", 0 }
     }, *test, *test_end;
     size_t test_vector_nr = sizeof(test_vector) / sizeof(test_vector[0]);
-    Display *display = XOpenDisplay(NULL);
 
-    if (display != NULL) {
-        XCloseDisplay(display);
+    test = &test_vector[0];
+    test_end = test + test_vector_nr;
 
-        test = &test_vector[0];
-        test_end = test + test_vector_nr;
-
-        while (test != test_end) {
-            CUTE_ASSERT(zacarias_set_kbd_layout(test->layout) == 1);
-            CUTE_ASSERT(zacarias_sendkeys(test->buffer, (test->buffer != NULL) ? strlen(test->buffer) : 0,
-                                          1, NULL, NULL) == test->expected);
-            test++;
-        }
-    } else {
-        fprintf(stdout, "WARN: Test skipped. X Server seems to be down!\n");
+    while (test != test_end) {
+        CUTE_ASSERT(zacarias_set_kbd_layout(test->layout) == 1);
+        CUTE_ASSERT(zacarias_sendkeys(test->buffer, (test->buffer != NULL) ? strlen(test->buffer) : 0,
+                                      1, NULL, NULL) == test->expected);
+        test++;
     }
 CUTE_TEST_CASE_END
 

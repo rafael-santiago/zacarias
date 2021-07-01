@@ -6,19 +6,23 @@
  *
  */
 #include <kbd/kbd.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
 #if !defined(_WIN32)
 # include <termios.h>
-#else
-# include <windows.h>
-#endif
 #include <signal.h>
 #include <unistd.h>
 #include <kbd/kmap.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
 #include <X11/keysym.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#else
+# include <windows.h>
+#endif
 
 #if !defined(_WIN32)
 static struct termios old, new;
@@ -32,29 +36,31 @@ static int g_abort_kbd_rw = 0;
 
 static void getuserkey_sigint_watchdog(int signo);
 
+#if defined(__unix__)
+static int zacarias_tty_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs, void (*cancel_callout)(void *), void *cancel_callout_args);
+#endif
+
 int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs, void (*cancel_callout)(void *), void *cancel_callout_args) {
     kryptos_u8_t *input = NULL, *ip = NULL, *ip_end = NULL;
     size_t input_size = 0;
-    int err = 0, hold_sh = 0, anulate_sh = 0;
+    int err = EXIT_SUCCESS, hold_sh = 0, anulate_sh = 0;
     unsigned int keycode = 0, shiftcode = 0;
     Display *display = NULL;
     kryptos_u8_t abs_key = 0;
 
     if (buffer == NULL || buffer_size == 0) {
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if ((display = XOpenDisplay(NULL)) == NULL) {
-        fprintf(stderr, "error: Unable to open X display.\n");
-        err = 1;
-        goto zacarias_sendkeys_epilogue;
+        return zacarias_tty_sendkeys(buffer, buffer_size, timeout_in_secs, cancel_callout, cancel_callout_args);
     }
 
     if (gZacariasCurrKbdLayout->key_demuxer != NULL) {
         input = gZacariasCurrKbdLayout->key_demuxer(buffer, buffer_size, &input_size);
         if (input == NULL) {
             fprintf(stderr, "error: Unable to demux keys from input buffer.\n");
-            err = 1;
+            err = EXIT_FAILURE;
             goto zacarias_sendkeys_epilogue;
         }
     } else {
@@ -109,6 +115,10 @@ int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, cons
         ip++;
     }
 
+    if (g_abort_kbd_rw) {
+        err = EXIT_FAILURE;
+    }
+
 zacarias_sendkeys_epilogue:
 
     if (display != NULL) {
@@ -151,6 +161,38 @@ int zacarias_set_kbd_layout(const char *name) {
     }
 
     return 0;
+}
+
+static int zacarias_tty_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs, void (*cancel_callout)(void *), void *cancel_callout_args) {
+    int dev_console;
+    const kryptos_u8_t *bp;
+    const kryptos_u8_t *bp_end;
+
+    if (buffer == NULL || buffer_size == 0) {
+        return EXIT_FAILURE;
+    }
+
+    if ((dev_console = open("/dev/console", O_WRONLY | O_NONBLOCK)) == -1) {
+        return EXIT_FAILURE;
+    }
+
+    g_cancel_callout = cancel_callout;
+    g_cancel_callout_args = cancel_callout_args;
+    g_abort_kbd_rw = 0;
+
+    bp = buffer;
+    bp_end = bp + buffer_size;
+
+    sleep(timeout_in_secs);
+
+    while (bp != bp_end && !g_abort_kbd_rw) {
+        ioctl(dev_console, TIOCSTI, &bp[0]);
+        bp++;
+    }
+
+    close(dev_console);
+
+    return (!g_abort_kbd_rw) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 #if defined(_WIN32)
