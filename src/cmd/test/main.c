@@ -9,6 +9,8 @@ static int zc(const char *command, const char *args, const char *keyboard_data);
 static int zacarias_install(void);
 static int zacarias_uninstall(void);
 
+// HINT(Rafael): If system tests are failing on your environment try to increase this timeout (expressed in secs).
+#define ZACARIAS_SYSTEST_TIMEO 3
 
 CUTE_DECLARE_TEST_CASE(cmd_tests);
 CUTE_DECLARE_TEST_CASE(get_canonical_path_tests);
@@ -16,6 +18,7 @@ CUTE_DECLARE_TEST_CASE(attach_tests);
 CUTE_DECLARE_TEST_CASE(detach_tests);
 CUTE_DECLARE_TEST_CASE(password_add_tests);
 CUTE_DECLARE_TEST_CASE(password_del_tests);
+CUTE_DECLARE_TEST_CASE(password_get_tests);
 
 CUTE_MAIN(cmd_tests);
 
@@ -25,6 +28,7 @@ CUTE_TEST_CASE(cmd_tests)
     CUTE_RUN_TEST(detach_tests);
     CUTE_RUN_TEST(password_add_tests);
     CUTE_RUN_TEST(password_del_tests);
+    CUTE_RUN_TEST(password_get_tests);
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(get_canonical_path_tests)
@@ -66,6 +70,37 @@ CUTE_TEST_CASE(get_canonical_path_tests)
     rmdir("404");
 CUTE_TEST_CASE_END
 
+CUTE_TEST_CASE(password_get_tests)
+    char args[4096];
+
+    remove("passwd");
+    zacarias_uninstall();
+    CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
+
+    CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --init", "123mudar*\n123mudar*\n") == EXIT_SUCCESS);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
+
+    CUTE_ASSERT(zc("password", "add --user=rs --alias=zacarias.get_test",
+                   "123mudar*\nwabbalabba\nwabbalabba\n") == EXIT_SUCCESS);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
+
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=zacarias.get_test", "123macular*\n") != EXIT_SUCCESS);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
+
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=not.found.aieee", "123mudar*\n") != EXIT_SUCCESS);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
+
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=zacarias.get_test", "123mudar*\n") == EXIT_SUCCESS);
+    sleep(ZACARIAS_SYSTEST_TIMEO << 1);
+
+    CUTE_ASSERT(zc("detach", "--user=rs", "123mudar*\n") == EXIT_SUCCESS);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
+
+    CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
+    remove("passwd");
+CUTE_TEST_CASE_END
+
 CUTE_TEST_CASE(password_del_tests)
     char args[4096];
     struct stat st;
@@ -73,44 +108,44 @@ CUTE_TEST_CASE(password_del_tests)
     remove("passwd");
     zacarias_uninstall();
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --init", "123mudar*\n123mudar*\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
     CUTE_ASSERT(stat("passwd", &st) == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password", "del --user=rs1 --alias=404.com", "123mudar*\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "del --user=rs --alias=404.com", "123mudar*\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "add --user=rs --alias=404.com", "123mudar*\n123change*\n123change*\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "add --user=rs --alias=200.com", "123mudar*\nabcd\nabcd\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "del --user=rs --alias=404.com", "123change*\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "del --user=rs --alias=404.com", "123mudar*\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "add --user=rs --alias=404.com", "123mudar*\n123change*\n123change*\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "del --user=rs --alias=200.com", "123mudar*\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "del --user=rs --alias=404.com", "123mudar*\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "del --user=rs --alias=404.com", "123mudar*\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("password", "del --user=rs --alias=200.com", "123mudar*\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
     remove("passwd");
@@ -123,26 +158,26 @@ CUTE_TEST_CASE(password_add_tests)
     remove("passwd");
     zacarias_uninstall();
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --init", "123mudar*\n123mudar*\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
     CUTE_ASSERT(stat("passwd", &st) == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password", "add --user=rs --alias=alpha.com", "123mudar\nabc\nabc\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
     CUTE_ASSERT(zc("password", "add", "123mudar*\n123mudar\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
     CUTE_ASSERT(zc("password", "add --user=rs", "123mudar*\n123mudar\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
     CUTE_ASSERT(zc("password", "add --user=rs --alias=alpha.com", "123mudar*\nabc\nabd\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
     CUTE_ASSERT(zc("password", "add --user=rs --alias=alpha.com", "123mudar*\nabc\nabc\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
     CUTE_ASSERT(zc("password", "add --user=rs --alias=alpha.com", "123mudar*\nabc\nabc\n") != EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
     CUTE_ASSERT(zc("password", "add --user=rs --alias=zeta.com", "123mudar*\nwww\nwww\n") == EXIT_SUCCESS);
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("detach", "--user=rs", "123mudar*\n") == EXIT_SUCCESS);
     CUTE_ASSERT(remove("passwd") == EXIT_SUCCESS);
@@ -160,7 +195,7 @@ CUTE_TEST_CASE(attach_tests)
     zacarias_uninstall();
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("attach", NULL, NULL) != EXIT_SUCCESS);
 
@@ -199,7 +234,7 @@ CUTE_TEST_CASE(attach_tests)
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     remove("passwd");
 
@@ -214,7 +249,7 @@ CUTE_TEST_CASE(attach_tests)
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs", cwd);
     CUTE_ASSERT(zc("attach", args, "123mudar*\n") == EXIT_SUCCESS);
@@ -222,7 +257,7 @@ CUTE_TEST_CASE(attach_tests)
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs --sessioned", cwd);
     CUTE_ASSERT(zc("attach", args, "123mudar*\n1#12\n1#12\n") == EXIT_SUCCESS);
@@ -230,7 +265,7 @@ CUTE_TEST_CASE(attach_tests)
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(mkdir("tmp", 0666) == EXIT_SUCCESS);
     CUTE_ASSERT(chdir("tmp") == EXIT_SUCCESS);
@@ -254,34 +289,33 @@ CUTE_TEST_CASE(detach_tests)
     zacarias_uninstall();
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(getcwd(cwd, sizeof(cwd) - 1) != NULL);
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs --init", cwd);
     CUTE_ASSERT(zc("attach", args, "123mudar*\n123mudar*\n") == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("detach", "--user=rs", "1234mudar*\n") != EXIT_SUCCESS);
     CUTE_ASSERT(zc("detach", "--user=rafael-santiago", "123mudar*\n") != EXIT_SUCCESS);
     CUTE_ASSERT(zc("detach", "--user=rs", "123mudar*\n") == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs", cwd);
     CUTE_ASSERT(zc("attach", args, "123mudar*\n") == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("detach", "--user=rs", "123mudar*\n") == EXIT_SUCCESS);
 
-
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     snprintf(args, sizeof(args) - 1, "--pwdb=%s/passwd --user=rs --sessioned", cwd);
     CUTE_ASSERT(zc("attach", args, "123mudar*\nabracadabra\nabracadabra\n") == EXIT_SUCCESS);
 
-    sleep(3);
+    sleep(ZACARIAS_SYSTEST_TIMEO);
 
     CUTE_ASSERT(zc("detach", "--user=rafael.santiago", "123mudar*\n") != EXIT_SUCCESS);
     CUTE_ASSERT(zc("detach", "--user=rs", "123mudar*\n") != EXIT_SUCCESS);
@@ -291,7 +325,6 @@ CUTE_TEST_CASE(detach_tests)
     remove("passwd");
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
 CUTE_TEST_CASE_END
-
 
 static int zc(const char *command, const char *args, const char *keyboard_data) {
 #if defined(__unix__)

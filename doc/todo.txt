@@ -1,3 +1,6 @@
+(A) Add to system tests case when session passwords are used (on password command: add, del, get sub-commands). +Test
+(A) Start up writing some documentation. +Documentation
+(B) Add copyring disclaimer and license. +Dev,+Documentation.
 (A) Make the local libkryptos lightweight. +Dev,+Sys
 x (A) Only recompile dependencies from kernel mode tests if '--clean' is passed. +Dev,+Sys,+Tests,+Build
 x (A) Make kernel mode tests infrastructure. +Dev,+Sys,+Tests
@@ -18,3 +21,4 @@ x (A) Implement pwdb encryption. AES/256(GCM), KDF=argon2i. +Dev,+Sec
 x (A) Write file from kernel space Linux. +Dev,+Sys
 x (A) Implement device driver code infrastructure. +Dev,+Sys
 x (A) Avoid executing X11 dependent tests when XServer is down. +Tests
+x (A) Allow password typing on when X server is down too. +Dev,+User,+Improvement
