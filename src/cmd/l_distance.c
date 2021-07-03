@@ -1,3 +1,10 @@
+/*
+ *                    Copyright (C) 2020, 2021 by Rafael Santiago
+ *
+ * Use of this source code is governed by GPL-v2 license that can
+ * be found in the COPYING file.
+ *
+ */
 #include <cmd/l_distance.h>
 #include <kryptos_memory.h>
 #include <string.h>

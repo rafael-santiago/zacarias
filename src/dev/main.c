@@ -1,3 +1,10 @@
+/*
+ *                    Copyright (C) 2020, 2021 by Rafael Santiago
+ *
+ * Use of this source code is governed by GPL-v2 license that can
+ * be found in the COPYING file.
+ *
+ */
 #define ZACARIAS_DEV_VERSION "0.0.1"
 
 #if defined(__linux__)
