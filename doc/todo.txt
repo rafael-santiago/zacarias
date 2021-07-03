@@ -1,6 +1,7 @@
 (A) Add to system tests case when session passwords are used (on password command: add, del, get sub-commands). +Test
 (A) Start up writing some documentation. +Documentation
 (A) Make the local libkryptos lightweight. +Dev,+Sys
+(A) Implement FreeBSD version. +Dev,+Sys,+Evolvement
 x (A) Only recompile dependencies from kernel mode tests if '--clean' is passed. +Dev,+Sys,+Tests,+Build
 x (A) Make kernel mode tests infrastructure. +Dev,+Sys,+Tests
 x (A) Inspect memory corruption present at plbuf_edit_shuffle. dev/sec/test is breaking randomly. +Dev,+Test,+BugHunting
