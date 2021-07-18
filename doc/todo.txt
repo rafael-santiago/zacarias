@@ -1,3 +1,5 @@
+(A) Stop using static libkryptos inside 'dev'. Write a build task that copies it at the first time or
+    when explicitly asked for. +Dev,+Sys,+Build,+Improvement
 (A) Write a test that simulate the whole possible use workflows:
     attach (init), add, del, get, detach, attach(sessioned), add, del, get, detach. +Test
 (A) Start up writing some documentation. +Documentation
@@ -25,3 +27,4 @@ x (A) Avoid executing X11 dependent tests when XServer is down. +Tests
 x (A) Allow password typing on when X server is down too. +Dev,+User,+Improvement
 x (B) Add copyring disclaimer and license. +Dev,+Documentation
 x (A) Add to system tests case when session passwords are used (on password command: add, del, get sub-commands). +Test
+x (A) Fix Argon2 heap corruption. +Dev,+Sys,+BugHunting,+Improvement
