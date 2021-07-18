@@ -9,6 +9,7 @@ src/*/test/bin/*
 */dev/.tmp_versions/*
 */dev/ctx/test/bin/*
 */dev/sec/test/bin/*
+*/dev/kryptos/*
 *bin/*
 */test/kernel/.tmp_versions/*
 */test/kernel/ctx/*
