@@ -56,9 +56,15 @@ local function mklocal_sec() : result type none {
     if (isdir("dev/sec") == 0 || is_clean_build()) {
         var src type string;
         $src = hefesto.sys.make_path(zacarias_rootdir(), "dev/sec");
-        hefesto.sys.run("rm -rf sec");
-        hefesto.sys.run("mkdir sec");
-        hefesto.sys.run("cp "+ $src +"/*.[ch] sec");
+        do_mklocal($src, "sec");
+    }
+}
+
+local function mklocal_defs() : result type none {
+    if (isdir("dev/defs") == 0 || is_clean_build()) {
+        var src type string;
+        $src = hefesto.sys.make_path(zacarias_rootdir(), "dev/defs");
+        do_mklocal($src, "defs");
     }
 }
 

@@ -14,5 +14,6 @@ src/*/test/bin/*
 */test/kernel/.tmp_versions/*
 */test/kernel/ctx/*
 */test/kernel/sec/*
+*/test/kernel/defs/*
 */test/kernel/kryptos/*
 */test/kernel/kutest.h

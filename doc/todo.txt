@@ -1,4 +1,3 @@
-(A) Find a way of running main core tests inside 'test' directory. +Dev,+Sys,+User,+Tests,+Build
 (A) Write a test that simulate the whole possible use workflows:
     attach (init), add, del, get, detach, attach(sessioned), add, del, get, detach. +Test
 (A) Start up writing some documentation. +Documentation
@@ -29,3 +28,4 @@ x (A) Add to system tests case when session passwords are used (on password comm
 x (A) Fix Argon2 heap corruption. +Dev,+Sys,+BugHunting,+Improvement
 x (A) Stop using static libkryptos inside 'dev'. Write a build task that copies it at the first time or
       when explicitly asked for. +Dev,+Sys,+Build,+Improvement
+x (A) Find a way of running main core tests inside 'test' directory. +Dev,+Sys,+User,+Tests,+Build

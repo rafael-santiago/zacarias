@@ -42,6 +42,7 @@ libzcsec-kernel-tests.prologue() {
     $cflags.add_item("-DKRYPTOS_DATA_WIPING_WHEN_FREEING_MEMORY=1");
     mklocal("ctx");
     mklocal("sec");
+    mklocal("defs");
     mklocal("kryptos");
     mklocal("kutest");
 }
