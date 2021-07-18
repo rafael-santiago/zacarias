@@ -11,8 +11,8 @@
 
 #define ZACARIAS_MAX_USERKEY_SIZE 32
 
-static kryptos_u8_t *zacarias_key_crunching(const char *user, const size_t user_size,
-                                            const kryptos_u8_t *passwd, const size_t passwd_size, size_t *key_size);
+static kryptos_u8_t *zacarias_key_crunching(const char *user, const kryptos_u32_t user_size,
+                                            const kryptos_u8_t *passwd, const kryptos_u32_t passwd_size, size_t *key_size);
 
 
 int zacarias_setkey_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *passwd, const size_t passwd_size,
@@ -164,8 +164,8 @@ zacarias_encrypt_pwdb_epilogue:
 
 }
 
-static kryptos_u8_t *zacarias_key_crunching(const char *user, const size_t user_size,
-                                            const kryptos_u8_t *passwd, const size_t passwd_size, size_t *key_size) {
+static kryptos_u8_t *zacarias_key_crunching(const char *user, const kryptos_u32_t user_size,
+                                            const kryptos_u8_t *passwd, const kryptos_u32_t passwd_size, size_t *key_size) {
     kryptos_u32_t parallelism = 1, memory_size_kb = 512, iterations = 4;
     kryptos_u8_t *in = NULL, *key = NULL;
     size_t in_size;
@@ -193,7 +193,7 @@ static kryptos_u8_t *zacarias_key_crunching(const char *user, const size_t user_
 
     key = kryptos_argon2i(in, in_size,
                           (kryptos_u8_t *)user, user_size,
-                          parallelism, *key_size, memory_size_kb, iterations,
+                          parallelism, (kryptos_u32_t)*key_size, memory_size_kb, iterations,
                           (kryptos_u8_t *)passwd, passwd_size,
                           "zcr", 3);
 

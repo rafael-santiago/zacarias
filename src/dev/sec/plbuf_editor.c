@@ -116,8 +116,15 @@ int plbuf_edit_detach(kryptos_u8_t **plbuf, size_t *plbuf_size) {
         p_end--;
     }
 
-    p_end += (*p_end == '\n');
+    if (*p == 0x1B) {
+        kryptos_freeseg((*plbuf), *plbuf_size);
+        (*plbuf) = NULL;
+        *plbuf_size = 0;
+        err = 0;
+        goto plbuf_edit_detach_epilogue;
+    }
 
+    p_end += (*p_end == '\n');
     temp_size = p_end - p;
     if ((temp = (kryptos_u8_t *) kryptos_newseg(temp_size + 1)) == NULL) {
         goto plbuf_edit_detach_epilogue;
@@ -130,7 +137,7 @@ int plbuf_edit_detach(kryptos_u8_t **plbuf, size_t *plbuf_size) {
 
 plbuf_edit_detach_epilogue:
 
-    if (temp != NULL && err == 0) {
+    if (temp != NULL && err == 0 && (*plbuf) != NULL) {
         kryptos_freeseg((*plbuf), *plbuf_size);
         (*plbuf) = temp;
         *plbuf_size = temp_size;
@@ -144,6 +151,68 @@ plbuf_edit_detach_epilogue:
 
     p = p_end = NULL;
     temp_size = 0;
+
+    return err;
+}
+
+int plbuf_edit_shuffle_stub(kryptos_u8_t **plbuf, size_t *plbuf_size) {
+    kryptos_u8_t *random_entries[2] = { NULL, NULL };
+    size_t random_entries_size[2] = { 0, 0 };
+    int err = 1;
+    kryptos_u8_t *stub = NULL;
+    size_t stub_size = 0;
+
+    if (plbuf == NULL || *plbuf == NULL || plbuf_size == NULL || *plbuf_size == 0) {
+        goto plbuf_edit_shuffle_stub_epilogue;
+    }
+
+    random_entries[0] = random_plbuf_entry(&random_entries_size[0]);
+    if (random_entries[0] == NULL) {
+        goto plbuf_edit_shuffle_stub_epilogue;
+    }
+
+    random_entries[1] = random_plbuf_entry(&random_entries_size[1]);
+    if (random_entries[1] == NULL) {
+        goto plbuf_edit_shuffle_stub_epilogue;
+    }
+
+    stub_size = *plbuf_size + random_entries_size[0] + random_entries_size[1];
+    stub = kryptos_newseg(stub_size + 1);
+    if (stub == NULL) {
+        goto plbuf_edit_shuffle_stub_epilogue;
+    }
+
+    memset(stub, 0, stub_size + 1);
+    memcpy(stub, random_entries[0], random_entries_size[0]);
+    memcpy(stub + random_entries_size[0], *plbuf, *plbuf_size);
+    memcpy(stub + random_entries_size[0] + *plbuf_size, random_entries[1], random_entries_size[1]);
+
+    kryptos_freeseg(*plbuf, *plbuf_size);
+    *plbuf = stub;
+    *plbuf_size = stub_size;
+    stub_size = 0;
+    stub = NULL;
+    err = 0;
+
+plbuf_edit_shuffle_stub_epilogue:
+
+    if (random_entries[0] != NULL) {
+        kryptos_freeseg(random_entries[0], random_entries_size[0]);
+        random_entries[0] = NULL;
+        random_entries_size[0] = 0;
+    }
+
+    if (random_entries[1] != NULL) {
+        kryptos_freeseg(random_entries[1], random_entries_size[1]);
+        random_entries[1] = NULL;
+        random_entries_size[1] = 0;
+    }
+
+    if (stub != NULL) {
+        kryptos_freeseg(stub, stub_size);
+        stub = NULL;
+        stub_size = 0;
+    }
 
     return err;
 }
@@ -354,7 +423,9 @@ plbuf_edit_add_epilogue:
 
     if (temp != NULL) {
         if (err == 0) {
-            kryptos_freeseg(*plbuf, *plbuf_size);
+            if ((*plbuf) != NULL) {
+                kryptos_freeseg(*plbuf, *plbuf_size);
+            }
             (*plbuf) = temp;
             *plbuf_size = temp_size;
         } else {

@@ -248,10 +248,16 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
         profile->plbuf = NULL;
         profile->plbuf_size = 0;
         goto zc_dev_act_del_password_epilogue;
-    } else if (profile->plbuf_size == 0 && plbuf_edit_add(&profile->plbuf, &profile->plbuf_size,
-                                                          "\x1B\n", 2, "\x1B\n", 2) != 0) {
-        d->status = kPWDBWritingError;
-        goto zc_dev_act_del_password_epilogue;
+    } else if (profile->plbuf_size == 0) {
+        if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size,
+                           "\x1BZ", 2, "\x1BZ", 2) != 0) {
+            d->status = kPWDBWritingError;
+            goto zc_dev_act_del_password_epilogue;
+        }
+        if (plbuf_edit_shuffle_stub(&profile->plbuf, &profile->plbuf_size) != 0) {
+            d->status = kGeneralError;
+            goto zc_dev_act_del_password_epilogue;
+        }
     }
 
     if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
@@ -556,8 +562,16 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
     }
 
     if (d->action == kInitAndAttachProfile && profile != NULL) {
-        if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, "\x1B\n", 2, "\x1B\n", 2) != 0) {
+        if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, "\x1BZ", 2, "\x1BZ", 2) != 0) {
             d->status = kPWDBWritingError;
+            goto zc_dev_act_attach_profile_epilogue;
+        }
+        if (plbuf_edit_shuffle_stub(&profile->plbuf, &profile->plbuf_size) != 0) {
+            err = 0;
+            kryptos_freeseg(profile->plbuf, profile->plbuf_size);
+            profile->plbuf = NULL;
+            profile->plbuf_size = 0;
+            d->status = kGeneralError;
             goto zc_dev_act_attach_profile_epilogue;
         }
         if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) == 0) {

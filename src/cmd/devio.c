@@ -109,6 +109,8 @@ int zcdev_add_password(const int zcd, const char *user, const size_t user_size,
     int err;
     struct zc_devio_ctx ioctx;
 
+    memset(&ioctx, 0, sizeof(ioctx));
+
     ioctx.action = kAddPassword;
 
     ioctx.user_size = (user_size > sizeof(ioctx.user) - 1) ? sizeof(ioctx.user) - 1 : user_size;
@@ -122,6 +124,7 @@ int zcdev_add_password(const int zcd, const char *user, const size_t user_size,
         ioctx.session_passwd_size = (session_passwd_size > sizeof(ioctx.session_passwd) - 1) ? sizeof(ioctx.session_passwd) - 1
                                                                                              : session_passwd_size;
         memcpy(ioctx.session_passwd, session_passwd, ioctx.session_passwd_size);
+        ioctx.sessioned = 1;
     }
 
     ioctx.alias_size = (alias_size > sizeof(ioctx.alias) - 1) ? sizeof(ioctx.alias) - 1 : alias_size;
@@ -147,6 +150,8 @@ int zcdev_del_password(const int zcd, const char *user, const size_t user_size,
     int err;
     struct zc_devio_ctx ioctx;
 
+    memset(&ioctx, 0, sizeof(ioctx));
+
     ioctx.action = kDelPassword;
 
     ioctx.user_size = (user_size > sizeof(ioctx.user) - 1) ? sizeof(ioctx.user) - 1 : user_size;
@@ -160,6 +165,7 @@ int zcdev_del_password(const int zcd, const char *user, const size_t user_size,
         ioctx.session_passwd_size = (session_passwd_size > sizeof(ioctx.session_passwd) - 1) ? sizeof(ioctx.session_passwd) - 1
                                                                                              : session_passwd_size;
         memcpy(ioctx.session_passwd, session_passwd, ioctx.session_passwd_size);
+        ioctx.sessioned = 1;
     }
 
     ioctx.alias_size = (alias_size > sizeof(ioctx.alias) - 1) ? sizeof(ioctx.alias) - 1 : alias_size;
@@ -180,8 +186,10 @@ int zcdev_get_password(const int zcd, const char *user, const size_t user_size,
                        unsigned char **password, size_t *password_size,
                        zc_device_status_t *status) {
     int err;
-    struct zc_devio_ctx ioctx = { 0 };
+    struct zc_devio_ctx ioctx;
     unsigned char *p = NULL, *p_end = NULL;
+
+    memset(&ioctx, 0, sizeof(ioctx));
 
     ioctx.action = kGetPassword;
 
