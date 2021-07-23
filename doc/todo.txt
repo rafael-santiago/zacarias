@@ -1,3 +1,4 @@
+(A) Create --quick-tests that excludes regular_using_tests from cmd module tests. +Build,+Test
 (A) Start up writing some documentation. +Documentation
 (A) Make the local libkryptos lightweight. +Dev,+Sys
 (A) Implement FreeBSD version. +Dev,+Sys,+Evolvement
