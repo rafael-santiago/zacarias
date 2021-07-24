@@ -39,8 +39,9 @@ databases. This device driver can handle more than one attached user.
 
 ### Installing Zacarias device
 
-The device driver must be installed. You can do it by using the general operating system driver loading command or
-simply using ``zc`` passing the command ``device`` and its sub-command ``install``:
+All password management depends on the device. It must be previously installed before any using attempt. You can do it by
+using the general operating system driver loading command or simply using ``zc`` passing the command ``device`` and its
+sub-command ``install``:
 
 ```
 you@AdventureGalley:~/# zc device --install --device-driver-path=/usr/local/share/zacarias/mod/zacarias.ko
