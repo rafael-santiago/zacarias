@@ -1,10 +1,10 @@
 # Zacarias
 
 ``Zacarias`` is a password manager with ``kernel-mode`` powers. With this tool all password database encryption/decryption
-stuff is done from ``kernel``. The idea here is isolate almost possible your secrets avoiding any involuntary data leaking,
+is done from ``kernel``. The idea here is isolate almost possible your secrets avoiding any involuntary data leaking,
 easier to happen from ``user-space`` context. The name ``Zacarias`` means the ``Lord recalled``.
 
-The tool features:
+Until now this tool features:
 
 - ``AES-256/GCM`` to encrypt the password database.
 
@@ -17,6 +17,8 @@ The tool features:
 - Session password definition.
 
 - Clipboard use avoidance, it types your passwords for you.
+
+- Password database I/O done from ``kernel-space`` context.
 
 Until now you can use it on ``Linux`` (4.4.14 or above).
 
