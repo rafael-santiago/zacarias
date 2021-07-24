@@ -181,7 +181,7 @@ A sessioned profile is a profile that at the moment of its attachement a session
 ``password get`` command will only requires this temporary password instead of the general one. However, bearmind if you want
 to add or delete passwords from your PWDB, the two passwords will be needed (the general and the session password).
 
-Attach a sessioned profile is strainghtforward:
+Attach a sessioned profile is straightforward:
 
 ```
 you@AdventureGalley:~/# zc attach --user=kidd --pwdb=kidd.pwdb --sessioned
