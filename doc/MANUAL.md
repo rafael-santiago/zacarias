@@ -123,7 +123,7 @@ When ``--generate`` is not passed the password related with the new alias being 
 
 ### Deleting a password
 
-Delete a password is pretty easy, being needed you inform:
+Delete a password is pretty easy, being needed you to inform:
 
 1. Who you are by using ``--user`` option.
 2. What alias you want to delete by using ``--alias`` option.
