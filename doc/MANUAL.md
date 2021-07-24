@@ -193,7 +193,7 @@ Ask for a password is the same as before but the PWDB password ``must be the ses
 you@AdventureGalley:~/# zc get --user=kidd --alias=treasure@island.pirate-bay.com
 ```
 
-Add a new password into with a sessioned profile requires the flag option ``--sessioned``. You will need to
+Add a new password into your PWDB with a sessioned profile requires the flag option ``--sessioned``. You will need to
 inform the general password and the session password, too:
 
 ```
