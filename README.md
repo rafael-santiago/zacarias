@@ -24,4 +24,4 @@ Until now you can use it on ``Linux`` (4.4.14 or above).
 
 - If you want to know how to build this tool take a look at [doc/BUILD.md](https://github.com/rafael-santiago/zacarias/blob/master/doc/BUILD.md).
 
-- If you want to learn more details about it take a look at [doc/MANUAL.md]().
+- If you want to learn more details about it take a look at [doc/MANUAL.md](https://github.com/rafael-santiago/zacarias/blob/master/doc/MANUAL.md).
