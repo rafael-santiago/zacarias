@@ -2,7 +2,7 @@
 
 ``Zacarias`` build is based on another tool of mine called [Hefesto](https://github.com/rafael-santiago/hefesto).
 ``Hefesto`` is a well-simple and contained build system if you have a C compiler on your system you are able to
-build and install ``Hefesto``.
+build and install ``Hefesto``. There is no reason to be scared! ;)
 
 ## Contents
 
