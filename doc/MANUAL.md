@@ -200,7 +200,7 @@ inform the general password and the session password, too:
 you@AdventureGalley:~/# zc password add --user=kidd --alias=treasure@island.nowherehere --sessioned
 ```
 
-Delete is the same. You need to inform the general and session passwords:
+Delete is the same. You need to inform the general and session passwords, besides ``--sessioned`` option flag:
 
 ```
 you@AdventureGalley:~/# zc password del --user=kidd --alias=treasure@island.nowherehere --sessioned
