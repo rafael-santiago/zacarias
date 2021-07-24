@@ -94,7 +94,7 @@ you@AdventureGalley:~/# zc attach --user=kidd --pwdb=/kidd/stuff/kidd.pwdb --ini
 ```
 
 After running this command a general password will be asked and confirmed. An important detail here is that from now on you
-need to remenber your informed user name (filled in ``--user`` option) otherwise the profile loading will fail.
+need to remember your informed user name (filled in ``--user`` option) otherwise the profile loading will fail.
 
 The password database informed by using ``--pwdb`` option can be relative without problem. Its content is about ``PEM``
 authenticated data by using ``AES-256/GCM``.
