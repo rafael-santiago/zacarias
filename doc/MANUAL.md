@@ -161,7 +161,7 @@ It will ask your general PWDB password. Being it well authenticated you will get
 ### Detaching your profile
 
 It is pointless to let your profile attached in ``Zacarias`` device if you are not actually using it or will be for a long
-time during your session without using any password authentication. Remember that the idea is reduce disclosure, leaking etc.
+time during your session without using any password authentication. Remember that the idea is reducing disclosure, leaking etc.
 You have to help doing your part, too. In this case, you should detach your profile:
 
 ```
