@@ -3,7 +3,8 @@
 ``Zacarias`` is a password manager with ``kernel-mode`` powers. It is suitable for freak paranoid users that do not like
 the idea of having a simple user application encrypting/decrypting your passwords sit on ``user-space`` sending their
 passwords to clipboard. A simple user application that can be accessible from other applications or even easily debugged,
-probed, logged, hooked, swapped out from memory etc.
+probed, logged, hooked, swapped out from memory etc. You prefer mitigate those issues by letting ``kernel`` takes the control
+during some critical parts of your passwords management.
 
 ## Contents
 - [How Zacarias works](#how-zacarias-works)
