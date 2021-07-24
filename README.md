@@ -2,7 +2,7 @@
 
 ``Zacarias`` is a password manager with ``kernel-mode`` powers. With this tool all password database encryption/decryption
 is done from ``kernel``. The idea here is isolate almost possible your secrets avoiding any involuntary data leaking,
-easier to happen from ``user-space`` context. The name ``Zacarias`` means the ``Lord recalled``.
+easier to happen from ``user-space`` context. The name ``Zacarias`` means ``the Lord recalled``.
 
 Until now this tool features:
 

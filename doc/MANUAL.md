@@ -6,6 +6,10 @@ passwords to clipboard. A simple user application that can be accessible from ot
 probed, logged, hooked, swapped out from memory etc. You prefer mitigating those issues by letting ``kernel`` takes the control
 during some critical parts of your passwords management.
 
+As you may know the name ``Zacarias`` means ``the Lord recalled``. ``Lord`` here relates to the ``kernel`` of your operating
+system. Only it will access directly your password database, never ever the ``user-space`` portion. In this sense if we got
+a leak, this leak will be the less as possible.
+
 ## Contents
 - [How Zacarias works](#how-zacarias-works)
 - [The device](#the-device)
