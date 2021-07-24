@@ -4,6 +4,12 @@
 ``Hefesto`` is a well-simple and contained build system if you have a C compiler on your system you are able to
 build and install ``Hefesto``.
 
+## Contents
+
+- [Setup your environment](#setup-your-environment)
+- [Cloning Zacarias repository](#cloning-zacarias-repository)
+- [Building](#building)
+
 ## Setup your environment
 
 After putting ``Hefesto`` to work on you environment you need to clone another repository called ``Helios`` and
@@ -20,6 +26,8 @@ you@AdventureGalley:~/# rm -rf helios
 Nice. Now your ``Hefesto`` copy knows how to build ``Zacarias`` device, user tool, tests and also how to install
 all of it into your system.
 
+[``Back``](#contents)
+
 ## Cloning Zacarias repository
 
 The easiest way to clone ``Zacarias`` is as follows:
@@ -27,6 +35,8 @@ The easiest way to clone ``Zacarias`` is as follows:
 ```
 you@AdventureGalley:~/# git clone https://github.com/rafael-santiago/zacarias --recursive
 ```
+
+[``Back``](#contents)
 
 ## Building
 
@@ -44,3 +54,5 @@ you@AdventureGallye:~/zacarias/src# hefesto
 
 It will build the device driver, the user-mode tool, run some testing and after a successful build you should
 run ``hefesto --install``. Once installed you will be able to start using ``Zacarias`` as your password manager.
+
+[``Back``](#contents)
