@@ -28,12 +28,12 @@ a leak, this leak will be less harmful.
 ``Zacarias`` works based on a char device. Through this char device users can store and access their passwords by requesting
 it by using the ``zc`` command line tool.
 
-The password management here works based on a device driver that performs all real I/O stuff over the encrypted password
-databases. This device driver can handle more than one attached user.
-
 [``Back``](#contents)
 
 ## The device
+
+The password management here works based on a device driver that performs all real I/O stuff over the encrypted password
+databases. This device driver can handle more than one attached user.
 
 [``Back``](#contents)
 

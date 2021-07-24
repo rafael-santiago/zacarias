@@ -1,6 +1,5 @@
+(A) Implement device install and uninstall commands. +Dev,+User.
 (A) Create --quick-tests that excludes regular_using_tests from cmd module tests. +Build,+Test
-(A) Start up writing some documentation. +Documentation
-(A) Make the local libkryptos lightweight. +Dev,+Sys
 (A) Implement FreeBSD version. +Dev,+Sys,+Evolvement
 x (A) Only recompile dependencies from kernel mode tests if '--clean' is passed. +Dev,+Sys,+Tests,+Build
 x (A) Make kernel mode tests infrastructure. +Dev,+Sys,+Tests
@@ -30,3 +29,5 @@ x (A) Stop using static libkryptos inside 'dev'. Write a build task that copies 
 x (A) Find a way of running main core tests inside 'test' directory. +Dev,+Sys,+User,+Tests,+Build
 x (A) Write a test that simulate the whole possible use workflows:
     attach (init), add, del, get, detach, attach(sessioned), add, del, get, detach. +Test
+x (A) Make the local libkryptos lightweight. +Dev,+Sys
+x (A) Start up writing some documentation. +Documentation
