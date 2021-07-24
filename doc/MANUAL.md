@@ -147,7 +147,7 @@ You can do it by using the command ``password`` and its sub-command ``get``. Thi
 
 1. Who you are. Use ``--user`` option to inform it.
 2. What password you are looking for. Use ``--alias`` option to inform it.
-3. How much (in seconds) ``Zacarias`` must wait for you to be read to receive your password at the right place.
+3. How much (in seconds) ``Zacarias`` must wait for you to be ready to receive your password at the expected place.
    Use the option ``--timeout``. By default it is fixed to 3 seconds.
 
 ```
