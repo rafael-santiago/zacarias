@@ -140,7 +140,7 @@ you@AdventureGalley:~/# zc password del --user=kidd --alias=treasure@island.nowh
 Maybe you are thinking about how a device driver based password manager would be able to expose easily the stored passwords to
 the user. Well, the idea here is avoid spreading those secrets across the system.
 
-The found way was simulate the password typing. So you inform ``Zacarias`` device about what password you are looking for
+The found way was simulate the password typing. So you inform ``Zacarias`` device about what password you are looking for,
 it will get the password, give you a timeout to positioning your cursor focus where this password must be put and abracadabra.
 
 You can do it by using the command ``password`` and its sub-command ``get``. This sub-command need the following information:
