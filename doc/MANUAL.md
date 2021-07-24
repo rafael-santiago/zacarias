@@ -138,7 +138,7 @@ you@AdventureGalley:~/# zc password del --user=kidd --alias=treasure@island.nowh
 ### Getting a password
 
 Maybe you are thinking about how a device driver based password manager would be able to expose easily the stored passwords to
-the user easily use them. Well, the idea here is avoid spreading those secrets across the system.
+the user. Well, the idea here is avoid spreading those secrets across the system.
 
 The found way was simulate the password typing. So you inform ``Zacarias`` device about what password you are looking for
 it will get the password, give you a timeout to positioning your cursor focus where this password must be put and abracadabra.
