@@ -26,7 +26,8 @@ a leak, this leak will be less harmful.
 ## How Zacarias works
 
 ``Zacarias`` works based on a char device. Through this char device users can store and access their passwords by requesting
-it by using the ``zc`` command line tool.
+it by using the ``zc`` command line tool. The zacarias binary package is divided into two parts: 
+``zacarias.ko`` (the device driver) and ``zc`` (the user device interaction tool).
 
 [``Back``](#contents)
 
