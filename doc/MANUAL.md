@@ -175,7 +175,7 @@ It will ask your PWDB password. Being it well-authenticated your profile will be
 ### Sessioned profiles
 
 Maybe you can see the necessity of informing the general PWDB password as a weak point into the workflow. If you want to avoid
-almost possible the necessity of informing those critical secret you could give sessined profiles a try.
+as much as possible the necessity of informing those critical secret you could give sessined profiles a try.
 
 A sessioned profile is a profile that at the moment of its attachement a session password is configured. Once configured any
 ``password get`` command will only requires this temporary password instead of the general one. However, bearmind if you want
