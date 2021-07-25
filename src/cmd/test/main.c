@@ -36,6 +36,8 @@ CUTE_TEST_CASE(cmd_tests)
     CUTE_RUN_TEST(password_get_tests);
     if (CUTE_GET_OPTION("quick-tests") == NULL) {
         CUTE_RUN_TEST(regular_using_tests);
+    } else {
+        fprintf(stdout, "WARN: regular_using_tests skipped.\n");
     }
 CUTE_TEST_CASE_END
 

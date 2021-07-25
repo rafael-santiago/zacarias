@@ -65,6 +65,7 @@ cmd-tests.epilogue() {
 
 local function runtests() : result type int {
     var exit_code type int;
-    $exit_code = hefesto.sys.run(hefesto.sys.make_path("bin", $appname) + " --cutest-leak-check=yes");
+    $exit_code = hefesto.sys.run(hefesto.sys.make_path("bin", $appname) + " --cutest-leak-check=yes " +
+                                 hefesto.project.cmdline());
     result $exit_code;
 }
