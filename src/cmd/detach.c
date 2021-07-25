@@ -11,11 +11,12 @@
 #include <cmd/devio.h>
 #include <kbd/kbd.h>
 #include <kryptos.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 int zc_detach(void) {
     int zcd = zcdev_open();
-    int err = 1;
+    int err = EXIT_FAILURE;
     char *user = NULL;
     size_t user_size = 0;
     unsigned char *pwdb_passwd = NULL;
@@ -58,5 +59,5 @@ zc_detach_epilogue:
 
 int zc_detach_help(void) {
     fprintf(stdout, "use: zc detach --user=<name>\n");
-    return 0;
+    return EXIT_SUCCESS;
 }

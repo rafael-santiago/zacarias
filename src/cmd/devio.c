@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 static int zcdev_ioctl(const int zcd, const int cmd, struct zc_devio_ctx *ioctx);
@@ -40,7 +41,7 @@ int zcdev_attach(const int zcd,
                  const unsigned char *session_passwd, const size_t session_passwd_size,
                  const int init, zc_device_status_t *status) {
     struct zc_devio_ctx ioctx;
-    int err = 0;
+    int err = EXIT_FAILURE;
 
     memset(&ioctx, 0, sizeof(ioctx));
 
@@ -78,7 +79,7 @@ int zcdev_detach(const int zcd, const char *user, const size_t user_size,
                  const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
                  zc_device_status_t *status) {
     struct zc_devio_ctx ioctx;
-    int err;
+    int err = EXIT_FAILURE;
 
     memset(&ioctx, 0, sizeof(ioctx));
 
@@ -106,7 +107,7 @@ int zcdev_add_password(const int zcd, const char *user, const size_t user_size,
                        const char *alias, const size_t alias_size,
                        const unsigned char *password, const size_t password_size,
                        zc_device_status_t *status) {
-    int err;
+    int err = EXIT_FAILURE;
     struct zc_devio_ctx ioctx;
 
     memset(&ioctx, 0, sizeof(ioctx));
@@ -147,7 +148,7 @@ int zcdev_del_password(const int zcd, const char *user, const size_t user_size,
                        const unsigned char *session_passwd, const size_t session_passwd_size,
                        const char *alias, const size_t alias_size,
                        zc_device_status_t *status) {
-    int err;
+    int err = EXIT_FAILURE;
     struct zc_devio_ctx ioctx;
 
     memset(&ioctx, 0, sizeof(ioctx));
@@ -185,7 +186,7 @@ int zcdev_get_password(const int zcd, const char *user, const size_t user_size,
                        const char *alias, const size_t alias_size,
                        unsigned char **password, size_t *password_size,
                        zc_device_status_t *status) {
-    int err;
+    int err = EXIT_FAILURE;
     struct zc_devio_ctx ioctx;
     unsigned char *p = NULL, *p_end = NULL;
 

@@ -14,6 +14,7 @@
 #include <kbd/kbd.h>
 #include <kryptos.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -52,7 +53,7 @@ int zc_password(void) {
 
     if (subcommand == NULL) {
         fprintf(stderr, "ERROR: subcommand not informed.\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     zc_pscmd = &g_zc_password_subcommands[0];
@@ -96,7 +97,7 @@ int zc_password(void) {
         if (suggestions != NULL) {
             free(suggestions);
         }
-        return 1;
+        return EXIT_FAILURE;
     }
 
     return sb_cmd();
@@ -106,7 +107,7 @@ int zc_password_help(void) {
     fprintf(stdout, "use: zc password add --user=<name> --alias=<name> [--sessioned]\n"
                     "     zc password del --user=<name> --alias=<name> [--sessioned]\n"
                     "     zc password get --user=<name> --alias=<name> [--timeout=<seconds>]\n");
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 static int zc_password_unk(void) {

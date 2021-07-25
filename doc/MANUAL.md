@@ -16,11 +16,11 @@ a leak, this leak will be less harmful.
     - [Installing Zacarias device](#installing-zacarias-device)
     - [Uninstalling Zacarias device](#uninstalling-zacarias-device)
 - [The zc tool](#the-zc-tool)
-    - [Attaching your profile](#attach-your-profile)
-    - [Adding a password](#add-a-password)
+    - [Attaching your profile](#attaching-your-profile)
+    - [Adding a password](#adding-a-password)
     - [Deleting a password](#deleting-a-password)
     - [Getting a password](#getting-a-password)
-    - [Detaching your profile](#detach-your-profile)
+    - [Detaching your profile](#detaching-your-profile)
     - [Sessioned profiles](#sessioned-profiles)
 
 ## How Zacarias works
@@ -45,7 +45,7 @@ using the general operating system driver loading command or simply using ``zc``
 sub-command ``install``:
 
 ```
-you@AdventureGalley:~/# zc device --install --device-driver-path=/usr/local/share/zacarias/mod/zacarias.ko
+you@AdventureGalley:~/# zc device install --device-driver-path=/usr/local/share/zacarias/mod/zacarias.ko
 ```
 
 Once done the device under ``/dev/zacarias`` is ready.
@@ -58,7 +58,7 @@ If you do not want to let the device loaded during all your session, you can uni
 system driver unloading command or simply using ``zc`` passing the command ``device`` and its sub-command ``uninstall``:
 
 ```
-you@AdventureGalley:~/# zc device --uninstall
+you@AdventureGalley:~/# zc device uninstall
 ```
 
 After unloading any previously loaded sessioned profile will be lost but all its stored passwords will be consistent and safe.
@@ -73,7 +73,7 @@ This tool only can work properly with a previously well-loaded device driver on 
 
 [``Back``](#contents)
 
-### Attacing your profile
+### Attaching your profile
 
 When you attach your profile you are informing to ``Zacarias`` device driver who are you and where to find your passwords
 (where your password database are stored in).

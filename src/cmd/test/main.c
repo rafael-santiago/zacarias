@@ -18,6 +18,8 @@ static int zacarias_uninstall(void);
 
 CUTE_DECLARE_TEST_CASE(cmd_tests);
 CUTE_DECLARE_TEST_CASE(get_canonical_path_tests);
+CUTE_DECLARE_TEST_CASE(device_install_tests);
+CUTE_DECLARE_TEST_CASE(device_uninstall_tests);
 CUTE_DECLARE_TEST_CASE(attach_tests);
 CUTE_DECLARE_TEST_CASE(detach_tests);
 CUTE_DECLARE_TEST_CASE(password_add_tests);
@@ -29,6 +31,8 @@ CUTE_MAIN(cmd_tests);
 
 CUTE_TEST_CASE(cmd_tests)
     CUTE_RUN_TEST(get_canonical_path_tests);
+    CUTE_RUN_TEST(device_install_tests);
+    CUTE_RUN_TEST(device_uninstall_tests);
     CUTE_RUN_TEST(attach_tests);
     CUTE_RUN_TEST(detach_tests);
     CUTE_RUN_TEST(password_add_tests);
@@ -39,6 +43,18 @@ CUTE_TEST_CASE(cmd_tests)
     } else {
         fprintf(stdout, "WARN: regular_using_tests skipped.\n");
     }
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(device_install_tests)
+    zc("device", "uninstall", NULL);
+    CUTE_ASSERT(zc("device", "install", NULL) != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("device", "install --device-driver-path=../../dev/zacarias.ko", NULL) == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("device", "install --device-driver-path=../../dev/zacarias.ko", NULL) != EXIT_SUCCESS);
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(device_uninstall_tests)
+    CUTE_ASSERT(zc("device", "uninstall", NULL) == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("device", "uninstall", NULL) != EXIT_SUCCESS);
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(get_canonical_path_tests)
@@ -555,28 +571,10 @@ static int zacarias_install(void) {
 #endif
     char command_line[4096];
 
-#if defined(__linux__)
-    snprintf(command_line, sizeof(command_line) - 1, "insmod %s", zacarias_lkm);
-#else
-    return EXIT_FAILURE;
-#endif
-
-    return system(command_line);
+    snprintf(command_line, sizeof(command_line) - 1, "install --device-driver-path=%s", zacarias_lkm);
+    return zc("device", command_line, NULL);
 }
 
 static int zacarias_uninstall(void) {
-#if defined(__unix__)
-    const char zacarias_lkm[] = "zacarias.ko";
-#else
-# error Some code wanted.
-#endif
-    char command_line[4096];
-
-#if defined(__linux__)
-    snprintf(command_line, sizeof(command_line) - 1, "rmmod %s", zacarias_lkm);
-#else
-    return EXIT_FAILURE;
-#endif
-
-    return system(command_line);
+    return zc("device", "uninstall", NULL);
 }

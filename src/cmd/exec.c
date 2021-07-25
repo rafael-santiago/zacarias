@@ -15,6 +15,7 @@
 #  include <sys/mman.h>
 # endif
 #endif
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -60,5 +61,5 @@ int zc_exec(const int argc, char **argv) {
 
 static int zc_unk_command(void) {
     fprintf(stderr, "ERROR: unknown command.\n");
-    return 1;
+    return EXIT_FAILURE;
 }

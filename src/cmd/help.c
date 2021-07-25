@@ -10,6 +10,7 @@
 #include <cmd/options.h>
 #include <cmd/didumean.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 extern struct zc_exec_table_ctx g_command_table[];
@@ -66,7 +67,7 @@ int zc_help(void) {
                 free(suggestions);
             }
 
-            return 1;
+            return EXIT_FAILURE;
         }
     }
     return do_help();
@@ -80,5 +81,5 @@ int zc_help_help(void) {
         fprintf(stdout, "\t%s\n", cmd->cmd_name);
         cmd++;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
