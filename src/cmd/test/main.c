@@ -98,7 +98,8 @@ CUTE_TEST_CASE(regular_using_tests)
 
     CUTE_ASSERT(stat("passwd", &st) == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=butterfly@screaming.trees", "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=butterfly@screaming.trees",
+                   "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password", "add --user=rs --alias=butterfly@screaming.trees",
                    "GiveTheMuleWhatHeWants\nCryCryButterfly\nCryCryButFly\n") != EXIT_SUCCESS);
@@ -112,76 +113,104 @@ CUTE_TEST_CASE(regular_using_tests)
     CUTE_ASSERT(zc("password", "add --user=rs --alias=dirt_in_the_ground@tom.waits",
                    "GiveTheMuleWhatHeWants\nDrivingBonesToLive\nDrivingBonesToLive\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=butterfly@screaming.trees --timeout=1", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=butterfly@screaming.trees "
+                               "--timeout=1", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "del --user=rafael --alias=butterfly@screaming.trees", "GiveTheMuleWatHeWants\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "del --user=rafael --alias=butterfly@screaming.trees",
+                   "GiveTheMuleWatHeWants\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "del --user=rafael --alias=butterfly@screaming.trees", "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "del --user=rafael --alias=butterfly@screaming.trees",
+                   "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "del --user=rs --alias=butterfly@screaming.trees", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "del --user=rs --alias=butterfly@screaming.trees",
+                   "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=butterfly@screaming.trees", "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=butterfly@screaming.trees",
+                   "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
 
     remove("useless-things-i-forgot");
-    CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=useless-things-i-forgot --init", "MonkeyBoy\nMonkeyBoy\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=useless-things-i-forgot --init",
+                   "MonkeyBoy\nMonkeyBoy\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(stat("useless-things-i-forgot", &st) == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "add --alias=grendel-snowman@fu.manchu --user=zaca", "MonkeyBoiMoooo\nThereHeGoes\nThereHeGoes\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "add --alias=grendel-snowman@fu.manchu --user=zaca",
+                   "MonkeyBoiMoooo\nThereHeGoes\nThereHeGoes\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "add --alias=grendel-snowman@fu.manchu --user=zaca", "MonkeyBoy\nThereHeGoes\nThereHeGoes\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "add --alias=grendel-snowman@fu.manchu --user=zaca",
+                   "MonkeyBoy\nThereHeGoes\nThereHeGoes\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password", "add --alias=the_boxer@simon.garfunkel --user=zaca",
                    "MonkeyBoy\nLieLaLie\nLieLaLie\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=butterfly@screaming.trees", "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=butterfly@screaming.trees",
+                   "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits",
+                   "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel --timeout=1", "MonkeyBoy\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel "
+                               "--timeout=1", "MonkeyBoy\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("detach", "--user=rs", "GiveTheMuleWhatHeWants.\n") != EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("detach", "--user=rs", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=zaca --alias=grendel-snowman@fu.manchu", "MonkeyBoy\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=zaca --alias=grendel-snowman@fu.manchu",
+                   "MonkeyBoy\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits", "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits",
+                   "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=funky-monks --sessioned", "GiveTheMuleWhatHeWants\nJabulaniDaSilva\nJabulaniDaSilva\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=funky-monks --sessioned",
+                   "GiveTheMuleWhatHeWants\nJabulaniDaSilva\nJabulaniDaSilva\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --sessioned", "GiveTheMuleWhatHeWants\nFunkyMonks\nFunkyMonks\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --sessioned",
+                   "GiveTheMuleWhatHeWants\nFunkyMonks\nFunkyMonks\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits", "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits",
+                   "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits --timeout=1", "FunkyMonks\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits "
+                               "--timeout=1", "FunkyMonks\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel", "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel",
+                   "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel", "FunkyMonks\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel",
+                   "FunkyMonks\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel --timeout=1", "MonkeyBoy\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel --timeout=1",
+                   "MonkeyBoy\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "add --user=rs --alias=funland_at_the_beach@dead.kennedys --sessioned", "GiveTheMuleWhatHeWants\nFunkyMonks\nCrushedLittleKidsAdornTheBoardwalk\nCrushedLittleKidsAdornTheBoardwalk\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "add --user=rs --alias=funland_at_the_beach@dead.kennedys --sessioned",
+                   "GiveTheMuleWhatHeWants\nFunkyMonks\nCrushedLittleKidsAdornTheBoardwalk\n"
+                   "CrushedLittleKidsAdornTheBoardwalk\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=funland_at_the_beach@dead.kennedys --timeout=1", "FunkyMonks\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=funland_at_the_beach@dead.kennedys --timeout=1",
+                   "FunkyMonks\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("detach", "--user=zaca", "MonkeyBoy\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=useless-things-i-forgot --sessioned",
-                   "MonkeyBoy\nGodIsInTheRadioLeakingThroughTheStereo\nGodIsInTheRadioLeakingThroughTheStereo\n") == EXIT_SUCCESS);
+                   "MonkeyBoy\nGodIsInTheRadioLeakingThroughTheStereo\n"
+                   "GodIsInTheRadioLeakingThroughTheStereo\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password", "add --user=zaca --alias=harlen-shuffle@rolling.stones --sessioned",
-                   "MonkeyBoy\nGodIsInTheRadioLeakingThroughTheStereo\nYeahYeahYeah\nYeahYeahYeah\n") == EXIT_SUCCESS);
+                   "MonkeyBoy\nGodIsInTheRadioLeakingThroughTheStereo\n"
+                   "YeahYeahYeah\nYeahYeahYeah\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "del --user=zaca --alias=grendel-snowman@fu.manchu", "MonkeyBoy\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "del --user=zaca --alias=grendel-snowman@fu.manchu",
+                   "MonkeyBoy\n") != EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password", "del --user=zaca --alias=grendel-snowman@fu.manchu --sessioned",
                    "MonkeyBoy\nGodIsInTheRadioLeakingThroughTheStereo\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --alias=grendel-snowman@fu.manchu", "GodIsInTheRadioLeakingThroughTheStereo\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --alias=grendel-snowman@fu.manchu",
+                   "GodIsInTheRadioLeakingThroughTheStereo\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --alias=the_boxer@simon.garfunkel --timeout=1 --user=zaca", "GodIsInTheRadioLeakingThroughTheStereo\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --alias=the_boxer@simon.garfunkel --timeout=1 "
+                   "--user=zaca", "GodIsInTheRadioLeakingThroughTheStereo\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("detach", "--user=rs", "GiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
 
@@ -193,21 +222,29 @@ CUTE_TEST_CASE(regular_using_tests)
 
     CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=passwd", "MonkeyBoy\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=passwd", "GodIsInTheRadioLeakingThroughTheStereo\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=passwd",
+                   "GodIsInTheRadioLeakingThroughTheStereo\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=useless-things-i-forgot", "GodIsInTheRadioLeakingThroughTheStereo\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=useless-things-i-forgot",
+                   "GodIsInTheRadioLeakingThroughTheStereo\n") != EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=useless-things-i-forgot", "MonkeyBoy\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("attach", "--user=zaca --pwdb=useless-things-i-forgot",
+                   "MonkeyBoy\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("attach", "--user=rs --pwdb=passwd", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("attach", "--user=rs --pwdb=passwd",
+                   "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=funland_at_the_beach@dead.kennedys --timeout=1", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=funland_at_the_beach@dead.kennedys --timeout=1",
+                   "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits --timeout=1", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=dirt_in_the_ground@tom.waits --timeout=1",
+                   "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel", "MonkeyBoy\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=zaca --alias=the_boxer@simon.garfunkel",
+                   "MonkeyBoy\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=zaca --alias=harlen-shuffle@rolling.stones", "MonkeyBoy\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=zaca --alias=harlen-shuffle@rolling.stones",
+                   "MonkeyBoy\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("detach", "--user=rs", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
 
@@ -227,12 +264,14 @@ CUTE_TEST_CASE(password_get_tests)
     zacarias_uninstall();
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --init", "123mudar*\n123mudar*\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --init",
+                   "123mudar*\n123mudar*\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password", "add --user=rs --alias=zacarias.get_test",
                    "123mudar*\nwabbalabba\nwabbalabba\n") == EXIT_SUCCESS);
 
-    CUTE_ASSERT(zc("password", "get --user=rs --alias=zacarias.get_test", "123macular*\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "get --user=rs --alias=zacarias.get_test",
+                   "123macular*\n") != EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password", "get --user=rs --alias=not.found.aieee", "123mudar*\n") != EXIT_SUCCESS);
 
@@ -498,7 +537,8 @@ static int zc(const char *command, const char *args, const char *keyboard_data) 
         kbd_input = "< .keybd_data";
     }
 
-    snprintf(command_line, sizeof(command_line) - 1, "%s%s %s %s %s", backbuf, zc_binary, command, (args != NULL) ? args : "", kbd_input);
+    snprintf(command_line, sizeof(command_line) - 1, "%s%s %s %s %s",
+             backbuf, zc_binary, command, (args != NULL) ? args : "", kbd_input);
 
     exit_code = system(command_line);
 
