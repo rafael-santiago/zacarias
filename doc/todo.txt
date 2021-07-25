@@ -1,4 +1,5 @@
 (A) Implement device install and uninstall commands. +Dev,+User.
+(A) Implement install/uninstall build tasks. +Build
 (A) Implement FreeBSD version. +Dev,+Sys,+Evolvement
 x (A) Only recompile dependencies from kernel mode tests if '--clean' is passed. +Dev,+Sys,+Tests,+Build
 x (A) Make kernel mode tests infrastructure. +Dev,+Sys,+Tests
