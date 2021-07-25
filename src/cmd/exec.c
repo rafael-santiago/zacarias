@@ -8,6 +8,13 @@
 #include <cmd/exec.h>
 #include <cmd/types.h>
 #include <cmd/options.h>
+#include <kryptos_memory.h>
+#if defined(__unix__)
+# include <unistd.h>
+# if defined(_POSIX_MEMLOCK)
+#  include <sys/mman.h>
+# endif
+#endif
 #include <string.h>
 #include <stdio.h>
 
@@ -17,6 +24,15 @@ int zc_exec(const int argc, char **argv) {
     zc_cmd_func zc_cmd = zc_unk_command;
     struct zc_exec_table_ctx *zetc, *zetc_end;
     char *cmd_name = "";
+
+    kryptos_avoid_ram_swap();
+
+#if defined(__unix__) && defined(_POSIX_MEMLOCK)
+    if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
+        perror("mlockall");
+        return EXIT_FAILURE;
+    }
+#endif
 
     zc_set_argc_argv(argc, argv);
 
