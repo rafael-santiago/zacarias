@@ -135,6 +135,6 @@ zc_attach_epilogue:
 }
 
 int zc_attach_help(void) {
-    fprintf(stdout, "use: zc attach --pwdb=<profile path> --user=<name> [--sessioned]\n\r");
+    fprintf(stdout, "use: zc attach --pwdb=<profile path> --user=<name> [--init || --sessioned]\n\r");
     return EXIT_SUCCESS;
 }
