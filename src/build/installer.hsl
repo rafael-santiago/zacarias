@@ -1,0 +1,180 @@
+#
+#                    Copyright (C) 2020, 2021 by Rafael Santiago
+#
+# Use of this source code is governed by GPL-v2 license that can
+# be found in the COPYING file.
+#
+#
+
+include ~/fsutil.hsl
+include build/toolsets.hsl
+
+function installer() : result type none {
+    var option type list;
+    var opts type list;
+    $opts.add_item("y");
+    $opts.add_item("n");
+    $opts.add_item("c");
+    $opts.add_item("Y");
+    $opts.add_item("N");
+    $opts.add_item("C");
+    var choice type string;
+
+    $option = hefesto.sys.get_option("install");
+    if ($option.count() > 0) {
+        $choice = prompt("Do you want to install Zacarias on your system? [y/n/c] ", $opts);
+        if ($choice == "y" || $choice == "Y") {
+            hefesto.project.abort(do_install());
+        } else {
+            hefesto.project.abort(1);
+        }
+    }
+
+    $option = hefesto.sys.get_option("uninstall");
+    if ($option.count() > 0) {
+        $choice = prompt("Do you want to uninstall Zacarias on your system? [y/n/c] ", $opts);
+        if ($choice == "y" || $choice == "Y") {
+            hefesto.project.abort(do_uninstall());
+        } else {
+            hefesto.project.abort(1);
+        }
+    }
+}
+
+local function do_install() : result type int {
+    var err type int;
+    $err = 1;
+
+    var src_artifacts type list;
+    var dest_artifacts type list;
+
+    if (hefesto.sys.os_name() == "linux") {
+        $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "dev/zacarias.ko"));
+        $dest_artifacts.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
+
+        $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../bin/zc"));
+        $dest_artifacts.add_item("/usr/local/share/zacarias/bin/zc");
+
+        $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/MANUAL.md"));
+        $dest_artifacts.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
+
+        $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/man/zacarias.1"));
+        $dest_artifacts.add_item("/usr/local/man/man1/zacarias.1");
+
+        $err = do_install_cp_files($dest_artifacts, $src_artifacts);
+        if ($err == 0) {
+            hefesto.sys.echo("INFO: Installed.\n");
+        } else {
+            # INFO(Rafael): Somethig went wrong. Try to rollback as much as possible.
+            do_uninstall();
+        }
+    } else {
+        hefesto.sys.echo("ERROR: Unsupported operating system!\n");
+    }
+
+    result $err;
+}
+
+local function do_install_cp_files(dest type list, src type list) : result type int {
+    if ($dest.count() != $src.count()) {
+        hefesto.sys.echo("ERROR: Destination items count is different of Source items count.");
+        result 1;
+    }
+
+    var i type int;
+    $i = 0;
+    while ($i < $src.count()) {
+        var src_path type string;
+        $src_path = $src.item($i);
+        if (isfile($src_path) == 0) {
+            # INFO(Rafael): User call install from a fresh/clean repository,
+            #               let's build the artifacts and then try to continue with installation process.
+            var exit_code type int;
+            $exit_code = hefesto.sys.run("hefesto");
+            if ($exit_code != 0) {
+                hefesto.sys.echo("ERROR: Unable to build artifacts to install.\n");
+                result 1;
+            }
+            break;
+        }
+        $i = $i + 1;
+    }
+
+    $i = 0;
+    while ($i < $src.count()) {
+        var dest_path type string;
+        $dest_path = $dest.item($i);
+        $dest_path = pathfromfilepath($dest_path);
+        if (mktree($dest_path) != 1) {
+            hefesto.sys.echo("ERROR: Unable to make directory path `" + $dest_path + "`.\n");
+            result 1;
+        }
+        if (hefesto.sys.cp($src.item($i), $dest.item($i)) != 1) {
+            hefesto.sys.echo("ERROR: Unable to install `" + $dest.item($i) + "`.\n");
+            result 1;
+        }
+        $i = $i + 1;
+    }
+
+    result 0;
+}
+
+local function do_uninstall() : result type int {
+    var err type int;
+
+    var to_burn type list;
+
+    if (hefesto.sys.os_name() == "linux") {
+        $to_burn.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
+        $to_burn.add_item("/usr/local/share/zacarias/bin/zc");
+        $to_burn.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
+        $to_burn.add_item("/usr/local/man/man1/zacarias.1");
+        $to_burn.add_item("/usr/local/share/zacarias/bin");
+        $to_burn.add_item("/usr/local/share/zacarias/doc");
+        $to_burn.add_item("/usr/local/share/zacarias");
+        $err = do_uninstall_rm_paths($to_burn);
+        if ($err == 0) {
+            hefesto.sys.echo("INFO: Uninstalled.\n");
+        }
+    } else {
+        hefesto.sys.echo("ERROR: Unsupported operating system!\n");
+    }
+
+    result $err;
+}
+
+local function do_uninstall_rm_paths(rmlist type list) : result type int {
+    var err type int;
+    $err = 0;
+
+    var r type int;
+    $r = 0;
+    while ($r < $rmlist.count()) {
+        var path type string;
+        $path = $rmlist.item($r);
+        if (isfile($path)) {
+            if (hefesto.sys.rm($path) != 0) {
+                hefesto.sys.echo("WARN: Unable to remove the file `" + $path +
+                                 "`. Try to do it by yourself.\n");
+            }
+        } else if (isdir($path)) {
+            if (hefesto.sys.rmdir($path) != 0) {
+                hefesto.sys.echo("WARN: Unable to remove the directory `" + $path +
+                                 "`. Try to do it by yourself.\n");
+                $err = 1;
+            }
+        }
+        $r = $r + 1;
+    }
+
+    result $err;
+}
+
+local function prompt(message type string, choices type list) : result type string {
+    var choice type string;
+    $choice = "";
+    while ($choices.index_of($choice) == -1) {
+        $choice = hefesto.sys.prompt($message);
+    }
+    result $choice;
+}

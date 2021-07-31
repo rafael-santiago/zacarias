@@ -8,6 +8,7 @@
 
 include ~/toolsets/null/null.hsl
 include ~/toolsets/utils/forge_projects.hsl
+include build/installer.hsl
 
 var exit_code type int;
 
@@ -15,6 +16,7 @@ project zacarias : toolset "no-tool-any-set" : $exit_code;
 
 zacarias.prologue() {
     hefesto.sys.setenv("ZACARIAS_ROOTDIR", hefesto.sys.pwd());
+    installer();
     var submodules type list;
     $submodules = hefesto.sys.get_option("modules");
 

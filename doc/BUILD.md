@@ -56,4 +56,6 @@ It will build the device driver, the user-mode tool, run some testing and after 
 run ``hefesto --install``. Once installed you will be able to start using ``Zacarias`` as your password manager.
 If you are new here it is time to start reading the [user's manual](https://github.com/rafael-santiago/zacarias/blob/master/doc/MANUAL.md).
 
+If you want to uninstall, use: ``hefesto --uninstall``.
+
 [``Back``](#contents)
