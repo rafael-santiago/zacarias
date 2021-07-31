@@ -48,8 +48,8 @@ Filling up those requirements all you should do is to change to ``src`` sub-dire
 invoke ``Hefesto`` from there:
 
 ```
-you@AdventureGallye:~/# cd zacarias/src
-you@AdventureGallye:~/zacarias/src# hefesto
+you@AdventureGalley:~/# cd zacarias/src
+you@AdventureGalley:~/zacarias/src# hefesto
 ```
 
 It will build the device driver, the user-mode tool, run some testing and after a successful build you should

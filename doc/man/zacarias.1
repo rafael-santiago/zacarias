@@ -1,0 +1,48 @@
+.TH zacarias 1 "July 30, 2021" "version 0.0.1" "USER COMMANDS"
+.SH NAME
+zacarias \- a password manager with some (paranoid) data isolation cares.
+.SH SYNOPSIS
+.B zc [\fIOPTIONS\fR]
+.SH DESCRIPTION
+\fIZacarias\fR is a password manager with \fIkernel-mode\fR powers. With this tool all password database encryption/decryption
+is done from \fIkernel\fR. The idea here is isolate as much as possible your secrets avoiding any involuntary data leaking,
+easier to happen from \fIuser-space\fR context. The name \fIZacarias\fR means \fIthe Lord recalled\fR.
+.PP
+\fIzc\fR is the \fIuser-mode\fR portion of \fIZacarias\fR password manager. With \fIzc\fR you are able to do your password management
+stuff: add, delete and get your passwords, besides installing/uninstalling the \fIZacarias\fR device driver.
+.PP
+Until now \fIZacarias\fR features:
+.PP
+- \fIAES-256/GCM\fR to encrypt the password database.
+
+- \fIArgon2i\fR as its \fIKDF\fR.
+
+- Predefined passwords storing.
+
+- Generate new passwords.
+
+- Session password definition.
+
+- Clipboard use avoidance, it types your passwords for you.
+
+- Password database I/O done from \fIkernel-space\fR context.
+.PP
+To learn more deeply about each implemented \fIzc\fR command you should read the user's manual probably installed in:
+.PP
+\fI/usr/local/share/zacarias/doc/MANUAL.md\fR (or equivalent in your system).
+.PP
+.SH EXIT STATUS
+If the execution succeeds \fIzc\fR returns zero, otherwise non zero values will be returned.
+.PP
+.SH
+SEE ALSO
+.TP
+\fI/usr/local/share/zacarias/doc\fR (or equivalent in your system).
+.PP
+.SH
+HOMEPAGE
+.TP
+<https://github.com/rafael-santiago/zacarias>
+.SH AUTHOR
+Rafael Santiago and Contributors
+
