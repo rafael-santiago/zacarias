@@ -1,5 +1,4 @@
-![Z](https://github.com/rafael-santiago/zacarias/blob/master/etc/zc_logo.png "Zacarias password manager")
-#
+# ![Z](https://github.com/rafael-santiago/zacarias/blob/master/etc/zc_logo.png "Zacarias password manager") acarias
 
 # Zacarias
 
