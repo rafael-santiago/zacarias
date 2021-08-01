@@ -91,4 +91,4 @@ are deprecated/banned here. You should use ``allowlist/denylist`` or anything mo
 like ``master/slave`` are out too. You could use ``main``, ``secondary``, ``next``, ``trunk``, ``current``, ``supervisor``,
 ``worker`` in replacement.
 
-Do not use sexist and machist terms, too.
+Do not use sexist and/or machist terms, too.
