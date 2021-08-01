@@ -1,4 +1,5 @@
-# Zacarias
+![Z](https://github.com/rafael-santiago/zacarias/blob/master/etc/zc_logo.png "Zacarias password manager") acarias
+#
 
 ``Zacarias`` is a password manager with ``kernel-mode`` powers. With this tool all password database encryption/decryption
 is done from ``kernel``. The idea here is isolate as much as possible your secrets avoiding any involuntary data leaking,
