@@ -75,9 +75,9 @@ Avoid capital letters in function and variable names.
 
 C Defines:
 
-    - while constants must be in upper case;
-    - while macros must be in lower case;
-    - while a DSL statement must be in upper case;
+- while constants must be in upper case;
+- while macros must be in lower case;
+- while a DSL statement must be in upper case;
 
 # Use inclusive and neutral language
 
@@ -85,7 +85,7 @@ Always try to use inclusive and neutral words/terms in your source codes and doc
 for you seems to be not so correct, please let me known by opening an issue and suggesting improvements. Thank you in
 advance.
 
-In general avoid use colors to name what should be "good" or "bad". Outdated caveman terms such as ``whitelist``/``blacklist``
+In general avoid use colors to name what should be "good" or "bad". Outdated terms such as ``whitelist``/``blacklist``
 are deprecated/banned here. You should use ``allowlist/denylist`` or anything more related to what you really are doing. Terms
 like ``master/slave`` are out too. You could use ``main``, ``secondary``, ``next``, ``trunk``, ``current``, ``supervisor``,
 ``worker`` in replacement.
