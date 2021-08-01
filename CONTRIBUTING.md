@@ -61,7 +61,8 @@ When commenting some code use the following format:
 
     // TODO(your name, or as people know you): To do item.
 
-    // TIP(your name, or as people know you): You are giving the tips for people understand some craziness, weird code chunk.
+    // TIP(your name, or as people know you): You are giving the tips for people understand
+    //                                        some craziness, weird code chunk.
 ```
 
 Static functions even being static must be prototyped at the beginning of the implementation file.
