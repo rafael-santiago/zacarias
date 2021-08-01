@@ -7,19 +7,19 @@ The best way of knowing what could be done is reading 'doc/todo.txt'.
 There is no absolute truth (a.k.a unicorn) when talking about code style, anyway, this is the truth that I have
 been taking into consideration here.
 
-    - Comments are good;
-    - Tests are awesome (use the testing library used by the project <https://github.com/rafael-santiago/cutest>);
-    - If your test need a human to drive it, sorry but your test is a kind of crap;
-    - We like C (C, not C with sugar or anything similar);
-    - Do not use 'func()' when prototyping use 'func(void)';
-    - Arrays as function parameters are not welcome, use pointers;
-    - Pointers are good. Taking into consideration that you are a fluent and experienced C programmer;
-    - The project should be the most self-contained possible;
-    - Git submodules are ok, but must be hosted into 'src/lib' directory;
-    - This project is GPLv2. Always include the copyright disclaimer in new code files;
-    - Respect the credit from other people;
-    - Give credit to other people;
-    - Give credit to yourself;
+- Comments are good;
+- Tests are awesome (use the testing library used by the project <https://github.com/rafael-santiago/cutest>);
+- If your test need a human to drive it, sorry but your test is a kind of crap;
+- We like C (C, not C with sugar or anything similar);
+- Do not use 'func()' when prototyping use 'func(void)';
+- Arrays as function parameters are not welcome, use pointers;
+- Pointers are good. Taking into consideration that you are a fluent and experienced C programmer;
+- The project should be the most self-contained possible;
+- Git submodules are ok, but must be hosted into 'src/lib' directory;
+- This project is GPLv2. Always include the copyright disclaimer in new code files;
+- Respect the credit from other people;
+- Give credit to other people;
+- Give credit to yourself;
 
 # Code constructions
 
@@ -90,4 +90,4 @@ are deprecated/banned here. You should use ``allowlist/denylist`` or anything mo
 like ``master/slave`` are out too. You could use ``main``, ``secondary``, ``next``, ``trunk``, ``current``, ``supervisor``,
 ``worker`` in replacement.
 
-Avoid sexist, machist terms, too.
+Avoid sexist and machist terms, too.
