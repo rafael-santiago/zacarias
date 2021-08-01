@@ -19,4 +19,5 @@ void cdev_deinit(void) {
     class_unregister(g_cdev()->device_class);
     class_destroy(g_cdev()->device_class);
     unregister_chrdev(g_cdev()->major_nr, CDEVNAME);
+    printk(KERN_INFO "/dev/zacarias: Device deinitialized.\n");
 }

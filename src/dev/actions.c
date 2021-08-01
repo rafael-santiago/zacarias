@@ -7,8 +7,11 @@
  */
 #include <defs/io.h>
 #include <defs/types.h>
-#include <linux/slab.h>
-#include <asm/uaccess.h>
+#include <defs/zc_dbg.h>
+#if defined(__linux__)
+# include <linux/slab.h>
+# include <asm/uaccess.h>
+#endif
 #include <kio.h>
 #include <ctx/ctx.h>
 #include <sec/crypto.h>
@@ -23,24 +26,29 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
     unsigned char detached = 0;
 
     if (!cdev_mtx_trylock(&g_cdev()->lock)) {
+        ZC_DBG("return EBUSY.\n");
         return EBUSY;
     }
 
     if (d->user_size == 0 || d->pwdb_passwd_size == 0 || d->alias_size == 0) {
         d->status = kInvalidParams;
         err = EINVAL;
+        ZC_DBG("invalid size(s) [d->user_size=%lu, d->pwdb_passwd_size=%lu, d->alias_size=%lu]\n",
+               d->user_size, d->pwdb_passwd_size, d->alias_size);
         goto zc_dev_act_add_password_epilogue;
     }
 
     if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size)) == NULL) {
         d->status = kProfileNotAttached;
         err = 0;
+        ZC_DBG("profile not found.\n");
         goto zc_dev_act_add_password_epilogue;
     }
 
     if (profile->sessioned && d->session_passwd_size == 0) {
         d->status = kInvalidParams;
         err = EINVAL;
+        ZC_DBG("sessioned profile but session password not provided.\n");
         goto zc_dev_act_add_password_epilogue;
     }
 
@@ -55,11 +63,13 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
             if (kread(profile->pwdb_path, &profile->pwdb, &profile->pwdb_size) != 0) {
                 d->status = kPWDBReadingError;
                 err = 0;
+                ZC_DBG("kread has failed.\n");
                 goto zc_dev_act_add_password_epilogue;
             }
         } else {
             d->status = kAuthenticationFailure;
             err = 0;
+            ZC_DBG("zacarias_setkey_pwdb() has failed.\n");
             goto zc_dev_act_add_password_epilogue;
         }
     }
@@ -67,12 +77,14 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
     if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         d->status = kAuthenticationFailure;
         err = 0;
+        ZC_DBG("zacarias_decrypt_pwdb() has failed.\n");
         goto zc_dev_act_add_password_epilogue;
     }
 
     if (plbuf_edit_detach(&profile->plbuf, &profile->plbuf_size) != 0) {
         d->status = kGeneralError;
         err = 0;
+        ZC_DBG("plbuf_edit_detach() has failed.\n");
         goto zc_dev_act_add_password_epilogue;
     }
 
@@ -81,6 +93,7 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
     if (plbuf_edit_find(profile->plbuf, profile->plbuf_size, d->alias, d->alias_size)) {
         err = 0;
         d->status = kAliasAlreadyUsed;
+        ZC_DBG("plbuf_edit_find() has failed.\n");
         goto zc_dev_act_add_password_epilogue;
     }
 
@@ -89,6 +102,7 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
         if (passwd == NULL) {
             err = ENOMEM;
             d->status = kGeneralError;
+            ZC_DBG("null password.\n");
             goto zc_dev_act_add_password_epilogue;
         }
     } else {
@@ -99,12 +113,14 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
     if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, d->alias, d->alias_size, passwd, passwd_size) != 0) {
         err = 0;
         d->status = kGeneralError;
+        ZC_DBG("plbuf_edit_add() has failed.\n");
         goto zc_dev_act_add_password_epilogue;
     }
 
     if (plbuf_edit_shuffle(&profile->plbuf, &profile->plbuf_size) != 0) {
         err = 0;
         d->status = kGeneralError;
+        ZC_DBG("plbuf_edit_shuffle() has failed.\n");
         goto zc_dev_act_add_password_epilogue;
     }
 
@@ -113,12 +129,14 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
     if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         err = 0;
         d->status = kGeneralError;
+        ZC_DBG("zacarias_encrypt_pwdb() has failed.\n");
         goto zc_dev_act_add_password_epilogue;
     }
 
     if (kwrite(profile->pwdb_path, profile->pwdb, profile->pwdb_size) != 0) {
         err = 0;
         d->status = kPWDBWritingError;
+        ZC_DBG("kwrite() has failed.\n");
         goto zc_dev_act_add_password_epilogue;
     }
 
@@ -128,6 +146,7 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
                                  d->session_passwd, d->session_passwd_size) != 0) {
             err = 0;
             d->status = kGeneralError;
+            ZC_DBG("zacarias_setkey_pwdb() has failed.\n");
             goto zc_dev_act_add_password_epilogue;
         }
     }
@@ -183,6 +202,7 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
     zacarias_profile_ctx *profile = NULL;
 
     if (!cdev_mtx_trylock(&g_cdev()->lock)) {
+        ZC_DBG("return EBUSY.\n");
         return EBUSY;
     }
 
@@ -190,6 +210,7 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
         d->user_size == 0) {
         err = 0;
         d->status = kInvalidParams;
+        ZC_DBG("invalid parameters.\n");
         goto zc_dev_act_del_password_epilogue;
     }
 
@@ -197,6 +218,7 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
     if (profile == NULL) {
         err = 0;
         d->status = kProfileNotAttached;
+        ZC_DBG("profile not found.\n");
         goto zc_dev_act_del_password_epilogue;
     }
 
@@ -209,22 +231,26 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
             if (kread(profile->pwdb_path, &profile->pwdb, &profile->pwdb_size) != 0) {
                 err = 0;
                 d->status = kPWDBReadingError;
+                ZC_DBG("kread has failed.\n");
                 goto zc_dev_act_del_password_epilogue;
             }
         } else {
             err = 0;
             d->status = kAuthenticationFailure;
+            ZC_DBG("zacarias_setkey_pwdb() has failed.\n");
             goto zc_dev_act_del_password_epilogue;
         }
     } else if (profile->sessioned && d->session_passwd_size == 0) {
         err = 0;
         d->status = kInvalidParams;
+        ZC_DBG("sessioned profile with no session password.\n");
         goto zc_dev_act_del_password_epilogue;
     }
 
     if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         err = 0;
         d->status = kAuthenticationFailure;
+        ZC_DBG("zacarias_decrypt_pwdb() has failed.\n");
         goto zc_dev_act_del_password_epilogue;
     }
 
@@ -232,12 +258,14 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
         err = 0;
         d->status = kGeneralError;
         zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size);
+        ZC_DBG("plbuf_edit_detach() has failed.\n");
         goto zc_dev_act_del_password_epilogue;
     }
 
     if (plbuf_edit_del(&profile->plbuf, &profile->plbuf_size, d->alias, d->alias_size) != 0) {
         err = 0;
         d->status = kAliasNotFound;
+        ZC_DBG("plbuf_edit_del() has failed.\n");
         goto zc_dev_act_del_password_epilogue;
     }
 
@@ -247,15 +275,18 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
         kryptos_freeseg(profile->plbuf, profile->plbuf_size);
         profile->plbuf = NULL;
         profile->plbuf_size = 0;
+        ZC_DBG("plbuf_edit_shuffle() has failed.\n");
         goto zc_dev_act_del_password_epilogue;
     } else if (profile->plbuf_size == 0) {
         if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size,
                            "\x1BZ", 2, "\x1BZ", 2) != 0) {
             d->status = kPWDBWritingError;
+            ZC_DBG("plbuf_edit_add() has failed.\n");
             goto zc_dev_act_del_password_epilogue;
         }
         if (plbuf_edit_shuffle_stub(&profile->plbuf, &profile->plbuf_size) != 0) {
             d->status = kGeneralError;
+            ZC_DBG("plbuf_edit_shuffle_stub() has failed.\n");
             goto zc_dev_act_del_password_epilogue;
         }
     }
@@ -263,12 +294,14 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
     if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         err = 0;
         d->status = kGeneralError;
+        ZC_DBG("zacarias_encrypt_pwdb() has failed.\n");
         goto zc_dev_act_del_password_epilogue;
     }
 
     if (kwrite(profile->pwdb_path, profile->pwdb, profile->pwdb_size) != 0) {
         err = 0;
         d->status = kPWDBWritingError;
+        ZC_DBG("kwrite() has failed.\n");
         goto zc_dev_act_del_password_epilogue;
     }
 
@@ -277,6 +310,7 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
                                                 d->session_passwd, d->session_passwd_size) != 0) {
         err = 0;
         d->status = kAuthenticationFailure;
+        ZC_DBG("zacarias_setkey_pwdb() has failed.\n");
         goto zc_dev_act_del_password_epilogue;
     }
 
@@ -306,12 +340,14 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
     size_t passwd_size = 0;
 
     if (!cdev_mtx_trylock(&g_cdev()->lock)) {
+        ZC_DBG("return EBUSY.\n");
         return EBUSY;
     }
 
     if (d->alias_size == 0 || d->user_size == 0) {
         err = 0;
         d->status = kInvalidParams;
+        ZC_DBG("invalid sizes (d->alias_size=%lu, d->user_size=%lu).\n", d->alias_size, d->user_size);
         goto zc_dev_act_get_password_epilogue;
     }
 
@@ -319,12 +355,14 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
     if (profile == NULL) {
         err = 0;
         d->status = kProfileNotAttached;
+        ZC_DBG("profile not found.\n");
         goto zc_dev_act_get_password_epilogue;
     }
 
     if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         err = 0;
         d->status = kAuthenticationFailure;
+        ZC_DBG("zacarias_decrypt_pwdb() has failed.\n");
         goto zc_dev_act_get_password_epilogue;
     }
 
@@ -332,6 +370,7 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
         err = 0;
         d->status = kGeneralError;
         zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size);
+        ZC_DBG("zacarias_edit_detach() has failed.\n");
         goto zc_dev_act_get_password_epilogue;
     }
 
@@ -348,6 +387,7 @@ int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
         kryptos_freeseg(profile->plbuf, profile->plbuf_size);
         profile->plbuf = NULL;
         profile->plbuf_size = 0;
+        ZC_DBG("zacarias_edit_shuffle() has failed.\n");
         goto zc_dev_act_get_password_epilogue;
     }
 
@@ -367,7 +407,7 @@ zc_dev_act_get_password_epilogue:
 
     return err;
 }
-
+/*
 int zc_dev_act_setkey(struct zc_devio_ctx **devio) {
     int err = EFAULT;
     struct zc_devio_ctx *d = *devio;
@@ -513,6 +553,7 @@ zc_dev_act_is_sessioned_profile:
 
     return err;
 }
+*/
 
 int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
     struct zc_devio_ctx *d = *devio;
@@ -522,10 +563,12 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
     zacarias_profile_ctx *profile = NULL;
 
     if (!cdev_mtx_trylock(&g_cdev()->lock)) {
+        ZC_DBG("return EBUSY.\n");
         return EBUSY;
     }
 
     if (d->pwdb_path == NULL || d->user == NULL) {
+        ZC_DBG("null d->pwdb_path and/or d->user.\n");
         goto zc_dev_act_attach_profile_epilogue;
     }
 
@@ -533,12 +576,14 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
 
     if (zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size) != NULL) {
         d->status = kProfilePreviouslyAttached;
+        ZC_DBG("profiled previously attached.\n");
         goto zc_dev_act_attach_profile_epilogue;
     }
 
     if (d->action == kAttachProfile) {
         if (kread(d->pwdb_path, &pwdb, &pwdb_size) != 0) {
             d->status = kPWDBReadingError;
+            ZC_DBG("kread has failed.\n");
             goto zc_dev_act_attach_profile_epilogue;
         }
     } else if (d->action == kInitAndAttachProfile) {
@@ -546,6 +591,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         pwdb = (char *) kryptos_newseg(pwdb_size);
         if (pwdb == NULL) {
             d->status = kGeneralError;
+            ZC_DBG("unabled to allocate memory.\n");
             goto zc_dev_act_attach_profile_epilogue;
         }
         memset(pwdb, 0, pwdb_size);
@@ -553,17 +599,20 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
 
     if (zacarias_profiles_ctx_add(&g_cdev()->profiles, d->user, d->user_size, d->pwdb_path, d->pwdb_path_size, pwdb, pwdb_size) != 0) {
         d->status = kGeneralError;
+        ZC_DBG("zacarias_profiles_ctx_add() has failed.\n");
         goto zc_dev_act_attach_profile_epilogue;
     }
 
     if ((profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size)) == NULL) {
         d->status = kProfileNotFound;
+        ZC_DBG("zacarias_profiles_ctx_get() has failed.\n");
         goto zc_dev_act_attach_profile_epilogue;
     }
 
     if (d->action == kInitAndAttachProfile && profile != NULL) {
         if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, "\x1BZ", 2, "\x1BZ", 2) != 0) {
             d->status = kPWDBWritingError;
+            ZC_DBG("plbuf_edit_add() has failed.\n");
             goto zc_dev_act_attach_profile_epilogue;
         }
         if (plbuf_edit_shuffle_stub(&profile->plbuf, &profile->plbuf_size) != 0) {
@@ -572,26 +621,31 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
             profile->plbuf = NULL;
             profile->plbuf_size = 0;
             d->status = kGeneralError;
+            ZC_DBG("plbuf_edit_shuffle_stub() has failed.\n");
             goto zc_dev_act_attach_profile_epilogue;
         }
         if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) == 0) {
             if (kwrite(profile->pwdb_path, profile->pwdb, profile->pwdb_size) != 0) {
                 d->status = kPWDBWritingError;
+                ZC_DBG("kwrite has failed.\n");
                 goto zc_dev_act_attach_profile_epilogue;
             }
         } else {
             d->status = kPWDBWritingError;
+            ZC_DBG("zacarias_encrypt_pwdb() has failed.\n");
             goto zc_dev_act_attach_profile_epilogue;
         }
     } else if (d->action == kAttachProfile && profile != NULL) {
         if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
             d->status = kAuthenticationFailure;
             zacarias_profiles_ctx_del(&g_cdev()->profiles, d->user, d->user_size);
+            ZC_DBG("zacarias_decrypt_pwdb() has failed.\n");
             goto zc_dev_act_attach_profile_epilogue;
         }
         if (zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
             d->status = kGeneralError;
             zacarias_profiles_ctx_del(&g_cdev()->profiles, d->user, d->user_size);
+            ZC_DBG("zacarias_encrypt_pwdb() has failed.\n");
             goto zc_dev_act_attach_profile_epilogue;
         }
     }
@@ -601,6 +655,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         if (d->session_passwd_size == 0 || d->pwdb_passwd == NULL || d->pwdb_passwd_size == 0) {
             err = EINVAL;
             d->status = kInvalidParams;
+            ZC_DBG("invalid parameters.\n");
             goto zc_dev_act_attach_profile_epilogue;
         }
         profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size);
@@ -608,6 +663,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
             d->status = kNoError;
             profile->sessioned = 1;
         } else {
+            ZC_DBG("zacarias_setkey_pwdb() has failed.\n");
             d->status = kAuthenticationFailure;
         }
     } else {
@@ -636,6 +692,7 @@ int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
     zacarias_profile_ctx *profile;
 
     if (!cdev_mtx_trylock(&g_cdev()->lock)) {
+        ZC_DBG("return EBUSY.\n");
         return EBUSY;
     }
 
@@ -643,6 +700,7 @@ int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
         d->pwdb_passwd == NULL || d->pwdb_passwd_size == 0) {
         err = EINVAL;
         d->status = kInvalidParams;
+        ZC_DBG("invalid parameters.\n");
         goto zc_dev_act_detach_profile_epilogue;
     }
 
@@ -650,6 +708,7 @@ int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
     if (profile == NULL) {
         err = 0;
         d->status = kProfileNotAttached;
+        ZC_DBG("profile not found.\n");
         goto zc_dev_act_detach_profile_epilogue;
     }
 
@@ -657,6 +716,7 @@ int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
 
     if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
         d->status = kAuthenticationFailure;
+        ZC_DBG("zacarias_decrypt_pwdb() has failed.\n");
         goto zc_dev_act_detach_profile_epilogue;
     }
 
@@ -665,6 +725,7 @@ int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
 
     if (zacarias_profiles_ctx_del(&g_cdev()->profiles, d->user, d->user_size) != 0) {
         d->status = kGeneralError;
+        ZC_DBG("zacarias_profiles_ctx_del() has failed.\n");
         goto zc_dev_act_detach_profile_epilogue;
     }
 

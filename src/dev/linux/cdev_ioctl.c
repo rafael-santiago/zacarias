@@ -7,6 +7,7 @@
  */
 #include <linux/cdev_ioctl.h>
 #include <defs/io.h>
+#include <defs/zc_dbg.h>
 #include <asm/uaccess.h>
 #include <linux/slab.h>
 #include <actions.h>
@@ -31,7 +32,6 @@ long cdev_ioctl(struct file *fp, unsigned int cmd, unsigned long user_param) {
 
     switch (cmd) {
         case ZACARIAS_ATTACH_PROFILE:
-            printk(KERN_INFO "-- ZACARIAS_ATTACH_PROFILE IOCTL (%s)\n", dev_p->user);
             error = zc_dev_act_attach_profile(&dev_p);
             break;
 
@@ -51,20 +51,24 @@ long cdev_ioctl(struct file *fp, unsigned int cmd, unsigned long user_param) {
             error = zc_dev_act_get_password(&dev_p);
             break;
 
-        case ZACARIAS_IS_SESSIONED_PROFILE:
+        /*case ZACARIAS_IS_SESSIONED_PROFILE:
+            ZC_DBG("ZACARIAS_IS_SESSIONED_PROFILE command received.\n");
             error = zc_dev_act_is_sessioned_profile(&dev_p);
             break;
 
         case ZACARIAS_SETKEY:
+            ZC_DBG("ZACARIAS_SETKEY command received.\n");
             error = zc_dev_act_setkey(&dev_p);
-            break;
+            break;*/
 
         default:
+            ZC_DBG("Unknown command received.\n");
             devio.status = kUnknownDeviceCommand;
             break;
     }
 
     if (ucpy((void __user *)user_param, &devio, sizeof(struct zc_devio_ctx)) != 0) {
+        ZC_DBG("ucpy() has failed.\n");
         error = EFAULT;
     }
 
