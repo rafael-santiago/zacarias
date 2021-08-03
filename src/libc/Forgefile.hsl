@@ -13,19 +13,16 @@ local var includes type list;
 local var cflags type list;
 local var libraries type list;
 local var ldflags type list;
-local var deps type string;
 local var curr_toolset type string;
+local var deps type string;
 
-project libzckbd : toolset $curr_toolset : dependencies $deps : $src, $includes, $cflags, $libraries, $ldflags, "libzckbd.a";
+project libc : toolset $curr_toolset : dependencies $deps : $src, $includes, $cflags, $libraries, $ldflags, "libzcc.a";
 
-libzckbd.preloading() {
+libc.preloading() {
     $curr_toolset = get_lib_toolset();
 }
 
-libzckbd.prologue() {
-    if (build("libkryptos") != 0) {
-        hefesto.project.abort(1);
-    }
+libc.prologue() {
     $includes = hefesto.sys.get_option("includes");
     $cflags = hefesto.sys.get_option("cflags");
     $libraries = hefesto.sys.get_option("libraries");
@@ -35,11 +32,8 @@ libzckbd.prologue() {
     $src = get_codes($dirlist, $deps);
 }
 
-libzckbd.epilogue() {
+libc.epilogue() {
     if (hefesto.sys.last_forge_result() == 0) {
-        if (has_bad_funcs(hefesto.sys.lines_from_file("../BAD_FUNCS", ".*"), $src, $includes, $cflags)) {
-            hefesto.project.abort(1);
-        }
         hefesto.sys.echo("Done.\n");
     }
 }

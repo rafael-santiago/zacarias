@@ -14,37 +14,20 @@ local var cflags type list;
 local var libraries type list;
 local var ldflags type list;
 local var appname type string;
-
 local var curr_toolset type string;
+local var deps type string;
 
-project cmd-tests : toolset $curr_toolset : $src, $includes, $cflags, $libraries, $ldflags, $appname;
+project libc-tests : toolset $curr_toolset : dependencies $deps : $src, $includes, $cflags, $libraries, $ldflags, $appname;
 
-cmd-tests.preloading() {
+libc-tests.preloading() {
     $curr_toolset = get_app_toolset();
 }
 
-cmd-tests.prologue() {
-    if (build("libkryptos") != 0 || build("libcutest") != 0) {
-        hefesto.project.abort(1);
-    }
-
-    $src.ls(".*c$");
-
+libc-tests.prologue() {
     $includes = hefesto.sys.get_option("includes");
     $cflags = hefesto.sys.get_option("cflags");
     $libraries = hefesto.sys.get_option("libraries");
     $ldflags = hefesto.sys.get_option("ldflags");
-    $appname = "cmd-tests";
-
-    var oldcwd type string;
-    $oldcwd = hefesto.sys.pwd();
-    hefesto.sys.cd("../o");
-    $ldflags.ls(".*(utils).o$");
-    hefesto.sys.cd($oldcwd);
-
-    # INFO(Rafael): Due to we are including explicitly utils.o we need to link -lzcc after it otherwise
-    #               zc_memfuncs will not resolve correctly.
-    $ldflags.add_item("-lzcc");
 
     if (hefesto.sys.os_name() == "linux") {
         $ldflags.add_item("-ldl");
@@ -57,9 +40,12 @@ cmd-tests.prologue() {
         $ldflags.add_item("-lexecinfo");
         $ldflags.add_item("-lpthread");
     }
+
+    $appname = "libc-tests";
+    $src.ls(".*\\.c$");
 }
 
-cmd-tests.epilogue() {
+libc-tests.epilogue() {
     if (hefesto.sys.last_forge_result() == 0) {
         if (runtests() != 0) {
             hefesto.project.abort(1);
@@ -68,8 +54,5 @@ cmd-tests.epilogue() {
 }
 
 local function runtests() : result type int {
-    var exit_code type int;
-    $exit_code = hefesto.sys.run(hefesto.sys.make_path("bin", $appname) + " --cutest-leak-check=yes " +
-                                 hefesto.project.cmdline());
-    result $exit_code;
+    result hefesto.sys.run(hefesto.sys.make_path(hefesto.sys.make_path(hefesto.sys.pwd(), "bin"), $appname) + " --cutest-leak-check=yes");
 }

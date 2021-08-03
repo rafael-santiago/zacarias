@@ -1,1 +1,1 @@
---forgefiles=Forgefile.hsl --Forgefile-projects=zacarias --cflags=-DZC_CMD=1
+--forgefiles=Forgefile.hsl --Forgefile-projects=zacarias --cflags=-DZC_CMD=1,-Dmemcpy=zc_memcpy,-Dmemcmp=zc_memcmp,-Dmemset=zc_memset

@@ -35,3 +35,4 @@ x (A) Implement device install and uninstall commands. +Dev,+User.
 x (A) Write man page. +Documentation
 x (A) Implement install/uninstall build tasks. +Build
 x (A) Create ZC_DBG(message, params...) debug info macro. +Dev,+Sys
+x (A) Mitigate libc hooking by using bad functions searching, besides by linking zc static. +Dev,+Build,+Improvement
