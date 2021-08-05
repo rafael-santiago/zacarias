@@ -1,3 +1,7 @@
+(A) Have the possibility of static linking xorg dependencies thus chances of library hooking will be mitigated much more.
+    Xorg must be compiled and hosted into repo's lib/Xorg directory.
+    User should indicate the proper packages of libX11, libXau, libXdmcp, libXext, libXtst and libxcb,
+    the build must unpack those tarballs, compile and finally extract the relevant artifacts into lib/Xorg. +Dev,+Build,+Sec
 (A) Implement FreeBSD version. +Dev,+Sys,+Evolvement
 x (A) Only recompile dependencies from kernel mode tests if '--clean' is passed. +Dev,+Sys,+Tests,+Build
 x (A) Make kernel mode tests infrastructure. +Dev,+Sys,+Tests
