@@ -23,6 +23,205 @@ function zacarias_rootdir() : result type string {
     result hefesto.sys.env("ZACARIAS_ROOTDIR");
 }
 
+local function build_libXorg() : result type int {
+    if (hefesto.sys.os_name() == "windows") {
+        hefesto.sys.echo("BUILD ERROR: Unable to build Xorg on Windows.\n");
+        result 1;
+    }
+
+    var Xorg_build_task type list;
+
+    var option type list;
+    if (isfile(hefesto.sys.make_path(zacarias_rootdir(), "lib/Xorg/libX11.a")) == 0) {
+        $option = hefesto.sys.get_option("libX11-pkg");
+        if ($option.count() == 0) {
+            hefesto.sys.echo("BUILD ERROR: --libX11-pkg option is missing.\n");
+            result 1;
+        }
+        $Xorg_build_task.add_item("do_libX11_build");
+    }
+
+    if (isfile(hefesto.sys.make_path(zacarias_rootdir(), "lib/Xorg/libXtst.a")) == 0) {
+        $option = hefesto.sys.get_option("libXtst-pkg");
+        if ($option.count() == 0) {
+            hefesto.sys.echo("BUILD ERROR: --libXtst-pkg option is missing.\n");
+            result 1;
+        }
+        $Xorg_build_task.add_item("do_libXtst_build");
+    }
+
+    if (isfile(hefesto.sys.make_path(zacarias_rootdir(), "lib/Xorg/libxcb.a")) == 0) {
+        $option = hefesto.sys.get_option("libxcb-pkg");
+        if ($option.count() == 0) {
+            hefesto.sys.echo("BUILD ERROR: --libxcb-pkg is missing.\n");
+            result 1;
+        }
+        $Xorg_build_task.add_item("do_libxcb_build");
+    }
+
+    if (isfile(hefesto.sys.make_path(zacarias_rootdir(), "lib/Xorg/libXext.a")) == 0) {
+        $option = hefesto.sys.get_option("libXext-pkg");
+        if ($option.count() == 0) {
+            hefesto.sys.echo("BUILD ERROR: --libXext-pkg is missing.\n");
+            result 1;
+        }
+        $Xorg_build_task.add_item("do_libXext_build");
+    }
+
+    if (isfile(hefesto.sys.make_path(zacarias_rootdir(), "lib/Xorg/libXdmcp.a")) == 0) {
+        $option = hefesto.sys.get_option("libXdmcp-pkg");
+        if ($option.count() == 0) {
+            hefesto.sys.echo("BUILD ERROR: --libXdmcp-pkg is missing.\n");
+            result 1;
+        }
+        $Xorg_build_task.add_item("do_libXdmcp_build");
+    }
+
+    if (isfile(hefesto.sys.make_path(zacarias_rootdir(), "lib/Xorg/libXau.a")) == 0) {
+        $option = hefesto.sys.get_option("libXau-pkg");
+        if ($option.count() == 0) {
+            hefesto.sys.echo("BUILD ERROR: --libXau-pkg is missing.\n");
+            result 1;
+        }
+        $Xorg_build_task.add_item("do_libXau_build");
+    }
+
+    if ($Xorg_build_task.count() == 0) {
+        # INFO(Rafael): All needed Xorg artifacts were found. There is no necessity
+        #               of running any build sub-task.
+        result 0;
+    }
+
+    if (has_tar() == 0) {
+        hefesto.sys.echo("SYSTEM SANITY CHECK FAILURE: you need tar in order to unpack Xorg's packages tarballs.\n");
+        result 1;
+    }
+
+    var oldcwd type string;
+    $oldcwd = hefesto.sys.pwd();
+
+    if (hefesto.sys.cd(zacarias_rootdir()) == 0) {
+        hefesto.sys.echo("BUILD ERROR: Unable to change to zacarias rootdir.\n");
+        result 1;
+    }
+
+    mktree("lib/Xorg/stage");
+
+    if (hefesto.sys.cd("lib/Xorg/stage") == 0) {
+        hefesto.sys.echo("BUILD ERROR: Unable to change to lib sub-directory.\n");
+        result 1;
+    }
+
+    var exit_code type int;
+    $exit_code = 0;
+
+    var x type int;
+    $x = 0;
+    while ($exit_code == 0 && $x < $Xorg_build_task.count()) {
+        var build_subtask type int;
+        $build_subtask = hefesto.sys.get_func_addr($Xorg_build_task.item($x));
+        if ($build_subtask == 0) {
+            hefesto.sys.echo("BUILD ERROR: Unknown Xorg build sub-task.\n");
+            $exit_code = 1;
+        } else {
+            $exit_code = hefesto.sys.call_func_addr($build_subtask);
+        }
+        $x = $x + 1;
+    }
+
+    hefesto.sys.cd("..");
+    hefesto.sys.run("rm -rf stage");
+
+    if ($exit_code != 0) {
+        hefesto.sys.cd("..");
+        hefesto.sys.run("rm -rf Xorg");
+    }
+
+    hefesto.sys.cd($oldcwd);
+
+    result $exit_code;
+}
+
+local function has_tar() : result type int {
+    result (hefesto.sys.run("tar --version >/dev/null 2>&1") == 0);
+}
+
+local function do_libX11_build() : result type int {
+    result do_metaXorg_build("libX11-pkg", "src/.libs/libX11.a", "libX11.a");
+}
+
+local function do_libXtst_build() : result type int {
+    result do_metaXorg_build("libXtst-pkg", "src/.libs/libXtst.a", "libXtst.a");
+}
+
+local function do_libxcb_build() : result type int {
+    result do_metaXorg_build("libxcb-pkg", "src/.libs/libxcb.a", "libxcb.a");
+}
+
+local function do_libXext_build() : result type int {
+    result do_metaXorg_build("libXext-pkg", "src/.libs/libXext.a", "libXext.a");
+}
+
+local function do_libXdmcp_build() : result type int {
+    result do_metaXorg_build("libXdmcp-pkg", ".libs/libXdmcp.a", "libXdmcp.a");
+}
+
+local function do_libXau_build() : result type int {
+    result do_metaXorg_build("libXau-pkg", ".libs/libXau.a", "libXau.a");
+}
+
+local function do_metaXorg_build(pkg_option type string, artifact_srcpath type string,
+                                 artifact_name type string) : result type int {
+    var option type list;
+    $option = hefesto.sys.get_option($pkg_option);
+    var filepath type string;
+    $filepath = $option.item(0);
+
+    if (unpack_tarball($filepath) != 0) {
+        hefesto.sys.echo("BUILD ERROR: Unable to unpack `" + $filepath + "`.\n");
+        result 1;
+    }
+
+    var dirname type string;
+    $dirname = filenamefrompath($filepath);
+    $dirname.replace("\\.tar\\..*$", "");
+
+    if (hefesto.sys.cd($dirname) == 0) {
+        hefesto.sys.echo("BUILD ERROR: Unable to find sub-directory `" + $dirname + "`.\n");
+        result 1;
+    }
+
+    var exit_code type int;
+    $exit_code = 0;
+
+    $exit_code = hefesto.sys.run("./configure --enable-static");
+
+    if ($exit_code == 0) {
+        $exit_code = hefesto.sys.run("make");
+        if ($exit_code == 0) {
+            var artifact_path type string;
+            $artifact_path = hefesto.sys.make_path(zacarias_rootdir(), "lib/Xorg/" + $artifact_name);
+            hefesto.sys.rm($artifact_path);
+            if (hefesto.sys.cp($artifact_srcpath, $artifact_path) != 1) {
+                hefesto.sys.echo("BUILD ERROR: Unable to copy `" + $artifact_path + "`.\n");
+                $exit_code = 1;
+            }
+        }
+    }
+
+    hefesto.sys.cd("..");
+    hefesto.sys.run("rm -rf " + $dirname);
+
+    result 0;
+}
+
+local function unpack_tarball(filepath type string) : result type int {
+    if ($filepath.match("\\.bz2")) {
+        result hefesto.sys.run("tar -xf " + $filepath);
+    }
+    result hefesto.sys.run("tar -xvf " + $filepath);
+}
+
 function mklocal(libname type string) : result type none {
     var func_addr type int;
 
