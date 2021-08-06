@@ -52,6 +52,33 @@ you@AdventureGalley:~/# cd zacarias/src
 you@AdventureGalley:~/zacarias/src# hefesto
 ```
 
+Due to library hooking mitigations, by default, ``Zacarias`` command line tool (``zc``) is static linked. In this way,
+at the first time you run ``Zacarias`` build it is necessary to build all ``Xorg`` dependencies used by ``zc``. Thus,
+if you want to follow using the default static linking you will need to download the following ``Xorg`` tarballs:
+``libX11``, ``libXau``, ``libXdmcp``, ``libXext``, ``libXtst`` and ``libxcb``. You need to watch the correct versions
+used on your system. Once downloaded all you should do is indicate to ``hefesto`` where those tarballs are located
+and it will built and copied into your ``Zacarias`` repo ``lib`` sub-directory, your system will not be changed.
+Follows the command line sample based on my own environment:
+
+```
+you@AdventureGalley:~/zacarias/src# hefesto --libX11-pkg=/tmp/libX11-1.6.3.tar.gz \
+> --libXtst-pkg=/tmp/libXtst-1.2.2.tar.gz --libxcb-pkg=/tmp/libxcb-1.11.tar.bz2 \
+> --libXext-pkg=/tmp/libXext-1.3.3.tar.gz --libXdcmp-pkg=/tmp/libXdcmp-1.1.1.tar.bz2 \
+> --libXau-pkg=/tmp/libXau-1.0.8.tar.bz2
+```
+
+You can find the related ``Xorg`` tarballs at: <https://www.x.org/releases/individual/lib> and
+<https://xcb.freedesktop.org/dist>.
+
+It will build the ``Xorg`` dependencies and after build ``Zacarias`` by linking its command line tool statically.
+
+Anyway, if you do not mind about library hooking, you can use shared linking by passing ``--disable-static`` to
+``Hefesto`` as follows:
+
+```
+you@AdvendureGalley:~/zacarias/src# hefesto --disable-static
+```
+
 It will build the device driver, the user-mode tool, run some testing and after a successful build you should
 run ``hefesto --install``. Once installed you will be able to start using ``Zacarias`` as your password manager.
 If you are new here it is time to start reading the [user's manual](https://github.com/rafael-santiago/zacarias/blob/master/doc/MANUAL.md).

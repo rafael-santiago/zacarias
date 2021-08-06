@@ -29,6 +29,23 @@ zc.prologue() {
     $cflags = hefesto.sys.get_option("cflags");
     $libraries = hefesto.sys.get_option("libraries");
     $ldflags = hefesto.sys.get_option("ldflags");
+    var option type list;
+    if (hefesto.sys.os_name() != "windows") {
+        $ldflags.add_item("-lX11");
+        $ldflags.add_item("-lXtst");
+        $option = hefesto.sys.get_option("disable-static");
+        if ($option.count() == 0) {
+            if (build("libXorg") != 0) {
+                hefesto.project.abort(1);
+            }
+            $libraries.add_item("../lib/Xorg");
+            $ldflags.add_item("-lxcb");
+            $ldflags.add_item("-lXext");
+            $ldflags.add_item("-lXdmcp");
+            $ldflags.add_item("-lXau");
+            $ldflags.add_item("-lpthread");
+        }
+    }
     var dirlist type list;
     $dirlist.add_item(".");
     $src = get_codes($dirlist, $deps);
