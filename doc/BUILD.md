@@ -56,7 +56,7 @@ Due to library hooking mitigations, by default, ``Zacarias`` command line tool (
 at the first time you run ``Zacarias`` build it is necessary to build all ``Xorg`` dependencies used by ``zc``. Thus,
 if you want to follow using the default static linking you will need to download the following ``Xorg`` tarballs:
 ``libX11``, ``libXau``, ``libXdmcp``, ``libXext``, ``libXtst`` and ``libxcb``. You need to watch the correct versions
-used on your system. Once downloaded all you should do is indicate to ``hefesto`` where those tarballs are located
+used on your system. Once downloaded all you should do is indicating to ``hefesto`` where those tarballs are located
 and they will built and copied into your ``Zacarias`` repo ``lib`` sub-directory, your system will not be changed.
 Follows the command line sample based on my own environment:
 
