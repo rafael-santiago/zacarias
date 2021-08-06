@@ -67,7 +67,7 @@ you@AdventureGalley:~/zacarias/src# hefesto --libX11-pkg=/tmp/libX11-1.6.3.tar.g
 > --libXau-pkg=/tmp/libXau-1.0.8.tar.bz2
 ```
 
-This command will build the ``Xorg`` dependencies and after build ``Zacarias`` by linking its command line tool statically.
+This command will build the ``Xorg`` dependencies and after building ``Zacarias`` by linking its command line tool statically.
 
 You can find the related ``Xorg`` tarballs at: <https://www.x.org/releases/individual/lib> and
 <https://xcb.freedesktop.org/dist>.
