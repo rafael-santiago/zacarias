@@ -20,6 +20,8 @@ Until now this tool features:
 
 - Password database I/O done from ``kernel-space`` context.
 
+- Command line tool static linked in order to mitigate library hooking.
+
 Until now you can use it on ``Linux`` (4.4.14 or above).
 
 - If you want to know how to build this tool take a look at [doc/BUILD.md](https://github.com/rafael-santiago/zacarias/blob/main/doc/BUILD.md).
