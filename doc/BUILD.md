@@ -79,7 +79,7 @@ Anyway, if you do not mind about library hooking, you can use shared linking by 
 you@AdvendureGalley:~/zacarias/src# hefesto --disable-static
 ```
 
-Independently of using static or shared linking on ``zc``. The whole build task will build the device driver,
+Independently of using static or shared linking on ``zc``, the whole build task will build the device driver,
 the user-mode tool, run some testing and after a successful build you should run ``hefesto --install``.
 Once installed you will be able to start using ``Zacarias`` as your password manager. If you are new here it
 is time to start reading the [user's manual](https://github.com/rafael-santiago/zacarias/blob/main/doc/MANUAL.md).
