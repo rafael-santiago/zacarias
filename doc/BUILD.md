@@ -13,7 +13,7 @@ build and install ``Hefesto``. There is no reason to be scared! ;)
 ## Setup your environment
 
 After putting ``Hefesto`` to work on you environment you need to clone another repository called ``Helios`` and
-then do the following:
+then do the following if you are on ``Linux``:
 
 ```
 you@AdventureGalley:~/# git clone https://github.com/rafael-santiago/helios
@@ -21,6 +21,23 @@ you@AdventureGalley:~/# cd helios
 you@AdventureGalley:~/helios# hefesto --install=lnx-module-toolset,forge-bootstrapper
 you@AdventureGalley:~/helios# cd ..
 you@AdventureGalley:~/# rm -rf helios
+```
+
+On ``FreeBSD``:
+
+```
+you@AdventureGalley:~/# git clone https://github.com/rafael-santiago/helios
+you@AdventureGalley:~/# cd helios
+you@AdventureGalley:~/helios# hefesto --install=freebsd-module-toolset,forge-bootstrapper
+you@AdventureGalley:~/helios# cd ..
+you@AdventureGalley:~/# rm -rf helios
+```
+
+Maybe ``xorgproto`` headers will be missing on your ``FreeBSD`` box, in this case you should try:
+
+```
+you@AdventureGalley:~/# pkg install -f xorgproto
+you@AdventureGalley:~/# pkg install xcb-proto
 ```
 
 Nice. Now your ``Hefesto`` copy knows how to build ``Zacarias`` device, user tool, tests and also how to install

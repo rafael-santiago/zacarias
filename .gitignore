@@ -8,8 +8,11 @@ src/*/test/bin/*
 *.mod.c
 */dev/.tmp_versions/*
 */dev/ctx/test/bin/*
+*/dev/ctx/test/o/*
 */dev/sec/test/bin/*
 */dev/kryptos/*
+*/dev/machine
+*/dev/x86
 *bin/*
 */test/kernel/.tmp_versions/*
 */test/kernel/ctx/*

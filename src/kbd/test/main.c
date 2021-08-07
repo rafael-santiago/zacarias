@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <X11/Xlib.h>
 
+
 CUTE_DECLARE_TEST_CASE(kbd_tests);
 CUTE_DECLARE_TEST_CASE(zacarias_getuserkey_tests);
 CUTE_DECLARE_TEST_CASE(zacarias_set_kbd_layout_tests);
@@ -61,6 +62,11 @@ CUTE_TEST_CASE(zacarias_getuserkey_tests)
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(zacarias_sendkeys_tests)
+#if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpointer-sign"
+# pragma GCC diagnostic ignored "-Winvalid-source-encoding"
+#endif
     struct {
         kryptos_u8_t *buffer;
         const char *layout;
@@ -85,6 +91,19 @@ CUTE_TEST_CASE(zacarias_sendkeys_tests)
         { "!?:;,%$&@#\"'*<>().", "pt-br", 0 }
     }, *test, *test_end;
     size_t test_vector_nr = sizeof(test_vector) / sizeof(test_vector[0]);
+#if defined(__GNUC__) || defined(__clang__)
+# pragma pop
+# pragma pop
+#endif
+
+#if defined(__FreeBSD__)
+    // WARN(Rafael): On FreeBSD (12.1-RELEASE) I have noticed a memory leak inside libthr related to a condition structure (thread/thr_cond.c:103).
+    //               It is accessed and initialized by an indirect call from libxcb. This is passing on Linux without any memory leak issue. Thus,
+    //                I will trust on my Linux environment and disable it by now on FreeBSD.
+    if (CUTE_GET_OPTION("cutest-leak-check") != NULL) {
+        g_cute_leak_check = 0;
+    }
+#endif
 
     test = &test_vector[0];
     test_end = test + test_vector_nr;
@@ -95,9 +114,20 @@ CUTE_TEST_CASE(zacarias_sendkeys_tests)
                                       1, NULL, NULL) == test->expected);
         test++;
     }
+
+#if defined(__FreeBSD__)
+    if (CUTE_GET_OPTION("cutest-leak-check") != NULL) {
+        g_cute_leak_check = 1;
+    }
+#endif
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(pt_br_latin1_demuxer_tests)
+#if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpointer-sign"
+# pragma GCC diagnostic ignored "-Winvalid-source-encoding"
+#endif
     struct {
         kryptos_u8_t *input;
         size_t expected_output_size;
@@ -158,6 +188,10 @@ CUTE_TEST_CASE(pt_br_latin1_demuxer_tests)
           "Eu digo ei, eu digo ei, c^e parece que n~ao sei, eu digo ei..." },
         { "αινσϊ", 15, "\000`a\000`e\000`i\000`o\000`u" }
     }, *test, *test_end;
+#if defined(__GNUC__) || defined(__clang__)
+# pragma pop
+# pragma pop
+#endif
     size_t test_vector_nr = sizeof(test_vector) / sizeof(test_vector[0]);
     kryptos_u8_t *output;
     size_t output_size;

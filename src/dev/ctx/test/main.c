@@ -20,6 +20,10 @@ CUTE_TEST_CASE(ctx_tests)
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(ctx_general_tests)
+#if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpointer-sign"
+#endif
     zacarias_profiles_ctx *profiles;
     struct {
         char *user;
@@ -101,4 +105,7 @@ CUTE_TEST_CASE(ctx_general_tests)
     }
 
     zacarias_profiles_ctx_deinit(profiles);
+#if defined(__GNUC__) || defined(__clang__)
+# pragma pop
+#endif
 CUTE_TEST_CASE_END

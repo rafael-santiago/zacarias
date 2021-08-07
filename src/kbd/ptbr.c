@@ -10,6 +10,12 @@
 #include <stdio.h>
 
 kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input_size, size_t *output_size) {
+#if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Winvalid-source-encoding"
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpointer-sign"
+#endif
     // INFO(Rafael): Sequences in form: "\000<shifted symbol>..." indicates that the shifted symbol will be typed without holding shift key.
     //               In other words, it will anulate the shift key press event. It will only force the key code lookup gets the key code by
     //               using the upper lookup table.
@@ -97,6 +103,10 @@ kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input
     }
 
     return output;
+#if defined(__GNUC__) || defined(__clang__)
+# pragma pop
+# pragma pop
+#endif
 }
 
 kryptos_u8_t pt_br_key_mapper(const kryptos_u8_t k, int *hold_sh) {

@@ -195,7 +195,7 @@ static kryptos_u8_t *zacarias_key_crunching(const char *user, const kryptos_u32_
                           (kryptos_u8_t *)user, user_size,
                           parallelism, (kryptos_u32_t)*key_size, memory_size_kb, iterations,
                           (kryptos_u8_t *)passwd, passwd_size,
-                          "zcr", 3);
+                          (kryptos_u8_t *)"zcr", 3);
 
     if (key == NULL) {
         *key_size = 0;

@@ -38,6 +38,12 @@ libzckbd-tests.prologue() {
     $ldflags = hefesto.sys.get_option("ldflags");
     var option type list;
     if (hefesto.sys.os_name() != "windows") {
+        if (isdir("/usr/local/include") != 0) {
+            $includes.add_item("/usr/local/include");
+        }
+        if (isdir("/usr/local/lib") != 0) {
+            $libraries.add_item("/usr/local/lib");
+        }
         $ldflags.add_item("-lX11");
         $ldflags.add_item("-lXtst");
         $option = hefesto.sys.get_option("disable-static");

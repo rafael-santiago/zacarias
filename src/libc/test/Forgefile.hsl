@@ -24,6 +24,10 @@ libc-tests.preloading() {
 }
 
 libc-tests.prologue() {
+    if (build("libcutest") != 0) {
+        hefesto.project.abort(1);
+    }
+
     $includes = hefesto.sys.get_option("includes");
     $cflags = hefesto.sys.get_option("cflags");
     $libraries = hefesto.sys.get_option("libraries");

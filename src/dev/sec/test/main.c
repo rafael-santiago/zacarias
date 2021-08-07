@@ -64,6 +64,10 @@ CUTE_TEST_CASE(zacarias_gen_userkey_tests)
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(plbuf_editor_tests)
+#if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpointer-sign"
+#endif
     kryptos_u8_t *plbuf = NULL;
     size_t plbuf_size = 0;
     struct test_ctx {
@@ -197,9 +201,16 @@ CUTE_TEST_CASE(plbuf_editor_tests)
     CUTE_ASSERT(plbuf_edit_passwd(plbuf, plbuf_size, "Greenfuzz", strlen("Greenfuzz"), &passwd_size) == NULL);
 
     kryptos_freeseg(plbuf, plbuf_size);
+#if defined(__GNUC__) || defined(__clang__)
+# pragma pop
+#endif
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(crypto_tests)
+#if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpointer-sign"
+#endif
     zacarias_profiles_ctx *profiles;
     kryptos_u8_t pwdb[ZC_STR_NR];
     kryptos_u8_t user[ZC_STR_NR];
@@ -276,4 +287,7 @@ CUTE_TEST_CASE(crypto_tests)
     CUTE_ASSERT(zacarias_setkey_pwdb(&profiles->head, "FOOBAR", 6, "boo", 3) != 0);
 
     zacarias_profiles_ctx_deinit(profiles);
+#if defined(__GNUC__) || defined(__clang__)
+# pragma pop
+#endif
 CUTE_TEST_CASE_END

@@ -547,7 +547,7 @@ static const kryptos_u8_t *findalias(const kryptos_u8_t *haystack, const kryptos
 }
 
 static kryptos_u8_t *random_plbuf_entry(size_t *size) {
-    static kryptos_u8_t *randcharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789=/<>.,%#@!*(){}[]+-\\";
+    static kryptos_u8_t *randcharset = (kryptos_u8_t *)"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789=/<>.,%#@!*(){}[]+-\\";
     static size_t randcharset_size = 82;
     kryptos_u8_t *entry, *ep, *ep_end;
 
