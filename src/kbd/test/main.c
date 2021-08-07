@@ -64,6 +64,8 @@ CUTE_TEST_CASE_END
 CUTE_TEST_CASE(zacarias_sendkeys_tests)
 #if defined(__GNUC__) || defined(__clang__)
 # pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpragmas"
+# pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wpointer-sign"
 # pragma GCC diagnostic ignored "-Winvalid-source-encoding"
 #endif
@@ -92,6 +94,7 @@ CUTE_TEST_CASE(zacarias_sendkeys_tests)
     }, *test, *test_end;
     size_t test_vector_nr = sizeof(test_vector) / sizeof(test_vector[0]);
 #if defined(__GNUC__) || defined(__clang__)
+# pragma pop
 # pragma pop
 # pragma pop
 #endif
@@ -124,6 +127,8 @@ CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(pt_br_latin1_demuxer_tests)
 #if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpragmas"
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wpointer-sign"
 # pragma GCC diagnostic ignored "-Winvalid-source-encoding"
@@ -189,6 +194,7 @@ CUTE_TEST_CASE(pt_br_latin1_demuxer_tests)
         { "αινσϊ", 15, "\000`a\000`e\000`i\000`o\000`u" }
     }, *test, *test_end;
 #if defined(__GNUC__) || defined(__clang__)
+# pragma pop
 # pragma pop
 # pragma pop
 #endif

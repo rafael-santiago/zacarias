@@ -12,6 +12,8 @@
 kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input_size, size_t *output_size) {
 #if defined(__GNUC__) || defined(__clang__)
 # pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wpragmas"
+# pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Winvalid-source-encoding"
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wpointer-sign"
@@ -104,6 +106,7 @@ kryptos_u8_t *pt_br_latin1_demuxer(const kryptos_u8_t *input, const size_t input
 
     return output;
 #if defined(__GNUC__) || defined(__clang__)
+# pragma pop
 # pragma pop
 # pragma pop
 #endif
