@@ -5,6 +5,7 @@
  * be found in the COPYING file.
  *
  */
+#include <actions.h>
 #include <defs/io.h>
 #include <defs/types.h>
 #include <defs/zc_dbg.h>
@@ -206,8 +207,7 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
         return EBUSY;
     }
 
-    if (d->alias == NULL || d->alias_size == 0 || d->pwdb_passwd == NULL || d->pwdb_passwd_size == 0 || d->user == NULL ||
-        d->user_size == 0) {
+    if (d->alias_size == 0 || d->pwdb_passwd_size == 0 || d->user_size == 0) {
         err = 0;
         d->status = kInvalidParams;
         ZC_DBG("invalid parameters.\n");
@@ -567,7 +567,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         return EBUSY;
     }
 
-    if (d->pwdb_path == NULL || d->user == NULL) {
+    if (d->pwdb_path_size == 0 || d->user_size == 0) {
         ZC_DBG("null d->pwdb_path and/or d->user.\n");
         goto zc_dev_act_attach_profile_epilogue;
     }
@@ -652,7 +652,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
 
     if (d->sessioned) {
         // INFO(Rafael): The user asked for a session passwd. We need to patch pwdb in memory in order to deliver it.
-        if (d->session_passwd_size == 0 || d->pwdb_passwd == NULL || d->pwdb_passwd_size == 0) {
+        if (d->session_passwd_size == 0 || d->pwdb_passwd_size == 0) {
             err = EINVAL;
             d->status = kInvalidParams;
             ZC_DBG("invalid parameters.\n");
@@ -696,8 +696,7 @@ int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
         return EBUSY;
     }
 
-    if (d->user == NULL || d->user_size == 0 ||
-        d->pwdb_passwd == NULL || d->pwdb_passwd_size == 0) {
+    if (d->user_size == 0 || d->pwdb_passwd_size == 0) {
         err = EINVAL;
         d->status = kInvalidParams;
         ZC_DBG("invalid parameters.\n");

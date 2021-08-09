@@ -377,6 +377,10 @@ plbuf_edit_shuffle_epilogue:
 int plbuf_edit_add(kryptos_u8_t **plbuf, size_t *plbuf_size,
                    const kryptos_u8_t *alias, const size_t alias_size,
                    const kryptos_u8_t *passwd, const size_t passwd_size) {
+#if defined(__FreeBSD__) && defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wcast-qual"
+#endif
     int err = 1;
     kryptos_u8_t *temp = NULL;
     size_t temp_size;
@@ -438,6 +442,10 @@ plbuf_edit_add_epilogue:
     kryptos_task_free(ktask, KRYPTOS_TASK_OUT);
 
     return err;
+
+#if defined(__FreeBSD___) && defined(__clang__)
+# pragma pop
+#endif
 }
 
 int plbuf_edit_del(kryptos_u8_t **plbuf, size_t *plbuf_size,

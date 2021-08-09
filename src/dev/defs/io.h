@@ -13,7 +13,8 @@
 #if defined(__linux__)
 # include <linux/ioctl.h>
 # include <linux/kernel.h>
-#elif defined(__FreeBSD__) || defined(__NetBSD__)
+#elif defined(__FreeBSD__)
+# include <sys/types.h>
 # include <sys/ioccom.h>
 #else
 # error Some code wanted.

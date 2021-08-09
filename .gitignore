@@ -13,6 +13,7 @@ src/*/test/bin/*
 */dev/kryptos/*
 */dev/machine
 */dev/x86
+*/dev/export_syms
 *bin/*
 */test/kernel/.tmp_versions/*
 */test/kernel/ctx/*

@@ -32,7 +32,37 @@ module_exit(finis);
 
 #elif defined(__FreeBSD__)
 
-#elif defined(__NetBSD__)
+#include <freebsd/cdev_init.h>
+#include <freebsd/cdev_deinit.h>
+#include <sys/param.h>
+#include <sys/module.h>
+#include <sys/kernel.h>
+#include <sys/conf.h>
+
+static int zacarias_modevent(module_t mod __unused, int event, void *arg __unused) {
+    int error = 0;
+
+    switch (event) {
+        case MOD_LOAD:
+            error = cdev_init();
+            break;
+
+        case MOD_QUIESCE:
+            break;
+
+        case MOD_UNLOAD:
+            error = cdev_deinit();
+            break;
+
+        default:
+            error = EOPNOTSUPP;
+            break;
+    }
+
+    return error;
+}
+
+DEV_MODULE(zacarias, zacarias_modevent, NULL);
 
 #else
 # error Some code wanted

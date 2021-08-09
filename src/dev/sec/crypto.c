@@ -166,6 +166,10 @@ zacarias_encrypt_pwdb_epilogue:
 
 static kryptos_u8_t *zacarias_key_crunching(const char *user, const kryptos_u32_t user_size,
                                             const kryptos_u8_t *passwd, const kryptos_u32_t passwd_size, size_t *key_size) {
+#if defined(__FreeBSD__) && defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wcast-qual"
+#endif
     kryptos_u32_t parallelism = 1, memory_size_kb = 512, iterations = 4;
     kryptos_u8_t *in = NULL, *key = NULL;
     size_t in_size;
@@ -208,6 +212,10 @@ static kryptos_u8_t *zacarias_key_crunching(const char *user, const kryptos_u32_
     }
 
     return key;
+
+#if defined(__FreeBSD__) && defined(__clang__)
+# pragma pop
+#endif
 }
 
 kryptos_u8_t *zacarias_gen_userkey(size_t *size) {
