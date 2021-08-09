@@ -7,6 +7,7 @@
  */
 #include <freebsd/cdev_deinit.h>
 #include <defs/types.h>
+#include <ctx/ctx.h>
 #include <sys/param.h>
 #include <sys/module.h>
 #include <sys/kernel.h>
@@ -21,6 +22,8 @@ int cdev_deinit(void) {
 
     cdev_mtx_deinit(&g_cdev()->lock);
     destroy_dev(g_cdev()->device);
+
+    zacarias_profiles_ctx_deinit(g_cdev()->profiles);
 
     uprintf("/dev/zacarias: Device Deinitialized.\n");
 

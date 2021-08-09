@@ -10,6 +10,7 @@
 #include <linux/cdev_open.h>
 #include <defs/types.h>
 #include <defs/io.h>
+#include <ctx/ctx.h>
 #include <linux/device.h>
 #include <linux/fs.h>
 #include <asm/segment.h>

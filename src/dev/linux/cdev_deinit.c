@@ -8,6 +8,7 @@
 #include <linux/cdev_deinit.h>
 #include <defs/types.h>
 #include <defs/io.h>
+#include <ctx/ctx.h>
 #include <linux/module.h>
 #include <linux/device.h>
 #include <linux/kernel.h>
@@ -19,5 +20,6 @@ void cdev_deinit(void) {
     class_unregister(g_cdev()->device_class);
     class_destroy(g_cdev()->device_class);
     unregister_chrdev(g_cdev()->major_nr, CDEVNAME);
+    zacarias_profiles_ctx_deinit(g_cdev()->profiles);
     printk(KERN_INFO "/dev/zacarias: Device deinitialized.\n");
 }
