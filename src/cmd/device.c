@@ -10,6 +10,9 @@
 #include <cmd/options.h>
 #if defined(__linux__)
 # include <sys/syscall.h>
+#elif defined(__FreeBSD__)
+# include <sys/param.h>
+# include <sys/linker.h>
 #endif
 #include <unistd.h>
 #include <fcntl.h>
@@ -60,11 +63,12 @@ int zc_device_help(void) {
 static int zc_device_install(void) {
     int err = EXIT_FAILURE;
     char *device_driver_path = NULL;
+
+    ZC_GET_OPTION_OR_DIE(device_driver_path, "device-driver-path", zc_device_install_epilogue);
+
 #if defined(__linux__)
     int fd = -1;
 # define init_linux_mod(fd) syscall(__NR_finit_module, fd, "", 0)
-    ZC_GET_OPTION_OR_DIE(device_driver_path, "device-driver-path", zc_device_install_epilogue);
-
     if ((fd = open(device_driver_path, O_RDONLY)) == -1) {
         fprintf(stderr, "ERROR: Unable to read module from '%s'.\n", device_driver_path);
         goto zc_device_install_epilogue;
@@ -78,6 +82,13 @@ static int zc_device_install(void) {
 
     close(fd);
 # undef init_linux_mod
+#elif defined(__FreeBSD__)
+    if (kldload(device_driver_path) == -1) {
+        fprintf(stderr, "ERROR: Whiling trying to install kernel module '%s'.\n", device_driver_path);
+        goto zc_device_install_epilogue;
+    } else {
+        err = EXIT_SUCCESS;
+    }
 #else
 # error Some code wanted.
 #endif
@@ -94,6 +105,16 @@ static int zc_device_uninstall(void) {
         fprintf(stderr, "ERROR: Unable to uninstall kernel module.\n");
     }
 # undef deinit_linux_mod
+#elif defined(__FreeBSD__)
+    int fd = kldfind("zacarias");
+    if (fd == -1) {
+        fprintf(stderr, "ERROR: Unable to find kernel module. There is nothing to unload.\n");
+        return EXIT_FAILURE;
+    }
+
+    if ((err = kldunload(fd)) != 0) {
+        fprintf(stderr, "ERROR: Unable to uninstall kernel module.\n");
+    }
 #else
 # error Some code wanted.
 #endif

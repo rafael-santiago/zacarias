@@ -25,8 +25,8 @@ zacarias.prologue() {
         $submodules.add_item("kbd");
         $submodules.add_item("dev/ctx");
         $submodules.add_item("dev/sec");
-        if (hefesto.sys.os_name() == "linux") {
-        #    hefesto.sys.os_name() == "freebsd") {
+        if (hefesto.sys.os_name() == "linux" ||
+            hefesto.sys.os_name() == "freebsd") {
             $submodules.add_item("dev");
             $submodules.add_item("test/kernel");
         }

@@ -22,10 +22,10 @@ int zc_attach(void) {
     size_t pwdb_path_size = 0;
     char *user = NULL;
     size_t user_size = 0;
-    unsigned char *pwdb_passwd[2] = { NULL, NULL };
-    size_t pwdb_passwd_size[2] = { 0, 0 };
-    unsigned char *session_passwd[2] = { NULL, NULL };
-    size_t session_passwd_size[2] = { 0, 0 };
+    unsigned char *pwdb_passwd[2];
+    size_t pwdb_passwd_size[2];
+    unsigned char *session_passwd[2];
+    size_t session_passwd_size[2];
     zc_device_status_t status;
     struct stat st;
     int do_init = zc_get_bool_option("init", 0);
@@ -34,6 +34,11 @@ int zc_attach(void) {
         err = errno;
         goto zc_attach_epilogue;
     }
+
+    pwdb_passwd[0] = pwdb_passwd[1] = NULL;
+    pwdb_passwd_size[0] = pwdb_passwd_size[1] = 0;
+    session_passwd[0] = session_passwd[1] = NULL;
+    session_passwd_size[0] = session_passwd_size[1] = 0;
 
     ZC_GET_OPTION_OR_DIE(pwdb_path, "pwdb", zc_attach_epilogue);
     pwdb_path_size = strlen(pwdb_path);

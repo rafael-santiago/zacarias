@@ -31,10 +31,6 @@ libzcsec-kernel-tests.prologue() {
     if (hefesto.sys.os_name() == "linux") {
         $includes.add_item("/usr/include");
         $cflags.add_item("-std=gnu99");
-    } else if (hefesto.sys.os_name() == "freebsd") {
-        $modname = $modname + ".ko";
-    } else if (hefesto.sys.os_name() == "netbsd") {
-        $modname = $modname + ".kmod";
     } else if (hefesto.sys.os_name() == "windows") {
         $modname = $modname + ".sys";
     }
@@ -65,6 +61,11 @@ local function runtests(modname type string) : result type int {
         $exit_code = hefesto.sys.run("insmod ./" + $modname + ".ko");
         if ($exit_code == 0) {
             hefesto.sys.run("rmmod libzcsec_kernel_tests");
+        }
+    } else if ($os_name == "freebsd") {
+        $exit_code = hefesto.sys.run("kldload ./" + $modname + ".ko");
+        if ($exit_code == 0) {
+            hefesto.sys.run("kldunload " + $modname);
         }
     }
     result $exit_code;

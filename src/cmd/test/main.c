@@ -78,6 +78,7 @@ CUTE_TEST_CASE(get_canonical_path_tests)
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "404/passwd", 10) == NULL);
 
     snprintf(input, sizeof(input) - 1, "%s/404/passwd", cwd);
+    printf("%s\n", result);
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, input, strlen(input)) == NULL);
 
     CUTE_ASSERT(mkdir("404", 0666) == EXIT_SUCCESS);
@@ -475,7 +476,7 @@ CUTE_TEST_CASE(attach_tests)
 
     CUTE_ASSERT(mkdir("tmp", 0666) == EXIT_SUCCESS);
     CUTE_ASSERT(chdir("tmp") == EXIT_SUCCESS);
-    snprintf(args, sizeof(args) - 1, "--pwdb=../passwd --user=rs", cwd);
+    snprintf(args, sizeof(args) - 1, "--pwdb=../passwd --user=rs");
     CUTE_ASSERT(zc("attach", args, "123mudar*\n") == EXIT_SUCCESS);
     CUTE_ASSERT(stat("../passwd", &st) == EXIT_SUCCESS);
     CUTE_ASSERT(chdir("..") == EXIT_SUCCESS);

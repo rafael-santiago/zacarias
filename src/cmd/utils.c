@@ -19,7 +19,9 @@ void del_scr_line(void) {
 }
 
 char prompt(const char *question, const char *options, const size_t options_size) {
-    char opt[2] = { 0 };
+    char opt[2];
+
+    opt[0] = opt[1] = 0;
 
     if (question == NULL || options == NULL || options_size == 0) {
         return 0;
@@ -47,17 +49,17 @@ char *get_canonical_path(char *dest, const size_t dest_size, const char *src, co
     }
 
     dest_p = dest;
+    memset(dest, 0, dest_size);
 
     if (strstr(src, "/") == NULL) {
         if (getcwd(dest, dest_size - 1) == NULL) {
             return NULL;
         }
         dest_p_end = dest + strlen(dest);
-        snprintf(dest_p_end, dest_p_end - dest - dest_size - 1, "/%s", src);
+        snprintf(dest_p_end, dest_size - (dest_p_end - dest) - 1, "/%s", src);
         return dest;
     }
 
-    memset(dest, 0, dest_size);
     dest_p_end = dest + dest_size;
 
     src_p = src;
@@ -87,7 +89,7 @@ char *get_canonical_path(char *dest, const size_t dest_size, const char *src, co
             memset(dest, 0, dest_size);
             return NULL;
         }
-        snprintf(dest_p, dest_p_end - dest_p - dest_size - 1, "%s", src_p_end);
+        snprintf(dest_p, dest_size - (dest_p_end - dest_p) - 1, "%s", src_p_end);
     }
 
     while (dest_p_end != dest_p && *dest_p_end != '/') {

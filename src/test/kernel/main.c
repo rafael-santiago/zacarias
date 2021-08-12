@@ -9,7 +9,9 @@
 #include <sec/crypto.h>
 #include <sec/plbuf_editor.h>
 #include <ctx/ctx.h>
-#include <string.h>
+#if defined(__linux__)
+# include <string.h>
+#endif
 
 KUTE_DECLARE_TEST_CASE(sec_tests);
 KUTE_DECLARE_TEST_CASE(crypto_tests);

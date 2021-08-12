@@ -21,3 +21,6 @@ src/*/test/bin/*
 */test/kernel/defs/*
 */test/kernel/kryptos/*
 */test/kernel/kutest.h
+*/test/kernel/export_syms
+*/test/kernel/x86
+*/test/kernel/machine
