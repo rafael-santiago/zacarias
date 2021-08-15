@@ -85,6 +85,7 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
         if (kern_readv(td, fd, &uio_ctx) != *buf_size) {
             *buf_size = 0;
             free(*buf, M_TEMP);
+            *buf = NULL;
         }
     }
 

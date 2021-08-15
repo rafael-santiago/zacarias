@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static int zcdev_ioctl(const int zcd, const int cmd, struct zc_devio_ctx *ioctx);
+static int zcdev_ioctl(const int zcd, const unsigned long cmd, struct zc_devio_ctx *ioctx);
 
 int zcdev_open(void) {
     int zcd = open("/dev/"CDEVNAME, O_RDWR);
@@ -238,7 +238,7 @@ void zcdev_perror(const zc_device_status_t status) {
     fprintf(stderr, "ERROR: %s.\n", gZacariasDeviceStatusVerbose[status]);
 }
 
-static int zcdev_ioctl(const int zcd, const int cmd, struct zc_devio_ctx *ioctx) {
+static int zcdev_ioctl(const int zcd, const unsigned long cmd, struct zc_devio_ctx *ioctx) {
     int ntry = 10, retval = ioctl(zcd, cmd, ioctx);
 
     while (retval == -1 && ntry-- > 0) {

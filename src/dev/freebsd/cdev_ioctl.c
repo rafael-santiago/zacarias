@@ -12,7 +12,7 @@
 #include <actions.h>
 
 int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __unused, struct thread *td __unused) {
-    struct zc_devio_ctx devio = { 0 }, *dev_p = &devio;
+    struct zc_devio_ctx *dev_p = NULL;
     int error = 0;
 
     if (data == NULL) {
@@ -20,10 +20,7 @@ int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __u
         goto cdev_ioctl_epilogue;
     }
 
-    if (kcpy(&devio, (struct zc_devio_ctx *)data, sizeof(struct zc_devio_ctx)) != 0) {
-        error = EFAULT;
-        goto cdev_ioctl_epilogue;
-    }
+    dev_p = (struct zc_devio_ctx *)data;
 
     switch (cmd) {
         case ZACARIAS_ATTACH_PROFILE:
@@ -48,13 +45,8 @@ int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __u
 
         default:
             ZC_DBG("Unknown command received.\n");
-            devio.status = kUnknownDeviceCommand;
+            dev_p->status = kUnknownDeviceCommand;
             break;
-    }
-
-    if (ucpy((void *)data, &devio, sizeof(struct zc_devio_ctx)) != 0) {
-        ZC_DBG("ucpy() has failed.\n");
-        error = EFAULT;
     }
 
 cdev_ioctl_epilogue:
