@@ -44,6 +44,8 @@ zc.prologue() {
             $ldflags.add_item("-lXdmcp");
             $ldflags.add_item("-lXau");
             $ldflags.add_item("-lpthread");
+        }  else if (isdir("/usr/local/lib")) {
+            $libraries.add_item("/usr/local/lib");
         }
     }
     var dirlist type list;
