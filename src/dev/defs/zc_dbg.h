@@ -9,7 +9,7 @@
 #define ZACARIAS_DEV_DEFS_ZC_DBG_H 1
 
 // INFO(Rafael): Define the following macro if you want to log some debug info into device driver.
-#define ZACARIAS_DEBUG_INFO 1
+#undef ZACARIAS_DEBUG_INFO
 
 #if defined(__linux__)
 # if defined(ZACARIAS_DEBUG_INFO)

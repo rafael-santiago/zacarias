@@ -10,8 +10,9 @@
 #include <defs/zc_dbg.h>
 #include <defs/types.h>
 #include <actions.h>
+#include <sys/proc.h>
 
-int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __unused, struct thread *td __unused) {
+int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __unused, struct thread *td) {
     struct zc_devio_ctx *dev_p = NULL;
     int error = 0;
 
@@ -25,7 +26,6 @@ int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __u
     switch (cmd) {
         case ZACARIAS_ATTACH_PROFILE:
             error = zc_dev_act_attach_profile(&dev_p);
-            ZC_DBG("-- attach error = %d %d\n", error, dev_p->status);
             break;
 
         case ZACARIAS_DETACH_PROFILE:
@@ -49,6 +49,8 @@ int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __u
             dev_p->status = kUnknownDeviceCommand;
             break;
     }
+
+    td->td_retval[0] = error;
 
 cdev_ioctl_epilogue:
 

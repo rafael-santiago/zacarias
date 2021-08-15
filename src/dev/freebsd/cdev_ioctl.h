@@ -13,6 +13,6 @@
 #include <sys/kernel.h>
 #include <sys/systm.h>
 
-int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __unused, struct thread *td __unused);
+int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __unused, struct thread *td);
 
 #endif

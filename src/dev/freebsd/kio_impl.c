@@ -82,7 +82,7 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
         uio_ctx.uio_segflg = UIO_SYSSPACE;
         uio_ctx.uio_offset = 0;
         uio_ctx.uio_resid = iovec_ctx.iov_len;
-        if (kern_readv(td, fd, &uio_ctx) != *buf_size) {
+        if (kern_readv(td, fd, &uio_ctx) != 0) {
             *buf_size = 0;
             free(*buf, M_TEMP);
             *buf = NULL;
