@@ -25,7 +25,7 @@ int cdev_deinit(void) {
 
     zacarias_profiles_ctx_deinit(g_cdev()->profiles);
 
-    uprintf("/dev/zacarias: Device Deinitialized.\n");
+    log(-1, "/dev/zacarias: Device Deinitialized.\n");
 
     return 0;
 }

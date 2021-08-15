@@ -19,7 +19,7 @@
 # endif
 #elif defined(__FreeBSD__)
 # if defined(ZACARIAS_DEBUG_INFO)
-#  define ZC_DBG(message, ...) uprintf("[%s:%d] " message, __FILE__, __LINE__, ## __VA_ARGS__)
+#  define ZC_DBG(message, ...) log(-1, "[%s:%d] " message, __FILE__, __LINE__, ## __VA_ARGS__)
 # else
 #  define ZC_DBG(message, ...)
 # endif

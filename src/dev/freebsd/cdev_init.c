@@ -39,7 +39,7 @@ int cdev_init(void) {
     }
 
     if (error == 0) {
-        uprintf("/dev/zacarias: Device Initialized.\n");
+        log(-1, "/dev/zacarias: Device Initialized.\n");
     }
 
     return error;
