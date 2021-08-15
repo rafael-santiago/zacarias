@@ -25,6 +25,7 @@ int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __u
     switch (cmd) {
         case ZACARIAS_ATTACH_PROFILE:
             error = zc_dev_act_attach_profile(&dev_p);
+            ZC_DBG("-- attach error = %d %d\n", error, dev_p->status);
             break;
 
         case ZACARIAS_DETACH_PROFILE:

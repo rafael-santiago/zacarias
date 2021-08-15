@@ -42,7 +42,7 @@ int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
         kern_close(td, fd);
     }
 
-    return (bc == buf_size) ? 0 : 1;
+    return bc;
 #pragma pop
 #pragma pop
 }

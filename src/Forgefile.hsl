@@ -22,7 +22,7 @@ zacarias.prologue() {
 
     if ($submodules.count() == 0) {
         $submodules.add_item("libc");
-        #$submodules.add_item("kbd");
+        $submodules.add_item("kbd");
         $submodules.add_item("dev/ctx");
         $submodules.add_item("dev/sec");
         if (hefesto.sys.os_name() == "linux" ||

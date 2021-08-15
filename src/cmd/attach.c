@@ -109,7 +109,7 @@ int zc_attach(void) {
                        user, user_size,
                        pwdb_passwd[0], pwdb_passwd_size[0],
                        session_passwd[0], session_passwd_size[0], do_init, &status);
-
+    printf("err=%d status=%d\n", err, status);
 
     if (err == EXIT_SUCCESS && status != kNoError) {
         zcdev_perror(status);
