@@ -89,7 +89,7 @@ I believe that the cornerstone of mitigating this kind of problem is avoiding li
 command line tool tries to use only ``libc`` conveniences on ``unix-like`` but it also uses ``Xorg`` seeking
 to be useful to users of ``X`` based environments, too.
 
-When stealing info from aplications, the most target API functions are the memory handling function from
+When stealing info from aplications, the most targeted API functions are the memory handling functions from
 ``libc``: ``memcpy``, ``memset`` and ``memcmp``. When coding ``Zacarias`` you must avoid using directly
 those functions. You must not avoid call it from your code, but you need to take the care of passing
 to the compiler the following macros:
@@ -99,11 +99,11 @@ to the compiler the following macros:
 - ``-Dmemcmp=zc_memcmp``
 
 It will replace all original memory handling functions to our local implementations located at ``src/libc``.
-Here our ``memcmp`` (``zc_memcmp``) is also time attack resilient.
+Here, our ``memcmp`` (``zc_memcmp``) is also time attack resilient.
 
 Anyway, if you have added a new sub-module into ``src`` (e.g.: ``src/passwd_mind_transfer_proto``). All
-your calls to ``memcpy``, ``memset`` or ``memcmp`` will be replaced automatically because your build
-inherited the compiler macros present within top-level src directory ``.ivk``.
+your calls to ``memcpy``, ``memset`` or ``memcmp`` will be replaced automatically because your build has
+inherited the compiler macros present within top-level ``src`` directory invocation file (``.ivk``).
 
 However, it is necessary to add the following lines into the epilogue function of your build project:
 
@@ -117,10 +117,10 @@ However, it is necessary to add the following lines into the epilogue function o
     }
 ```
 
-The build function ``has_bad_funcs`` will look for "bad functions" (to our context) into your code and
-break the build when at least one be found.
+The build function ``has_bad_funcs`` will look for "bad functions" (to our context) into your code by
+breaking the build when at least one be found.
 
-The file ``BAD_FUNCS`` is located at the top-level src directory. The function ``has_bad_funcs`` is
+The file ``BAD_FUNCS`` is located at the top-level ``src`` directory. The function ``has_bad_funcs`` is
 defined within ``build/toolsets.hsl``.
 
 Doing it at least the most critical parts will be mitigated but what to do about ``ioctl`` and ``Xorg``
@@ -129,8 +129,8 @@ by zacarias. Due to it, by default you will demanded to indicate some ``Xorg`` l
 first-time ``Zacarias'`` build.
 
 The bad functions searching is an important mitigation for people that still prefer using a ``shared link``
-version of ``Zacarias``. Thus, seeking to give some minimal level of password leaking mitigation for those
-people we need to include it into our build task.
+version of ``Zacarias``. It will allow us to give some minimal level of password leaking mitigation for those
+people, too.
 
 # Use inclusive and neutral language
 
