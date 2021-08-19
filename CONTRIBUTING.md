@@ -80,6 +80,58 @@ C Defines:
 - while macros must be in lower case;
 - while a DSL statement must be in upper case;
 
+# Avoiding libc hook
+
+Since ``zacarias`` is a password manager we need to mitigate as much as possible chances of password leakage.
+I believe that the cornerstone of mitigating this kind of problem is avoiding library hooking.
+
+``Zacarias`` try to reduce its dependencies in order to be able to control it in a more sane way. The ``zc``
+command line tool tries to use only ``libc`` conveniences on ``unix-like`` but it also uses ``Xorg`` seeking
+to be useful to users of ``X`` based environments, too.
+
+When stealing info from aplications, the most target API functions are the memory handling function from
+``libc``: ``memcpy``, ``memset`` and ``memcmp``. When coding ``Zacarias`` you must avoid using directly
+those functions. You must not avoid call it from your code, but you need to take the care of passing
+to the compiler the following macros:
+
+- ``-Dmemcpy=zc_memcpy``
+- ``-Dmemset=zc_memset``
+- ``-Dmemcmp=zc_memcmp``
+
+It will replace all original memory handling functions to our local implementations located at ``src/libc``.
+Here our ``memcmp`` (``zc_memcmp``) is also time attack resilient.
+
+Anyway, if you have added a new sub-module into ``src`` (e.g.: ``src/passwd_mind_transfer_proto``). All
+your calls to ``memcpy``, ``memset`` or ``memcmp`` will be replaced automatically because your build
+inherited the compiler macros present within top-level src directory ``.ivk``.
+
+However, it is necessary to add the following lines into the epilogue function of your build project:
+
+```
+    ...
+    if (hefesto.sys.last_forge_result() == 0) {
+        if (has_bad_funcs(hefesto.sys.lines_from_file("../BAD_FUNCS", ".*"), $src, $includes, $cflags)) {
+            hefesto.project.abort(1);
+        }
+        ...
+    }
+```
+
+The build function ``has_bad_funcs`` will look for "bad functions" (to our context) into your code and
+break the build when at least one be found.
+
+The file ``BAD_FUNCS`` is located at the top-level src directory. The function ``has_bad_funcs`` is
+defined within ``build/toolsets.hsl``.
+
+Doing it at least the most critical parts will be mitigated but what to do about ``ioctl`` and ``Xorg``
+functions? You should use ``static link``. By the way, this is the default linking configuration used
+by zacarias. Due to it, by default you will demanded to indicate some ``Xorg`` library tarballs at the
+first-time ``Zacarias'`` build.
+
+The bad functions searching is an important mitigation for people that still prefer using a ``shared link``
+version of ``Zacarias``. Thus, seeking to give some minimal level of password leaking mitigation for those
+people we need to include it into our build task.
+
 # Use inclusive and neutral language
 
 Always try to use inclusive and neutral words/terms in your source codes and documentations. If you find something that
