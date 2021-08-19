@@ -1,4 +1,4 @@
-# Zacarias - user's guide
+# ![Z](https://github.com/rafael-santiago/zacarias/blob/main/etc/zc_logo.png "Zacarias password manager") Zacarias - user's guide
 
 ``Zacarias`` is a password manager with ``kernel-mode`` powers. It is suitable for "paranoid" users that do not like
 the idea of having a simple user application encrypting/decrypting your passwords sit on ``user-space`` sending their
@@ -26,7 +26,7 @@ a leak, this leak will be less harmful.
 ## How Zacarias works
 
 ``Zacarias`` works based on a char device. Through this char device users can store and access their passwords by requesting
-it by using the ``zc`` command line tool. The zacarias binary package is divided into two parts: 
+it by using the ``zc`` command line tool. The zacarias binary package is divided into two parts:
 ``zacarias.ko`` (the device driver) and ``zc`` (the user device interaction tool).
 
 [``Back``](#contents)

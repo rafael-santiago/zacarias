@@ -48,7 +48,7 @@ local function do_install() : result type int {
     var src_artifacts type list;
     var dest_artifacts type list;
 
-    if (hefesto.sys.os_name() == "linux") {
+    if (hefesto.sys.os_name() == "linux" || hefesto.sys.os_name() == "freebsd") {
         $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "dev/zacarias.ko"));
         $dest_artifacts.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
 
@@ -124,7 +124,8 @@ local function do_uninstall() : result type int {
 
     var to_burn type list;
 
-    if (hefesto.sys.os_name() == "linux") {
+    if (hefesto.sys.os_name() == "linux" ||
+        hefesto.sys.os_name() == "freebsd") {
         $to_burn.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
         $to_burn.add_item("/usr/local/share/zacarias/bin/zc");
         $to_burn.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
