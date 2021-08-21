@@ -1,6 +1,31 @@
 # CONTRIBUTING
 
-The best way of knowing what could be done is reading 'doc/todo.txt'.
+The best way of knowing what could be done is reading ``doc/todo.txt``.
+
+This is the general ``Zacarias`` repository layout:
+
+- ``doc``: Documentation.
+    - ``man``: Unix zc's tool Unix manpage.
+- ``etc``: Miscellaneous stuff.
+- ``src``: All source code must be placed somewhere under this sub-directory.
+    - ``build``: Build scripts.
+    - ``cmd``: zc's command line tool source code.
+        - ``test``: zc's unit tests and system tests.
+    - ``dev``: Zacarias' device driver source code.
+        - ``ctx``: Codes related to Zacarias structures used in or shared from kernel.
+            - ``test``: Prelimiar user-mode unit tests from those kernel mode structures.
+        - ``defs``: Definitions related to the device driver.
+        - ``freebsd``: Platform dependent parts of device driver for FreeBSD.
+        - ``linux``: Platform dependent parts of device driver for Linux.
+        - ``sec``: Codes directly related to security.
+            - ``test``: Prelimiar user-mode unit tests from those security related stuff.
+    - ``kbd``: Codes related to keyboard management.
+        - ``test``: Unit tests for all keyboard management stuff.
+    - ``lib``: Libraries artifacts and git-submodules are built/hosted here.
+    - ``libc``: Codes related to our minimal libc replacements.
+        - ``test``: Unit tests for our minimal libc replacements.
+    - ``test``: Some general tests.
+        - ``kernel``: Kernel-mode unit tests for essential parts used into device driver.
 
 # Code style
 
