@@ -87,11 +87,11 @@ I believe that the cornerstone of mitigating this kind of problem is avoiding li
 
 ``Zacarias`` try to reduce its dependencies in order to be able to control it in a more sane way. The ``zc``
 command line tool tries to use only ``libc`` conveniences on ``unix-like`` but it also uses ``Xorg`` seeking
-to be useful to users of ``X`` based environments, too.
+to be also useful to users of ``X`` based environments.
 
-When stealing info from aplications, the most targeted API functions are the memory handling functions from
+When stealing info from applications, the most targeted API functions are the memory handling functions from
 ``libc``: ``memcpy``, ``memset`` and ``memcmp``. When coding ``Zacarias`` you must avoid using directly
-those functions. You must not avoid call it from your code, but you need to take the care of passing
+those functions. You must not avoid calling it from your code, but you need to take the care of passing
 to the compiler the following macros:
 
 - ``-Dmemcpy=zc_memcpy``
@@ -100,6 +100,10 @@ to the compiler the following macros:
 
 It will replace all original memory handling functions to our local implementations located at ``src/libc``.
 Here, our ``memcmp`` (``zc_memcmp``) is also time attack resilient.
+
+When using ``zc_memcpy``, ``zc_memset`` or ``zc_memcmp`` your code will depend on ``libzcc``. Thus you
+need to indicate ``-lzcc`` when building your tests or even another final artifact besides ``zc``
+command line tool.
 
 Anyway, if you have added a new sub-module into ``src`` (e.g.: ``src/passwd_mind_transfer_proto``). All
 your calls to ``memcpy``, ``memset`` or ``memcmp`` will be replaced automatically because your build has
@@ -125,7 +129,7 @@ defined within ``build/toolsets.hsl``.
 
 Doing it at least the most critical parts will be mitigated but what to do about ``ioctl`` and ``Xorg``
 functions? You should use ``static link``. By the way, this is the default linking configuration used
-by zacarias. Due to it, by default you will demanded to indicate some ``Xorg`` library tarballs at the
+by ``Zacarias``. Due to it by default you will demanded to indicate some ``Xorg`` library tarballs at the
 first-time ``Zacarias'`` build.
 
 The bad functions searching is an important mitigation for people that still prefer using a ``shared link``
