@@ -27,3 +27,5 @@ Until now you can use it on ``Linux`` (4.4.14 or above) and ``FreeBSD`` (12.1 bu
 - If you want to know how to build this tool take a look at [doc/BUILD.md](https://github.com/rafael-santiago/zacarias/blob/main/doc/BUILD.md).
 
 - If you want to learn more details about it take a look at [doc/MANUAL.md](https://github.com/rafael-santiago/zacarias/blob/main/doc/MANUAL.md).
+
+- If you have new ideas and are up to some contribution take a look at [CONTRIBUTING.md](https://github.com/rafael-santiago/zacarias/blob/main/CONTRIBUTING.md) and thank you!
