@@ -34,9 +34,9 @@ been taking into consideration here.
 
 - Replace tabs with spaces. Each tab must be equal to eight spaces. Use one tab to indent to the next level;
 - Avoid trailing spaces at the end of the lines;
-- Comments are good;
 - Your work must exist without having you around. Code it to make your ideas self-sufficient just by reading
   your code and its documentation let by you since the last time you have been working here;
+- Comments are good;
 - Tests are awesome (use the testing library used by the project <https://github.com/rafael-santiago/cutest>);
 - If your test need a human to drive it, sorry but your test is a kind of crap;
 - We like C (C, not C with sugar or anything similar);
