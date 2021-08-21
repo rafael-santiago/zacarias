@@ -32,7 +32,8 @@ This is the general ``Zacarias`` repository layout:
 There is no absolute truth (a.k.a unicorn) when talking about code style, anyway, this is the truth that I have
 been taking into consideration here.
 
-- Replace tabs with spaces. Each tab must be equal to eight spaces.
+- Replace tabs with spaces. Each tab must be equal to eight spaces. Use one tab to indent to the next level;
+- Avoid trailing spaces at the end of the lines;
 - Comments are good;
 - Tests are awesome (use the testing library used by the project <https://github.com/rafael-santiago/cutest>);
 - If your test need a human to drive it, sorry but your test is a kind of crap;
