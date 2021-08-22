@@ -48,6 +48,9 @@ zc.prologue() {
             $libraries.add_item("/usr/local/lib");
         }
     }
+    if (build("libaegis") != 0) {
+        hefesto.project.abort(1);
+    }
     var dirlist type list;
     $dirlist.add_item(".");
     $src = get_codes($dirlist, $deps);
