@@ -12,6 +12,7 @@
 #include <aegis.h>
 #if defined(__unix__)
 # include <unistd.h>
+# include <termios.h>
 # if defined(_POSIX_MEMLOCK)
 #  include <sys/mman.h>
 # endif
@@ -20,6 +21,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+#if defined(__unix__)
+static struct termios gOriginal_tty_conf;
+#endif
 
 static int gZcExiting = 0;
 
@@ -35,6 +40,10 @@ int zc_exec(const int argc, char **argv) {
     zc_cmd_func zc_cmd = zc_unk_command;
     struct zc_exec_table_ctx *zetc, *zetc_end;
     char *cmd_name = "";
+
+#if defined(__unix__)
+    tcgetattr(STDOUT_FILENO, &gOriginal_tty_conf);
+#endif
 
     signal(SIGINT, zc_sigint_watchdog);
     signal(SIGTERM, zc_sigint_watchdog);
@@ -91,6 +100,9 @@ static int zc_should_disable_dbg_gorgon(void *args) {
 }
 
 static void zc_on_debugger_attachment(void *args) {
+#if defined(__unix__)
+    tcsetattr(STDOUT_FILENO, TCSAFLUSH, &gOriginal_tty_conf);
+#endif
     fprintf(stderr, "ALERT: A debugger attachment was detect. Aborting execution to avoid more damage.\n"
                     "       Do not execute zc again until make sure that your system is clean.\n");
     exit(EXIT_FAILURE);

@@ -395,7 +395,7 @@ local function build_libaegis() : result type int {
         $oldcwd = hefesto.sys.pwd();
         $libpath = hefesto.sys.make_path($rootdir, "lib/aegis/src");
         if (hefesto.sys.cd($libpath)) {
-            $exit_code = hefesto.sys.run("hefesto");
+            $exit_code = hefesto.sys.run("hefesto --no-tests");
         }
         hefesto.sys.cd($oldcwd);
     }
