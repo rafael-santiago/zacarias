@@ -1,4 +1,3 @@
-(A) Add anti-debugging mitigation. +User,+SecurityHardening
 x (A) Only recompile dependencies from kernel mode tests if '--clean' is passed. +Dev,+Sys,+Tests,+Build
 x (A) Make kernel mode tests infrastructure. +Dev,+Sys,+Tests
 x (A) Inspect memory corruption present at plbuf_edit_shuffle. dev/sec/test is breaking randomly. +Dev,+Test,+BugHunting
@@ -41,3 +40,4 @@ x (A) Have the possibility of static linking xorg dependencies thus chances of l
       User should indicate the proper packages of libX11, libXau, libXdmcp, libXext, libXtst and libxcb,
       the build must unpack those tarballs, compile and finally extract the relevant artifacts into lib/Xorg. +Dev,+Build,+Sec
 x (A) Implement FreeBSD version. +Dev,+Sys,+Evolvement
+x (A) Add anti-debugging mitigation. +User,+SecurityHardening

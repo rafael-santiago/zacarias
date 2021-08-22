@@ -22,6 +22,8 @@ Until now this tool features:
 
 - User command line tool static linked in order to mitigate library hooking.
 
+- Anti-debugging mechanism to mitigate/alert data leaking.
+
 Until now you can use it on ``Linux`` (4.4.14 or above) and ``FreeBSD`` (12.1 but I believe that with lower versions it will work, too).
 
 - If you want to know how to build this tool take a look at [doc/BUILD.md](https://github.com/rafael-santiago/zacarias/blob/main/doc/BUILD.md).
