@@ -40,6 +40,7 @@ int zc_exec(const int argc, char **argv) {
     zc_cmd_func zc_cmd = zc_unk_command;
     struct zc_exec_table_ctx *zetc, *zetc_end;
     char *cmd_name = "";
+    char buf[1];
 
 #if defined(__unix__)
     tcgetattr(STDOUT_FILENO, &gOriginal_tty_conf);
@@ -57,6 +58,11 @@ int zc_exec(const int argc, char **argv) {
         fprintf(stderr, "ERROR: Unable to set anti-debugging mechanism.\n");
         return EXIT_FAILURE;
     }
+
+#if defined(__unix__)
+    // INFO(Rafael): A kind of no operation only used to trigger syscall tracing before any sensitve stuff.
+    usleep(1);
+#endif
 
 #if defined(__unix__) && defined(_POSIX_MEMLOCK)
     if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {

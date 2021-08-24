@@ -13,8 +13,10 @@
 #include <string.h>
 
 static int zc(const char *command, const char *args, const char *keyboard_data);
+static int traced_zc(const char *command, const char *args, const char *keyboard_data);
 static int zacarias_install(void);
 static int zacarias_uninstall(void);
+static int can_run_syscall_tracing_tests(void);
 
 CUTE_DECLARE_TEST_CASE(cmd_tests);
 CUTE_DECLARE_TEST_CASE(get_canonical_path_tests);
@@ -26,6 +28,7 @@ CUTE_DECLARE_TEST_CASE(password_add_tests);
 CUTE_DECLARE_TEST_CASE(password_del_tests);
 CUTE_DECLARE_TEST_CASE(password_get_tests);
 CUTE_DECLARE_TEST_CASE(regular_using_tests);
+CUTE_DECLARE_TEST_CASE(syscall_tracing_mitigation_tests);
 
 CUTE_MAIN(cmd_tests);
 
@@ -42,6 +45,33 @@ CUTE_TEST_CASE(cmd_tests)
         CUTE_RUN_TEST(regular_using_tests);
     } else {
         fprintf(stdout, "WARN: regular_using_tests skipped.\n");
+    }
+    CUTE_RUN_TEST(syscall_tracing_mitigation_tests);
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(syscall_tracing_mitigation_tests)
+    if (can_run_syscall_tracing_tests()) {
+        remove("passwd");
+        zc("device", "uninstall", NULL);
+        CUTE_ASSERT(zc("device",
+                       "install --device-driver-path=../../dev/zacarias.ko", NULL) == EXIT_SUCCESS);
+        CUTE_ASSERT(zc("attach", "--user=rs --pwdb=passwd --init", "1234mudar\n1234mudar\n") == EXIT_SUCCESS);
+        CUTE_ASSERT(zc("password", "add --user=rs --alias=syscall_tr@test.com",
+                       "1234mudar\n123\n123\n") == EXIT_SUCCESS);
+
+        CUTE_ASSERT(traced_zc("password",
+                              "get --user=rs --alias=syscall_tr@test.com", "1234mudar\n") != EXIT_SUCCESS);
+
+        CUTE_ASSERT(zc("detach", "--user=rs", "1234mudar\n") == EXIT_SUCCESS);
+
+        CUTE_ASSERT(traced_zc("attach", "--user=rs --pwdb=passwd", "1234mudar\n") != EXIT_SUCCESS);
+
+        CUTE_ASSERT(zc("device", "uninstall", NULL) == EXIT_SUCCESS);
+        remove("passwd");
+        remove("out.txt");
+    } else {
+        fprintf(stdout, "WARN: your system does not have any syscall "
+                        "tracing capabilities. This tests was skipped.\n");
     }
 CUTE_TEST_CASE_END
 
@@ -564,6 +594,49 @@ static int zc(const char *command, const char *args, const char *keyboard_data) 
     return exit_code;
 }
 
+static int traced_zc(const char *command, const char *args, const char *keyboard_data) {
+    const char zc_binary[] = "bin/zc";
+    const char systr_cmd[] =
+#if defined(__linux__)
+        "strace -o out.txt";
+#elif defined(__FreeBSD__)
+        "truss -o out.txt";
+#endif
+    char command_line[4096];
+    FILE *fp;
+    int exit_code = EXIT_FAILURE;
+    char *kbd_input = "";
+    struct stat st;
+    char backbuf[4096] = "";
+
+    do {
+        if (strlen(backbuf) > 4000) {
+            break;
+        }
+        strcat(backbuf, "../");
+        snprintf(command_line, sizeof(command_line) - 1, "%s%s", backbuf, zc_binary);
+    } while (stat(command_line, &st) != EXIT_SUCCESS);
+
+    if (keyboard_data != NULL) {
+        fp = fopen(".keybd_data", "wb");
+        if (fp == NULL) {
+            return EXIT_FAILURE;
+        }
+        fprintf(fp, "%s", keyboard_data);
+        fclose(fp);
+        kbd_input = "< .keybd_data";
+    }
+
+    snprintf(command_line, sizeof(command_line) - 1, "%s %s%s %s %s %s",
+             systr_cmd, backbuf, zc_binary, command, (args != NULL) ? args : "", kbd_input);
+
+    exit_code = system(command_line);
+
+    remove(".keybd_data");
+
+    return exit_code;
+}
+
 static int zacarias_install(void) {
 #if defined(__unix__)
     const char zacarias_lkm[] = "../../dev/zacarias.ko";
@@ -578,4 +651,14 @@ static int zacarias_install(void) {
 
 static int zacarias_uninstall(void) {
     return zc("device", "uninstall", NULL);
+}
+
+static int can_run_syscall_tracing_tests(void) {
+    const char *cmdline =
+#if defined(__linux__)
+        "strace -V >/dev/null 2>&1";
+#elif defined(__FreeBSD__)
+        "truss --version >/dev/null 2>&1";
+#endif
+    return (system(cmdline) == 0);
 }

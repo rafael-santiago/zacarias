@@ -41,3 +41,4 @@ x (A) Have the possibility of static linking xorg dependencies thus chances of l
       the build must unpack those tarballs, compile and finally extract the relevant artifacts into lib/Xorg. +Dev,+Build,+Sec
 x (A) Implement FreeBSD version. +Dev,+Sys,+Evolvement
 x (A) Add anti-debugging mitigation. +User,+SecurityHardening
+x (A) Create syscall tracing system test. +User,+Test
