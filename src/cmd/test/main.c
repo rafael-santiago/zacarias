@@ -72,7 +72,7 @@ CUTE_TEST_CASE(syscall_tracing_mitigation_tests)
         memset(buf, 0, sizeof(buf));
         fread(buf, 1, sizeof(buf) - 1, fp);
         fclose(fp);
-        CUTE_ASSERT(strstr(buf, "123mudar") == NULL);
+        CUTE_ASSERT(strstr(buf, "1234mudar") == NULL);
 #endif
 
         CUTE_ASSERT(zc("detach", "--user=rs", "1234mudar\n") == EXIT_SUCCESS);
@@ -87,7 +87,7 @@ CUTE_TEST_CASE(syscall_tracing_mitigation_tests)
         memset(buf, 0, sizeof(buf));
         fread(buf, 1, sizeof(buf) - 1, fp);
         fclose(fp);
-        CUTE_ASSERT(strstr(buf, "123mudar") == NULL);
+        CUTE_ASSERT(strstr(buf, "1234mudar") == NULL);
 #endif
 
         CUTE_ASSERT(zc("device", "uninstall", NULL) == EXIT_SUCCESS);
