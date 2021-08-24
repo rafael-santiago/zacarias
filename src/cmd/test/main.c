@@ -50,6 +50,8 @@ CUTE_TEST_CASE(cmd_tests)
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(syscall_tracing_mitigation_tests)
+    FILE *fp = NULL;
+    char buf[4096];
     if (can_run_syscall_tracing_tests()) {
         remove("passwd");
         zc("device", "uninstall", NULL);
@@ -59,12 +61,34 @@ CUTE_TEST_CASE(syscall_tracing_mitigation_tests)
         CUTE_ASSERT(zc("password", "add --user=rs --alias=syscall_tr@test.com",
                        "1234mudar\n123\n123\n") == EXIT_SUCCESS);
 
+#if defined(__linux__)
         CUTE_ASSERT(traced_zc("password",
                               "get --user=rs --alias=syscall_tr@test.com", "1234mudar\n") != EXIT_SUCCESS);
+#elif defined(__FreeBSD__)
+        CUTE_ASSERT(traced_zc("password",
+                              "get --user=rs --alias=syscall_tr@test.com", "1234mudar\n") == EXIT_SUCCESS);
+        fp = fopen("out.txt", "rb");
+        CUTE_ASSERT(fp != NULL);
+        memset(buf, 0, sizeof(buf));
+        fread(buf, 1, sizeof(buf) - 1, fp);
+        fclose(fp);
+        CUTE_ASSERT(strstr(buf, "123mudar") == NULL);
+#endif
 
         CUTE_ASSERT(zc("detach", "--user=rs", "1234mudar\n") == EXIT_SUCCESS);
 
+#if defined(__linux__)
         CUTE_ASSERT(traced_zc("attach", "--user=rs --pwdb=passwd", "1234mudar\n") != EXIT_SUCCESS);
+#elif defined(__FreeBSD__)
+        CUTE_ASSERT(traced_zc("password",
+                              "get --user=rs --alias=syscall_tr@test.com", "1234mudar\n") == EXIT_SUCCESS);
+        fp = fopen("out.txt", "rb");
+        CUTE_ASSERT(fp != NULL);
+        memset(buf, 0, sizeof(buf));
+        fread(buf, 1, sizeof(buf) - 1, fp);
+        fclose(fp);
+        CUTE_ASSERT(strstr(buf, "123mudar") == NULL);
+#endif
 
         CUTE_ASSERT(zc("device", "uninstall", NULL) == EXIT_SUCCESS);
         remove("passwd");
@@ -658,7 +682,7 @@ static int can_run_syscall_tracing_tests(void) {
 #if defined(__linux__)
         "strace -V >/dev/null 2>&1";
 #elif defined(__FreeBSD__)
-        "truss --version >/dev/null 2>&1";
+        "truss truss >/dev/null 2>&1";
 #endif
     return (system(cmdline) == 0);
 }
