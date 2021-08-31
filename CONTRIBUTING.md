@@ -15,8 +15,8 @@ This is the general ``Zacarias`` repository layout:
         - ``ctx``: Codes related to Zacarias structures used in or shared from kernel.
             - ``test``: Prelimiar user-mode unit tests from those kernel mode structures.
         - ``defs``: Definitions related to the device driver.
-        - ``freebsd``: Platform dependent parts of device driver for FreeBSD.
-        - ``linux``: Platform dependent parts of device driver for Linux.
+        - ``freebsd``: Platform dependent parts of the device driver for FreeBSD.
+        - ``linux``: Platform dependent parts of the device driver for Linux.
         - ``sec``: Codes directly related to security.
             - ``test``: Prelimiar user-mode unit tests from those security related stuff.
     - ``kbd``: Codes related to keyboard management.
@@ -97,7 +97,7 @@ When commenting some code use the following format:
 Static functions even being static must be prototyped at the beginning of the implementation file.
 
 Avoid using double quotes when including files in C implementation stuff (local includes). Headers
-and implemenation files should be relative to the toplevel src subdirectory.
+and implemenation files should be relative to the top-level src sub-directory.
 
 Gotos are ok if it always move forward but never ever backward.
 
@@ -168,7 +168,7 @@ people, too.
 # Use inclusive and neutral language
 
 Always try to use inclusive and neutral words/terms in your source codes and documentations. If you find something that
-for you seems to be not so correct, please let me known by opening an issue and suggesting improvements. Thank you in
+for you seems to be not so correct, please let me know by opening an issue and suggesting improvements. Thank you in
 advance.
 
 In general avoid use colors to name what should be "good" or "bad". Outdated terms such as ``whitelist``/``blacklist``
