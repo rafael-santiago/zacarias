@@ -9,10 +9,12 @@
 #include <cmd/types.h>
 #include <cmd/options.h>
 #include <kryptos_memory.h>
+#include <kryptos_random.h>
 #include <aegis.h>
 #if defined(__unix__)
 # include <unistd.h>
 # include <termios.h>
+# include <fcntl.h>
 # if defined(_POSIX_MEMLOCK)
 #  include <sys/mman.h>
 # endif
@@ -35,6 +37,10 @@ static int zc_should_disable_dbg_gorgon(void *args);
 static void zc_on_debugger_attachment(void *args);
 
 static void zc_sigint_watchdog(int signo);
+
+#if defined(__unix__)
+static void zc_tr_abait(void);
+#endif
 
 int zc_exec(const int argc, char **argv) {
     zc_cmd_func zc_cmd = zc_unk_command;
@@ -61,7 +67,7 @@ int zc_exec(const int argc, char **argv) {
 
 #if defined(__unix__)
     // INFO(Rafael): A kind of no operation only used to trigger syscall tracing before any sensitve stuff.
-    usleep(50);
+    zc_tr_abait();
 #endif
 
 #if defined(__unix__) && defined(_POSIX_MEMLOCK)
@@ -117,3 +123,26 @@ static void zc_on_debugger_attachment(void *args) {
 static void zc_sigint_watchdog(int signo) {
     gZcExiting = 1;
 }
+
+#if defined(__unix__)
+void zc_tr_abait(void) {
+    int fd = -1;
+    size_t times_nr = 1, t;
+    size_t bytes_nr = 0;
+    char buf[256];
+    if ((fd = open("/dev/urandom", O_RDONLY)) == -1) {
+        fprintf(stderr, "ALERT: zc_tr_abait() has failed.\n"
+                        "       It is a little suspicious, better to abort execution here.\n");
+        exit(1);
+    }
+    while ((t = kryptos_unbiased_rand_mod_u8(10)) == 0)
+        ;
+    for (t = 0; t < times_nr; t++) {
+        while((bytes_nr = kryptos_unbiased_rand_mod_u8(50)) == 0)
+            ;
+        read(fd, buf, bytes_nr);
+        usleep(50);
+    }
+    close(fd);
+}
+#endif
