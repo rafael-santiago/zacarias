@@ -84,7 +84,7 @@ static int zc_device_install(void) {
 # undef init_linux_mod
 #elif defined(__FreeBSD__)
     if (kldload(device_driver_path) == -1) {
-        fprintf(stderr, "ERROR: Whiling trying to install kernel module '%s'.\n", device_driver_path);
+        fprintf(stderr, "ERROR: While trying to install kernel module '%s'.\n", device_driver_path);
         goto zc_device_install_epilogue;
     } else {
         err = EXIT_SUCCESS;
