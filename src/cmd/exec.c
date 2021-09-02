@@ -61,7 +61,7 @@ int zc_exec(const int argc, char **argv) {
 
 #if defined(__unix__)
     // INFO(Rafael): A kind of no operation only used to trigger syscall tracing before any sensitve stuff.
-    usleep(1);
+    usleep(50);
 #endif
 
 #if defined(__unix__) && defined(_POSIX_MEMLOCK)
