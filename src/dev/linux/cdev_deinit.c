@@ -14,12 +14,14 @@
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <linux/unistd.h>
+#include <linux/cdev.h>
 
-void cdev_deinit(void) {
-    device_destroy(g_cdev()->device_class, MKDEV(g_cdev()->major_nr, 0));
-    class_unregister(g_cdev()->device_class);
+void zcdev_deinit(void) {
+    cdev_del(&g_cdev()->c_dev);
+    device_destroy(g_cdev()->device_class, g_cdev()->first);
     class_destroy(g_cdev()->device_class);
-    unregister_chrdev(g_cdev()->major_nr, CDEVNAME);
+    unregister_chrdev_region(g_cdev()->first, 1);
+
     zacarias_profiles_ctx_deinit(g_cdev()->profiles);
     printk(KERN_INFO "/dev/zacarias: Device deinitialized.\n");
 }

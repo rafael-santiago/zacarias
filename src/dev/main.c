@@ -20,11 +20,11 @@ MODULE_DESCRIPTION("Zacarias password manager char device");
 MODULE_VERSION(ZACARIAS_DEV_VERSION);
 
 static int __init ini(void) {
-    return cdev_init();
+    return zcdev_init();
 }
 
 static void __exit finis(void) {
-    cdev_deinit();
+    zcdev_deinit();
 }
 
 module_init(ini);

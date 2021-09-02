@@ -9,6 +9,7 @@
 #define ZACARIAS_DEV_DEFS_TYPES_H 1
 
 # if defined(__linux__)
+#  include <linux/cdev.h>
 #  include <linux/mutex.h>
    typedef struct mutex cdev_mtx;
 #  define cdev_mtx_init(m) mutex_init((m))
@@ -39,7 +40,8 @@ struct cdev_ctx {
 # if defined(__linux__)
     int major_nr;
     struct class *device_class;
-    struct device *device;
+    dev_t first;
+    struct cdev c_dev;
 # elif defined(__FreeBSD__)
     struct cdev *device;
 # endif

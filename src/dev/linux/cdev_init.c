@@ -16,6 +16,7 @@
 #include <asm/segment.h>
 #include <asm/uaccess.h>
 #include <linux/buffer_head.h>
+#include <linux/cdev.h>
 
 static struct file_operations fops = {
     .owner = THIS_MODULE,
@@ -23,16 +24,17 @@ static struct file_operations fops = {
     .unlocked_ioctl = cdev_ioctl,
 };
 
-int cdev_init(void) {
+int zcdev_init(void) {
+    int ret = -1;
+    struct device *device = NULL;
+
     cdev_mtx_init(&g_cdev()->lock);
 
     zacarias_profiles_ctx_init(g_cdev()->profiles);
 
-    g_cdev()->major_nr = register_chrdev(0, CDEVNAME, &fops);
-
-    if (g_cdev()->major_nr < 0) {
+    if ((ret = alloc_chrdev_region(&g_cdev()->first, 0, 1, CDEVNAME)) < 0) {
         printk(KERN_INFO "/dev/zacarias: Error during cdev registration.\n");
-        return g_cdev()->major_nr;
+        return ret;
     }
 
     g_cdev()->device_class = class_create(THIS_MODULE, CDEVCLASS);
@@ -43,13 +45,21 @@ int cdev_init(void) {
         return PTR_ERR(g_cdev()->device_class);
     }
 
-    g_cdev()->device = device_create(g_cdev()->device_class, NULL, MKDEV(g_cdev()->major_nr, 0), NULL, CDEVNAME);
+    device = device_create(g_cdev()->device_class, NULL, g_cdev()->first, NULL, CDEVNAME);
 
-    if (IS_ERR(g_cdev()->device)) {
+    if (IS_ERR(device)) {
         class_destroy(g_cdev()->device_class);
         unregister_chrdev(g_cdev()->major_nr, CDEVNAME);
         printk(KERN_INFO "/dev/zacarias: Device file creation failure.\n");
-        return PTR_ERR(g_cdev()->device);
+        return PTR_ERR(device);
+    }
+
+    cdev_init(&g_cdev()->c_dev, &fops);
+
+    if ((ret = cdev_add(&g_cdev()->c_dev, g_cdev()->first, 1)) < 0) {
+        device_destroy(g_cdev()->device_class, g_cdev()->first);
+        class_destroy(g_cdev()->device_class);
+        unregister_chrdev_region(g_cdev()->first, 1);
     }
 
     printk(KERN_INFO "/dev/zacarias: Device initialized.\n");
