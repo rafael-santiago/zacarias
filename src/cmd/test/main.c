@@ -27,6 +27,7 @@ CUTE_DECLARE_TEST_CASE(detach_tests);
 CUTE_DECLARE_TEST_CASE(password_add_tests);
 CUTE_DECLARE_TEST_CASE(password_del_tests);
 CUTE_DECLARE_TEST_CASE(password_get_tests);
+CUTE_DECLARE_TEST_CASE(device_install_uninstall_stressing_tests);
 CUTE_DECLARE_TEST_CASE(regular_using_tests);
 CUTE_DECLARE_TEST_CASE(syscall_tracing_mitigation_tests);
 
@@ -42,11 +43,30 @@ CUTE_TEST_CASE(cmd_tests)
     CUTE_RUN_TEST(password_del_tests);
     CUTE_RUN_TEST(password_get_tests);
     if (CUTE_GET_OPTION("quick-tests") == NULL) {
+        CUTE_RUN_TEST(device_install_uninstall_stressing_tests);
         CUTE_RUN_TEST(regular_using_tests);
     } else {
+        fprintf(stdout, "WARN: device_install_uninstall_stressing_tests skipped.\n");
         fprintf(stdout, "WARN: regular_using_tests skipped.\n");
     }
     CUTE_RUN_TEST(syscall_tracing_mitigation_tests);
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(device_install_uninstall_stressing_tests)
+    // INFO(Rafael): An important regression testing for Linux device.
+    //               Since char device creation on Linux is everything except simple,
+    //               there was a bug on it that was causing failures when attempting
+    //               many insmod/rmmods. Now it is being done correctly according to
+    //               the new but (still complicated) way. Anyway, executing it on
+    //               FreeBSD will no hurt.
+    const size_t attempts_nr = 10000;
+    size_t a;
+    for (a = 0; a < attempts_nr; a++) {
+        printf("%.0f%% completed...\r", ((float)a / (float)attempts_nr) * 100);
+        CUTE_ASSERT(zc("device", "install --device-driver-path=../../dev/zacarias.ko", NULL) == EXIT_SUCCESS);
+        CUTE_ASSERT(zc("device", "uninstall", NULL) == EXIT_SUCCESS);
+    }
+    printf("                            \r");
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(syscall_tracing_mitigation_tests)
