@@ -1,14 +1,14 @@
 # ![Z](https://github.com/rafael-santiago/zacarias/blob/main/etc/zc_logo.png "Zacarias password manager") Zacarias - user's guide
 
-``Zacarias`` is a password manager with ``kernel-mode`` powers. It is suitable for "paranoid" users that do not like
-the idea of having a simple user application encrypting/decrypting your passwords sit on ``user-space`` sending their
-passwords to clipboard. A simple user application that can be accessible from other applications or even easily debugged,
+``Zacarias`` is a password manager with ``kernel-mode`` powers. It is suitable for users concerned about secrecy. People that
+do not like the idea of having a simple user application encrypting/decrypting your passwords sit on ``user-space`` sending
+their passwords to clipboard. A simple user application that can be accessible from other applications or even easily debugged,
 probed, logged, hooked, swapped out from memory etc. You prefer mitigating those issues by letting ``kernel`` takes the control
-during some critical parts of your passwords management.
+during some critical parts of your passwords management process.
 
-As you may know the name ``Zacarias`` means ``the Lord recalled``. ``Lord`` here relates to the ``kernel`` of your operating
-system. Only it will access directly your password database, never ever the ``user-space`` portion. In this sense if we got
-a leak, this leak will be less harmful.
+As you may know the name ``Zacarias`` means ``the Lord recalled``, ``the Lord remembers``. ``Lord`` here relates to the
+``kernel`` of your operating system. Only it will access directly your password database, never ever the ``user-space`` portion.
+In this sense, if we got a leak, this leak will be less harmful.
 
 ## Contents
 - [How Zacarias works](#how-zacarias-works)
@@ -27,7 +27,9 @@ a leak, this leak will be less harmful.
 
 ``Zacarias`` works based on a char device. Through this char device users can store and access their passwords by requesting
 it by using the ``zc`` command line tool. The zacarias binary package is divided into two parts:
-``zacarias.ko`` (the device driver) and ``zc`` (the user device interaction tool).
+
+    1. ``zacarias.ko`` (the device driver)
+    2. ``zc`` (the user device interaction tool).
 
 [``Back``](#contents)
 
@@ -67,16 +69,15 @@ After unloading any previously loaded sessioned profile will be lost but all its
 
 ## The zc tool
 
-The ``zc`` tool provides the channel between the user and the ``kernel-mode`` portion of this password manager.
-
+The ``zc`` tool provides the channel between the user and the ``kernel-mode`` portion of this password management paradigm.
 This tool only can work properly with a previously well-loaded device driver on your [system](#installing-zacarias-device).
 
 [``Back``](#contents)
 
 ### Attaching your profile
 
-When you attach your profile you are informing to ``Zacarias`` device driver who are you and where to find your passwords
-(where your password database are stored in).
+When you attach your profile you are informing to ``Zacarias`` device driver who you are and where to find your passwords
+(where your password database is stored in).
 
 This can be done by using the following command:
 
@@ -94,10 +95,12 @@ you@AdventureGalley:~/# zc attach --user=kidd --pwdb=/kidd/stuff/kidd.pwdb --ini
 ```
 
 After running this command a general password will be asked and confirmed. An important detail here is that from now on you
-need to remember your informed user name (filled in ``--user`` option) otherwise the profile loading will fail.
+need to remember your informed user name (filled in ``--user`` option) otherwise the profile loading will always fail
+during an attachment.
 
-The password database path informed by using ``--pwdb`` option can be relative without problem. Its content is about ``PEM``
-authenticated data by using ``AES-256/GCM``.
+The password database path informed by using ``--pwdb`` option can be relative without problem.
+
+Its content is about ``PEM`` authenticated data by using ``AES-256/GCM``.
 
 [``Back``](#contents)
 
@@ -141,7 +144,7 @@ Maybe you are thinking about how a device driver based password manager would be
 the user. Well, the idea here is avoid spreading those secrets across the system.
 
 The found way was simulate the password typing. So you inform ``Zacarias`` device about what password you are looking for,
-it will get the password, give you a timeout to positioning your cursor focus where this password must be put and abracadabra.
+it will get the password, give you a timeout to position your cursor focus where this password must be put and abracadabra.
 
 You can do it by using the command ``password`` and its sub-command ``get``. This sub-command need the following information:
 
@@ -160,7 +163,7 @@ It will ask your general PWDB password. Being it well authenticated you will get
 
 ### Detaching your profile
 
-It is pointless to let your profile attached in ``Zacarias`` device if you are not actually using it or will be for a long
+It is pointless to let your profile attached in ``Zacarias`` device if you are not actually using it or you will be for a long
 time during your session without using any password authentication. Remember that the idea is reducing disclosure, leaking etc.
 You have to help by doing your part, too. In this case, you should detach your profile:
 
@@ -177,11 +180,11 @@ It will ask your PWDB password. Being it well-authenticated your profile will be
 Maybe you can see the necessity of informing the general PWDB password as a weak point into the workflow. If you want to avoid
 as much as possible the necessity of informing this critical data you could give sessioned profiles a try.
 
-A sessioned profile is a profile that at the moment of its attachement a session password is configured. Once configured any
+A sessioned profile is a profile that at the moment of its attachment a session password is configured. Once configured any
 ``password get`` command will only requires this temporary password instead of the general one. However, bearmind if you want
-to add or delete passwords from your PWDB, the two passwords will be needed (the general and the session password).
+to add or delete passwords from your PWDB, the two passwords will be required (the general and the session password).
 
-Attach a sessioned profile is straightforward:
+Attaching a sessioned profile is straightforward:
 
 ```
 you@AdventureGalley:~/# zc attach --user=kidd --pwdb=kidd.pwdb --sessioned
