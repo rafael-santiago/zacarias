@@ -43,7 +43,5 @@ data loss etc. The software is provided with no warranty.
 **Remark**: I do not provide pre-builts, if you have found any pre-built of this software somewhere, I **do not** endorse it.
 
 **Last but not least**: The code is open and auditable and it always will be. I believe this is the best paradigm
-for certain information security software. In this way it can be useful, loyal and ethical as much as possible
-with for the users. By the way, it should be the core intention behind any information security software. Anyone
-with disposition, knowledge and concerned about privacy is encouraged to join this project by reviewing,
-escrutinizing, proposing and always improving it on.
+for certain information security software. Anyone with disposition, knowledge and concerned about privacy is
+encouraged to join this project by reviewing, escrutinizing, proposing and always improving it on.
