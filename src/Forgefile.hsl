@@ -15,6 +15,14 @@ var exit_code type int;
 project zacarias : toolset "no-tool-any-set" : $exit_code;
 
 zacarias.prologue() {
+    var supp_platforms type list;
+    $supp_platforms = hefesto.sys.lines_from_file("SUPPORTED_PLATFORMS", hefesto.sys.os_name());
+    if ($supp_platforms.count() == 0) {
+        hefesto.sys.echo("ERROR: " + hefesto.sys.os_name() + " is not currently supported.\n" + 
+                         "       If you think it should be what about opening an issue asking for " +
+                         "at <https://github.com/rafael-santiago/zacarias/issues>.\n");
+        hefesto.project.abort(1);
+    }
     hefesto.sys.setenv("ZACARIAS_ROOTDIR", hefesto.sys.pwd());
     installer();
     var submodules type list;
@@ -25,11 +33,8 @@ zacarias.prologue() {
         $submodules.add_item("kbd");
         $submodules.add_item("dev/ctx");
         $submodules.add_item("dev/sec");
-        if (hefesto.sys.os_name() == "linux" ||
-            hefesto.sys.os_name() == "freebsd") {
-            $submodules.add_item("dev");
-            $submodules.add_item("test/kernel");
-        }
+        $submodules.add_item("dev");
+        $submodules.add_item("test/kernel");
         $submodules.add_item("cmd");
     }
 
