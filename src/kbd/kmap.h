@@ -8,6 +8,8 @@
 #ifndef ZACARIAS_KMAP_H
 #define ZACARIAS_KMAP_H 1
 
+#if defined(__unix__)
+
 #include <kryptos.h>
 #include <kbd/ptbr.h>
 
@@ -32,5 +34,7 @@ static zacarias_kmap_t gZacariasKmap[] = {
 static size_t gZacariasKmapNr = sizeof(gZacariasKmap) / sizeof(gZacariasKmap[0]);
 
 extern zacarias_kbd_layout *gZacariasCurrKbdLayout;
+
+#endif // defined(__unix__)
 
 #endif

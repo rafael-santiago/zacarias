@@ -5,6 +5,8 @@
  * be found in the COPYING file.
  *
  */
+#if defined(__unix__)
+
 #include <kbd/ptbr.h>
 #include <string.h>
 #include <stdio.h>
@@ -409,3 +411,5 @@ kryptos_u8_t pt_br_key_mapper(const kryptos_u8_t k, int *hold_sh) {
             return 0;
     }
 }
+
+#endif

@@ -5,6 +5,10 @@
  * be found in the COPYING file.
  *
  */
+#if defined(__unix__)
+
 #include <kbd/kmap.h>
 
 zacarias_kbd_layout *gZacariasCurrKbdLayout = NULL;
+
+#endif
