@@ -274,10 +274,26 @@ local function mklocal_kutest() : result type none {
     hefesto.sys.cp($src, "kutest.h");
 }
 
+local function is_unix_env() : result type int {
+    var is type int;
+    $is = (hefesto.sys.run("uname -s >.uname-out") == 0);
+    hefesto.sys.rm(".uname-out");
+    result $is;
+}
+
 local function do_mklocal(src type string, dest type string) : result type none {
-    hefesto.sys.run("rm -rf " + $dest);
-    hefesto.sys.run("mkdir " + $dest);
-    hefesto.sys.run("cp " + $src + "/*.[ch] " + $dest);
+    if (is_unix_env()) {
+        hefesto.sys.run("rm -rf " + $dest);
+        hefesto.sys.run("mkdir " + $dest);
+        hefesto.sys.run("cp " + $src + "/*.[ch] " + $dest);
+    } else if (hefesto.sys.os_name() == "windows") {
+        $src.replace("/", "\\");
+        $dest.replace("/", "\\");
+        hefesto.sys.run("rmdir /q /s " + $dest);
+        hefesto.sys.run("mkdir " + $dest);
+        hefesto.sys.run("copy " + $src + "\\*.c " + $dest);
+        hefesto.sys.run("copy " + $src + "\\*.h " + $dest);
+    }
 }
 
 function is_clean_build() : result type int {

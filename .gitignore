@@ -16,6 +16,8 @@ src/*/test/bin/*
 */dev/x64
 */dev/export_syms
 */dev/zacarias.inf
+*/dev/Debug/*
+*/dev/Release/*
 *bin/*
 */test/kernel/.tmp_versions/*
 */test/kernel/ctx/*
