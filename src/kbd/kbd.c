@@ -11,18 +11,18 @@
 #include <stdio.h>
 #if !defined(_WIN32)
 # include <termios.h>
-#include <signal.h>
-#include <unistd.h>
-#include <kbd/kmap.h>
-#include <X11/Xlib.h>
-#include <X11/extensions/XTest.h>
-#include <X11/keysym.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
+# include <unistd.h>
+# include <kbd/kmap.h>
+# include <X11/Xlib.h>
+# include <X11/extensions/XTest.h>
+# include <X11/keysym.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <sys/ioctl.h>
 #else
 # include <windows.h>
 #endif
+#include <signal.h>
 
 #if !defined(_WIN32)
 static struct termios old, new;
@@ -38,7 +38,6 @@ static void getuserkey_sigint_watchdog(int signo);
 
 #if defined(__unix__)
 static int zacarias_tty_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs, void (*cancel_callout)(void *), void *cancel_callout_args);
-#endif
 
 int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs, void (*cancel_callout)(void *), void *cancel_callout_args) {
     kryptos_u8_t *input = NULL, *ip = NULL, *ip_end = NULL;
@@ -195,6 +194,86 @@ static int zacarias_tty_sendkeys(const kryptos_u8_t *buffer, const size_t buffer
     return (!g_abort_kbd_rw) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
+#elif defined(_WIN32)
+
+int zacarias_sendkeys(const kryptos_u8_t *buffer, const size_t buffer_size, const unsigned int timeout_in_secs, void (*cancel_callout)(void *), void *cancel_callout_args) {
+    const kryptos_u8_t *bp = NULL;
+    const kryptos_u8_t *bp_end = NULL;
+    HKL keybd_layout = 0;
+    INPUT k_in = { 0 };
+    int state = 0;
+    SHORT vk = 0;
+    UINT vkey = 0;
+    int shifted = 0;
+
+    if (buffer == NULL || buffer_size == 0) {
+        return EXIT_FAILURE;
+    }
+
+    keybd_layout = GetKeyboardLayout(0);
+
+    bp = buffer;
+    bp_end = bp + buffer_size;
+
+    k_in.type = INPUT_KEYBOARD;
+
+    Sleep(timeout_in_secs * 1000);
+
+    while (bp != bp_end) {
+        vk = VkKeyScanEx(*bp, keybd_layout);
+        vkey = MapVirtualKey(LOBYTE(vk), 0);
+        shifted = HIBYTE(vk);
+
+        // INFO(Rafael): Let's avoid consume heap on allocating all
+        //               keyboard events required by the input buffer.
+        for (state = 0; state < 4; state++) {
+            switch (state) {
+                case 0: // INFO(Rafael): Shift key pressing (if necessary).
+                    if (shifted) {
+                        k_in.ki.dwFlags = KEYEVENTF_SCANCODE;
+                        k_in.ki.wScan = MapVirtualKey(VK_LSHIFT, 0);
+                    }
+                    break;
+
+                case 1: // INFO(Rafael): Key pressing.
+                    k_in.ki.dwFlags = (isalpha(*bp) || isdigit(*bp)) ? KEYEVENTF_SCANCODE : KEYEVENTF_UNICODE;
+                    k_in.ki.wScan = (isalpha(*bp) || isdigit(*bp)) ? vkey : *bp;
+                    break;
+
+                case 2: // INFO(Rafael): Key release.
+                    k_in.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+                    //k_in.ki.wScan = vkey;
+                    break;
+
+                case 3: // INFO(Rafael): Shift key release (if necessary).
+                    if (shifted) {
+                        k_in.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+                        k_in.ki.wScan = MapVirtualKey(VK_LSHIFT, 0);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (shifted || (state != 0 && state != 3)) {
+                if (SendInput(1, &k_in, sizeof(k_in)) != 1) {
+                    return EXIT_FAILURE;
+                }
+            }
+        }
+
+        bp++;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+#else // defined(__unix__)
+# error Some code wanted.
+#endif // defined(__unix__)
+
+
 #if defined(_WIN32)
 
 #define stty_echo_off system("stty -echo");
@@ -207,12 +286,12 @@ static int is_toynix(void);
 static void getuserkey_sigint_watchdog(int signo) {
 #if !defined(_WIN32)
     tcsetattr(STDOUT_FILENO, TCSAFLUSH, &old);
-#else
+#else // !defined(_WIN32)
     SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), con_mode);
     if (is_toynix()) {
         stty_echo_on
     }
-#endif
+#endif // !defined(_WIN32)
     if (g_cancel_callout != NULL) {
         g_cancel_callout(g_cancel_callout_args);
         g_cancel_callout = NULL;
@@ -306,7 +385,7 @@ zacarias_getuserkey_epilogue:
     return key;
 }
 
-#else
+#else // !defined(_WIN32)
 
 static int is_toynix(void) {
     static int is = -1;
@@ -414,4 +493,4 @@ zacarias_getuserkey_epilogue:
 
 #undef stty_echo_off
 
-#endif
+#endif // !defined(_WIN32)

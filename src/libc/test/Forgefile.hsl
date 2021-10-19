@@ -30,6 +30,11 @@ libc-tests.prologue() {
 
     $includes = hefesto.sys.get_option("includes");
     $cflags = hefesto.sys.get_option("cflags");
+    # INFO(Rafael): Here is not interesting replace any occurrence of memset/cpy or cmp
+    #               with our local equivalent ones.
+    $cflags.del_item("-Dmemcpy=zc_memcpy");
+    $cflags.del_item("-Dmemset=zc_memset");
+    $cflags.del_item("-Dmemcmp=zc_memcmp");
     $libraries = hefesto.sys.get_option("libraries");
     $ldflags = hefesto.sys.get_option("ldflags");
 

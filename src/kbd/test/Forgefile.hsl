@@ -71,6 +71,8 @@ libzckbd-tests.prologue() {
         $cflags.add_item("-std=c99");
         $ldflags.add_item("-lexecinfo");
         $ldflags.add_item("-lpthread");
+    } else if (hefesto.sys.os_name() == "windows") {
+        $appname = $appname + ".exe";
     }
 }
 
