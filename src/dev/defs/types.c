@@ -12,3 +12,8 @@ static struct cdev_ctx g_cdev_data;
 struct cdev_ctx *g_cdev(void) {
     return &g_cdev_data;
 }
+
+#if defined(_WIN32)
+UNICODE_STRING gZacariasDeviceName = RTL_CONSTANT_STRING(L"\\Device\\ZacariasDevice");
+UNICODE_STRING gZacariasSymLinkName = RTL_CONSTANT_STRING(L"\\??\\ZacariasDeviceLink");
+#endif // defined(_WIN32)

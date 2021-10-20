@@ -63,7 +63,7 @@ int zacarias_decrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *pa
         (*profile)->plbuf_size = 0;
     }
 
-    key = zacarias_key_crunching((*profile)->user, (*profile)->user_size, passwd, passwd_size, &key_size);
+    key = zacarias_key_crunching((*profile)->user, (kryptos_u32_t)(*profile)->user_size, passwd, (kryptos_u32_t)passwd_size, &key_size);
 
     if (key == NULL) {
         goto zacarias_decrypt_pwdb_epilogue;
@@ -105,7 +105,7 @@ int zacarias_encrypt_pwdb(zacarias_profile_ctx **profile, const kryptos_u8_t *pa
         goto zacarias_encrypt_pwdb_epilogue;
     }
 
-    key = zacarias_key_crunching((*profile)->user, (*profile)->user_size, passwd, passwd_size, &key_size);
+    key = zacarias_key_crunching((*profile)->user, (kryptos_u32_t)(*profile)->user_size, passwd, (kryptos_u32_t)passwd_size, &key_size);
 
     if (key == NULL) {
         goto zacarias_encrypt_pwdb_epilogue;
@@ -195,7 +195,7 @@ static kryptos_u8_t *zacarias_key_crunching(const char *user, const kryptos_u32_
 
     *key_size = 32;
 
-    key = kryptos_argon2i(in, in_size,
+    key = kryptos_argon2i(in, (kryptos_u32_t)in_size,
                           (kryptos_u8_t *)user, user_size,
                           parallelism, (kryptos_u32_t)*key_size, memory_size_kb, iterations,
                           (kryptos_u8_t *)passwd, passwd_size,

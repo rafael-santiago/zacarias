@@ -16,6 +16,8 @@
 #elif defined(__FreeBSD__)
 # include <sys/types.h>
 # include <sys/ioccom.h>
+#elif defined(_WIN32)
+# include <wdm.h>
 #else
 # error Some code wanted.
 #endif
@@ -26,6 +28,9 @@
 #elif defined(__FreeBSD__) || defined(__NetBSD__)
 # define kcpy(t, f, l) copyin((f), (t), (l))
 # define ucpy(t, f, l) copyout((f), (t), (l))
+#elif defined(_WIN32)
+# define kcpy(t, f, l) RtlCopyMemory((f), (t), (l))
+# define ucpy(t, f, l) RtlCopyMemory((f), (t), (l))
 #else
 # error Some code wanted.
 #endif
@@ -119,6 +124,14 @@ struct zc_devio_ctx {
 # define ZACARIAS_GET_PASSWORD           _IOWR(ZACARIAS_IOC_MAGIC, 4, struct zc_devio_ctx)
 # define ZACARIAS_IS_SESSIONED_PROFILE   _IOWR(ZACARIAS_IOC_MAGIC, 5, struct zc_devio_ctx)
 # define ZACARIAS_SETKEY                 _IOWR(ZACARIAS_IOC_MAGIC, 6, struct zc_devio_ctx)
+#elif defined(_WIN32)
+# define ZACARIAS_ATTACH_PROFILE         CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0, METHOD_BUFFERED, FILE_WRITE_DATA)
+# define ZACARIAS_DETACH_PROFILE         CTL_CODE(FILE_DEVICE_UNKNOWN, 0x1, METHOD_BUFFERED, FILE_WRITE_DATA)
+# define ZACARIAS_ADD_PASSWORD           CTL_CODE(FILE_DEVICE_UNKNOWM, 0x2, METHOD_BUFFERED, FILE_WRITE_DATA)
+# define ZACARIAS_DEL_PASSWORD           CTL_CODE(FILE_DEVICE_UNKNOWN, 0x3, METHOD_BUFFERED, FILE_WRITE_DATA)
+# define ZACARIAS_GET_PASSWORD           CTL_CODE(FILE_DEVICE_UNKNOWM, 0x4, METHOD_BUFFERED, FILE_READ_DATA)
+# define ZACARIAS_IS_SESSIONED_PROFILE   CTL_CODE(FILE_DEVICE_UNKNOWM, 0x5, METHOD_BUFFERED, FILE_READ_DATA)
+# define ZACARIAS_SETKEY                 CTL_CODE(FILE_DEVICE_UNKNOWM, 0x6, METHOD_BUFFERED, FILE_WRITE_DATA)
 #endif
 
 #endif

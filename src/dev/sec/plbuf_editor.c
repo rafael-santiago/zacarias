@@ -383,7 +383,7 @@ int plbuf_edit_add(kryptos_u8_t **plbuf, size_t *plbuf_size,
 #endif
     int err = 1;
     kryptos_u8_t *temp = NULL;
-    size_t temp_size;
+    size_t temp_size = 0;
     kryptos_task_ctx t, *ktask = &t;
 
     kryptos_task_init_as_null(ktask);
@@ -452,10 +452,10 @@ int plbuf_edit_del(kryptos_u8_t **plbuf, size_t *plbuf_size,
                    const kryptos_u8_t *alias, const size_t alias_size) {
     int err = 1;
     kryptos_u8_t *temp = NULL;
-    size_t temp_size;
+    size_t temp_size = 0;
     const kryptos_u8_t *entry, *entry_end;
-    kryptos_u8_t *pl, *pl_end;
-    size_t pl_size;
+    kryptos_u8_t *pl = NULL, *pl_end = NULL;
+    size_t pl_size = 0;
 
     if (plbuf == NULL || plbuf_size == NULL || (*plbuf) == NULL || *plbuf_size == 0 || alias == NULL || alias_size == 0) {
         goto plbuf_edit_del_epilogue;
@@ -541,7 +541,7 @@ static const kryptos_u8_t *findalias(const kryptos_u8_t *haystack, const kryptos
     hp = haystack;
     needle_size = needle_end - needle;
 
-    while (hp < haystack_end && (haystack_end - hp) >= needle_size) {
+    while (hp < haystack_end && (size_t)(haystack_end - hp) >= needle_size) {
         if (memcmp(hp, needle, needle_size) == 0) {
             return hp;
         }

@@ -32,6 +32,15 @@
 #  define cdev_mtx_trylock(m) mutex_tryenter((m))
 #  define cdev_mtx_unlock(m) mutex_exit((m))
 #  define cdev_mtx_deinit(m) mutex_destroy((m))
+# elif defined(_WIN32)
+#  include <wdm.h>
+   typedef KMUTEX cdev_mtx;
+#  define cdev_mtx_init(m) KeInitializeMutex(&m, 0)
+#  define cdev_mtx_trylock(m) ( PLARGE_INTEGER __loctm = { 0 }, NT_SUCCESS(KeWaitForSingleObject(&m, Executive, KernelMode, FALSE, &__loctm)) )
+#  define cdev_mtx_unlock(m) KeReleaseMutex(&m, FALSE)
+#  define cdev_mtx_deinit(m) // ...
+   extern UNICODE_STRING gZacariasDeviceName;
+   extern UNICODE_STRING gZacariasSymLinkName;
 # endif
 
 #include <ctx/ctx.h>
@@ -44,6 +53,8 @@ struct cdev_ctx {
     struct cdev c_dev;
 # elif defined(__FreeBSD__)
     struct cdev *device;
+# elif defined(_WIN32)
+    PDEVICE_OBJECT device;
 # endif
     cdev_mtx lock;
     zacarias_profiles_ctx *profiles;
