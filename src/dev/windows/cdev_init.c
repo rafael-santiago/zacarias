@@ -40,6 +40,12 @@ NTSTATUS cdev_init(_In_ PDRIVER_OBJECT driver_object) {
 
     driver_object->MajorFunction[IRP_MJ_CREATE] = cdev_create;
     driver_object->MajorFunction[IRP_MJ_DEVICE_CONTROL] = cdev_ioctl;
-    
+
+#if defined(DBG)
+    if (NT_SUCCESS(status)) {
+        KdPrint(("/dev/zacarias: Device Initialized.\n"));
+    }
+#endif
+
     return status;
 }
