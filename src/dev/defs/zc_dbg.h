@@ -25,7 +25,7 @@
 # endif
 #elif defined(_WIN32)
 # if defined(ZACARIAS_DEBUG_INFO) && !defined(DBG)
-# pragma message("You have defined ZACARIAS_DEBUG_INFO but you must compile the driver in debug configuration! [use --compile-model=debug]")
+#  pragma message("You have defined ZACARIAS_DEBUG_INFO but you must compile the driver in debug configuration! [use --compile-model=debug]")
 # endif
 # if defined(ZACARIAS_DEBUG_INFO)
 #  define ZC_DBG(message, ...) KdPrint(("[%s:%d] " message, __FILE__, __LINE__, ## __VA_ARGS__))

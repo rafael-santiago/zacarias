@@ -64,6 +64,22 @@ static int zacarias_modevent(module_t mod __unused, int event, void *arg __unuse
 
 DEV_MODULE(zacarias, zacarias_modevent, NULL);
 
+#elif defined(_WIN32)
+
+#include <windows/cdev_init.h>
+#include <windows/cdev_deinit.h>
+
+void DriverUnload(_In_ PDRIVER_OBJECT driver_object) {
+    UNREFERENCED_PARAMETER(driver_object);
+    cdev_deinit();
+}
+
+NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT driver_object, _In_ PUNICODE_STRING registry_path) {
+    UNREFERENCED_PARAMETER(registry_path);
+    driver_object->DriverUnload = DriverUnload;
+    return cdev_init(driver_object);
+}
+
 #else
 # error Some code wanted
 #endif
