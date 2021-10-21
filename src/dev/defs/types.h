@@ -36,7 +36,7 @@
 #  include <wdm.h>
    typedef KMUTEX cdev_mtx;
 #  define cdev_mtx_init(m) KeInitializeMutex(m, 0)
-#  define cdev_mtx_trylock(m) ( PLARGE_INTEGER __loctm = { 0 }, NT_SUCCESS(KeWaitForSingleObject(m, Executive, KernelMode, FALSE, &__loctm)) )
+   inline int cdev_mtx_trylock(KMUTEX *m);
 #  define cdev_mtx_unlock(m) KeReleaseMutex(m, FALSE)
 #  define cdev_mtx_deinit(m) // ...
    extern UNICODE_STRING gZacariasDeviceName;
