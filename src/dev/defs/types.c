@@ -17,7 +17,7 @@ struct cdev_ctx *g_cdev(void) {
 UNICODE_STRING gZacariasDeviceName = RTL_CONSTANT_STRING(L"\\Device\\ZacariasDevice");
 UNICODE_STRING gZacariasSymLinkName = RTL_CONSTANT_STRING(L"\\??\\ZacariasDeviceLink");
 
-inline int cdev_mtx_trylock(KMUTEX *m) {
+int cdev_mtx_trylock(KMUTEX *m) {
     LARGE_INTEGER tmo = { 0 };
     return NT_SUCCESS(KeWaitForSingleObject(m, Executive, KernelMode, FALSE, &tmo));
 }

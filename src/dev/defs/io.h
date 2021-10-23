@@ -101,7 +101,7 @@ struct zc_devio_ctx {
     size_t pwdb_passwd_size;
     unsigned char passwd[ZC_STR_NR];
     size_t passwd_size;
-    char alias[ZC_STR_NR];
+    unsigned char alias[ZC_STR_NR];
     size_t alias_size;
     unsigned char sessioned;
 };

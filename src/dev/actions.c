@@ -21,7 +21,7 @@
 int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
     int err = EFAULT;
     struct zc_devio_ctx *d = *devio;
-    zacarias_profile_ctx *profile;
+    zacarias_profile_ctx *profile = NULL;
     unsigned char *passwd = NULL;
     size_t passwd_size = 0;
     unsigned char detached = 0;
@@ -279,7 +279,7 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
         goto zc_dev_act_del_password_epilogue;
     } else if (profile->plbuf_size == 0) {
         if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size,
-                           "\x1BZ", 2, "\x1BZ", 2) != 0) {
+                           (kryptos_u8_t *)"\x1BZ", 2, (kryptos_u8_t *)"\x1BZ", 2) != 0) {
             d->status = kPWDBWritingError;
             ZC_DBG("plbuf_edit_add() has failed.\n");
             goto zc_dev_act_del_password_epilogue;
@@ -558,7 +558,7 @@ zc_dev_act_is_sessioned_profile:
 int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
     struct zc_devio_ctx *d = *devio;
     int err = EFAULT;
-    char *pwdb = NULL;
+    kryptos_u8_t *pwdb = NULL;
     size_t pwdb_size = 0;
     zacarias_profile_ctx *profile = NULL;
 
@@ -588,7 +588,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
         }
     } else if (d->action == kInitAndAttachProfile) {
         pwdb_size = 8;
-        pwdb = (char *) kryptos_newseg(pwdb_size);
+        pwdb = (kryptos_u8_t *) kryptos_newseg(pwdb_size);
         if (pwdb == NULL) {
             d->status = kGeneralError;
             ZC_DBG("unabled to allocate memory.\n");
@@ -610,7 +610,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
     }
 
     if (d->action == kInitAndAttachProfile && profile != NULL) {
-        if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, "\x1BZ", 2, "\x1BZ", 2) != 0) {
+        if (plbuf_edit_add(&profile->plbuf, &profile->plbuf_size, (kryptos_u8_t *)"\x1BZ", 2, (kryptos_u8_t *)"\x1BZ", 2) != 0) {
             d->status = kPWDBWritingError;
             ZC_DBG("plbuf_edit_add() has failed.\n");
             goto zc_dev_act_attach_profile_epilogue;

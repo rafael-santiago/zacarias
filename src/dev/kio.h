@@ -14,6 +14,8 @@
 # include <freebsd/kio_impl.h>
 #elif defined(__NetBSD__)
 # include <netbsd/kio_impl.h>
+#elif defined(_WIN32)
+# include <windows/kio_impl.h>
 #else
 # error Some code wanted.
 #endif

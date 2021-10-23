@@ -36,11 +36,15 @@
 #  include <wdm.h>
    typedef KMUTEX cdev_mtx;
 #  define cdev_mtx_init(m) KeInitializeMutex(m, 0)
-   inline int cdev_mtx_trylock(KMUTEX *m);
+   int cdev_mtx_trylock(KMUTEX *m);
 #  define cdev_mtx_unlock(m) KeReleaseMutex(m, FALSE)
 #  define cdev_mtx_deinit(m) // ...
    extern UNICODE_STRING gZacariasDeviceName;
    extern UNICODE_STRING gZacariasSymLinkName;
+#  define   EFAULT STATUS_UNSUCCESSFUL
+#  define   EBUSY  STATUS_DEVICE_BUSY
+#  define   EINVAL STATUS_INVALID_PARAMETER
+#  define   ENOMEM STATUS_NO_MEMORY
 # endif
 
 #include <ctx/ctx.h>
