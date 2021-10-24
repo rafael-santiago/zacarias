@@ -11,5 +11,8 @@
 void cdev_deinit(void) {
     IoDeleteSymbolicLink(&gZacariasSymLinkName);
     IoDeleteDevice(g_cdev()->device);
+
+    zacarias_profiles_ctx_deinit(g_cdev()->profiles);
+
     KdPrint(("/dev/zacarias: Device Deinitialized.\n"));
 }
