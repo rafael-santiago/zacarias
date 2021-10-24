@@ -19,6 +19,11 @@ project libzcsec-kernel-tests : toolset $curr_toolset : "main.c", $includes, $cf
 
 libzcsec-kernel-tests.preloading() {
     $curr_toolset = get_lkm_toolset();
+    if (hefesto.sys.os_name() == "windows") {
+        var exit_code type int;
+        $exit_code = hefesto.sys.forge("libzcsec-kernel-tests-sys", "WinForgefile.hsl", hefesto.project.cmdline());
+        hefesto.project.abort($exit_code);
+    }
 }
 
 libzcsec-kernel-tests.prologue() {

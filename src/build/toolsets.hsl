@@ -253,7 +253,7 @@ local function mklocal_ctx() : result type none {
 }
 
 local function mklocal_sec() : result type none {
-    if (isdir("dev/sec") == 0 || is_clean_build()) {
+    if (isdir("sec") == 0 || is_clean_build()) {
         var src type string;
         $src = hefesto.sys.make_path(zacarias_rootdir(), "dev/sec");
         do_mklocal($src, "sec");
@@ -261,7 +261,7 @@ local function mklocal_sec() : result type none {
 }
 
 local function mklocal_defs() : result type none {
-    if (isdir("dev/defs") == 0 || is_clean_build()) {
+    if (isdir("defs") == 0 || is_clean_build()) {
         var src type string;
         $src = hefesto.sys.make_path(zacarias_rootdir(), "dev/defs");
         do_mklocal($src, "defs");
@@ -291,8 +291,8 @@ local function do_mklocal(src type string, dest type string) : result type none 
         $dest.replace("/", "\\");
         hefesto.sys.run("rmdir /q /s " + $dest);
         hefesto.sys.run("mkdir " + $dest);
-        hefesto.sys.run("copy " + $src + "\\*.c " + $dest);
-        hefesto.sys.run("copy " + $src + "\\*.h " + $dest);
+        hefesto.sys.run("copy " + $src + "\\*.c " + $dest + " /Y");
+        hefesto.sys.run("copy " + $src + "\\*.h " + $dest + " /Y");
     }
 }
 

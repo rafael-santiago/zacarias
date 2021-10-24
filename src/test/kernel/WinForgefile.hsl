@@ -1,0 +1,60 @@
+#
+#                          Copyright (C) 2021 by Rafael Santiago
+#
+# Use of this source code is governed by GPL-v2 license that can
+# be found in the COPYING file.
+#
+#
+
+include ../../build/toolsets.hsl
+
+local var src type list;
+local var includes type list;
+local var cflags type list;
+local var libraries type list;
+local var ldflags type list;
+
+project libzcsec-kernel-tests-sys : toolset "windows-driver" : $src, $includes, $cflags, $libraries, $ldflags, "libzcsec-kernel-tests.sys";
+
+libzcsec-kernel-tests-sys.prologue() {
+    mklocal("ctx");
+    mklocal("sec");
+    mklocal("defs");
+    mklocal("kryptos");
+    mklocal("kutest");
+
+    $src.ls(".*\\.c$");
+
+    var submodules type list;
+    $submodules.add_item("defs");
+    $submodules.add_item("ctx");
+    $submodules.add_item("sec");
+    $submodules.add_item("kryptos");
+
+    var s type int;
+    $s = 0;
+    while ($s < $submodules.count()) {
+        var sname type string;
+        $sname = $submodules.item($s);
+        if (hefesto.sys.cd($sname) == 0) {
+            hefesto.sys.echo("ERROR: Unable to get " + $sname + " codes.\n");
+            hefesto.project.abort(1);
+        }
+        $src.ls(".*\\.c$");
+        hefesto.sys.cd("..");
+        $s = $s + 1;
+    }
+
+    $includes.add_item(hefesto.sys.pwd());
+    $includes.add_item(hefesto.sys.make_path(hefesto.sys.pwd(), "kryptos"));
+
+    $cflags.add_item("-DKRYPTOS_KERNEL_MODE=1");
+    $cflags.add_item("-DKRYPTOS_DATA_WIPING_WHEN_FREEING_MEMORY=1");
+    $cflags.add_item("-DUSE_LIBCNTPR=1");
+
+    $ldflags.add_item("cng.lib");
+    $ldflags.add_item("libcntpr.lib");
+}
+
+libzcsec-kernel-tests-sys.epilogue() {
+}
