@@ -9,6 +9,9 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/stat.h>
+#if defined(_WIN32
+# include <shlwapi.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -121,7 +124,7 @@ char *get_canonical_path(char *dest, const size_t dest_size, const char *src, co
     snprintf(dest, dest_size, "%s", drive);
     d = dest + strlen(dest);
 
-    Canonicalize(canonical, src);
+    PathCanonicalizeA(canonical, src);
     c = strstr(canonical, ":\\");
     if (canonical[0] == '\\' && strlen(canonical) == 1) {
         canonical[0] = 0;
