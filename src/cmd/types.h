@@ -12,6 +12,17 @@
 
 typedef int (*zc_cmd_func)(void);
 
+#if defined(__unix__)
+  typedef int zc_dev_t;
+# define ZC_INVALID_DEVICE -1
+#elif defined(_WIN32)
+# include <windows.h>
+  typedef HANDLE zc_dev_t;
+# define ZC_INVALID_DEVICE INVALID_HANDLE_VALUE
+#else
+# error Some code wanted.
+#endif
+
 struct zc_exec_table_ctx {
     const char *cmd_name;
     zc_cmd_func cmd_do, cmd_help;

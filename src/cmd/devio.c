@@ -14,10 +14,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static int zcdev_ioctl(const int zcd, const unsigned long cmd, struct zc_devio_ctx *ioctx);
+static int zcdev_ioctl(const zc_dev_t zcd, const unsigned long cmd, struct zc_devio_ctx *ioctx);
 
-int zcdev_open(void) {
-    int zcd = open("/dev/"CDEVNAME, O_RDWR);
+zc_dev_t zcdev_open(void) {
+#if defined(__unix__)
+    zc_dev_t zcd = open("/dev/"CDEVNAME, O_RDWR);
     int ntry = 10;
 
     while (zcd == -1 && ntry-- > 0) {
@@ -32,9 +33,34 @@ int zcdev_open(void) {
     }
 
     return zcd;
+#elif defined(_WIN32
+    zc_dev_t zcd = CreateFile(gZacariasSymLinkName, GENERIC_ALL, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, 0);
+    int ntry = 10;
+    char err_buf[1024] = "";
+
+    while (zcd == INVALID_HANDLE_VALUE && ntry-- > 0) {
+        Sleep(1000);
+        zcd = CreateFile(gZacariasSymLinkName, GENERIC_ALL, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, 0);
+    }
+
+    if (zcd == INVALID_HANDLE_VALUE) {
+        FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                       NULL,
+                       GetLastError(),
+                       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                       buf,
+                       sizeof(buf),
+                       NULL);
+        fprintf(stderr, "ERROR: Unable to open zacarias device : failure detail : %s\n", err_buf);
+    }
+
+    return INVALID_HANDLE_VALUE;
+#else
+# error Some code wanted.
+#endif
 }
 
-int zcdev_attach(const int zcd,
+int zcdev_attach(const zc_dev_t zcd,
                  const char *pwdb_path, const size_t pwdb_path_size,
                  const char *user, const size_t user_size,
                  const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
@@ -75,7 +101,7 @@ int zcdev_attach(const int zcd,
     return err;
 }
 
-int zcdev_detach(const int zcd, const char *user, const size_t user_size,
+int zcdev_detach(const zc_dev_t zcd, const char *user, const size_t user_size,
                  const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
                  zc_device_status_t *status) {
     struct zc_devio_ctx ioctx;
@@ -101,7 +127,7 @@ int zcdev_detach(const int zcd, const char *user, const size_t user_size,
     return err;
 }
 
-int zcdev_add_password(const int zcd, const char *user, const size_t user_size,
+int zcdev_add_password(const zc_dev_t zcd, const char *user, const size_t user_size,
                        const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
                        const unsigned char *session_passwd, const size_t session_passwd_size,
                        const char *alias, const size_t alias_size,
@@ -143,7 +169,7 @@ int zcdev_add_password(const int zcd, const char *user, const size_t user_size,
     return err;
 }
 
-int zcdev_del_password(const int zcd, const char *user, const size_t user_size,
+int zcdev_del_password(const zc_dev_t zcd, const char *user, const size_t user_size,
                        const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
                        const unsigned char *session_passwd, const size_t session_passwd_size,
                        const char *alias, const size_t alias_size,
@@ -181,7 +207,7 @@ int zcdev_del_password(const int zcd, const char *user, const size_t user_size,
     return err;
 }
 
-int zcdev_get_password(const int zcd, const char *user, const size_t user_size,
+int zcdev_get_password(const zc_dev_t zcd, const char *user, const size_t user_size,
                        const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
                        const char *alias, const size_t alias_size,
                        unsigned char **password, size_t *password_size,
@@ -238,7 +264,8 @@ void zcdev_perror(const zc_device_status_t status) {
     fprintf(stderr, "ERROR: %s.\n", gZacariasDeviceStatusVerbose[status]);
 }
 
-static int zcdev_ioctl(const int zcd, const unsigned long cmd, struct zc_devio_ctx *ioctx) {
+static int zcdev_ioctl(const zc_dev_t zcd, const unsigned long cmd, struct zc_devio_ctx *ioctx) {
+#if defined(__unix__)
     int ntry = 10, retval = ioctl(zcd, cmd, ioctx);
 
     while (retval == -1 && ntry-- > 0) {
@@ -252,4 +279,29 @@ static int zcdev_ioctl(const int zcd, const unsigned long cmd, struct zc_devio_c
     }
 
     return retval;
+#elif defined(_WIN32)
+    int ntry = 10;
+    DWORD ret_bytes = 0;
+    BOOL done = DeviceIoControl(zcd, (DWORD)cmd, ioctx, sizeof(struct zc_devio_ctx), ioctx, sizeof(struct zc_devio_ctx), &ret_bytes, 0);
+    char err_buf[1024] = "";
+
+    while (!done && ntry-- > 0) {
+        done = DeviceIoControl(zcd, (DWORD)cmd, ioctx, sizeof(struct zc_devio_ctx), ioctx, sizeof(struct zc_devio_ctx), &ret_bytes, 0);
+    }
+
+    if (!done) {
+        FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                       NULL,
+                       GetLastError(),
+                       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                       buf,
+                       sizeof(buf),
+                       NULL);
+        fprintf(stderr, "ERROR: Unable to communicate with zacarias device : failure detail : %s\n", err_buf);
+    }
+
+    return (done) ? EXIT_SUCCESS : EXIT_FAILURE;
+#else
+# error Some code wanted.
+#endif
 }

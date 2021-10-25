@@ -116,7 +116,7 @@ static int zc_password_unk(void) {
 }
 
 static int zc_password_add(void) {
-    int zcd = zcdev_open();
+    zc_dev_t zcd = zcdev_open();
     char *user = NULL, *alias = NULL;
     int err = EXIT_FAILURE;
     size_t user_size = 0, alias_size = 0;
@@ -128,7 +128,7 @@ static int zc_password_add(void) {
     size_t password_size[2];
     zc_device_status_t status;
 
-    if (zcd == -1) {
+    if (zcd == ZC_INVALID_DEVICE) {
         err = errno;
         goto zc_password_add_epilogue;
     }
@@ -225,7 +225,7 @@ zc_password_add_epilogue:
 }
 
 static int zc_password_del(void) {
-    int zcd = zcdev_open();
+    zc_dev_t zcd = zcdev_open();
     char *user = NULL, *alias = NULL;
     unsigned char *pwdb_passwd = NULL;
     unsigned char *session_passwd = NULL;
@@ -292,7 +292,7 @@ zc_password_del_epilogue:
 }
 
 static int zc_password_get(void) {
-    int zcd = zcdev_open();
+    zc_dev_t zcd = zcdev_open();
     char *user = NULL, *alias = NULL, *timeout = NULL, *tp, *tp_end;
     unsigned char *password = NULL, *pwdb_passwd = NULL;
     size_t user_size = 0, alias_size = 0, password_size = 0, pwdb_passwd_size = 0;
@@ -300,7 +300,7 @@ static int zc_password_get(void) {
     zc_device_status_t status;
     struct zc_data_drain_ctx zc_drain;
 
-    if (zcd == -1) {
+    if (zcd == ZC_INVALID_DEVICE) {
         err = errno;
         goto zc_password_get_epilogue;
     }

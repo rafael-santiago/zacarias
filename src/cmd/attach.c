@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 int zc_attach(void) {
-    int zcd = zcdev_open();
+    zc_dev_t zcd = zcdev_open();
     int err = EXIT_FAILURE;
     char *pwdb_path = NULL;
     size_t pwdb_path_size = 0;
@@ -30,7 +30,7 @@ int zc_attach(void) {
     struct stat st;
     int do_init = zc_get_bool_option("init", 0);
 
-    if (zcd == -1) {
+    if (zcd == ZC_INVALID_DEVICE) {
         err = errno;
         goto zc_attach_epilogue;
     }

@@ -37,13 +37,13 @@ char prompt(const char *question, const char *options, const size_t options_size
 }
 
 char *get_canonical_path(char *dest, const size_t dest_size, const char *src, const size_t src_size) {
+#if defined(__unix__)
     char *dest_p, *dest_p_end;
     const char *src_p, *src_p_end;
     char in[4096];
     char out[4096], *out_p;
     struct stat st;
 
-#if defined(__unix__)
     if (dest == NULL || dest_size == 0 || src == NULL || src_size == 0) {
         return NULL;
     }
@@ -104,6 +104,32 @@ char *get_canonical_path(char *dest, const size_t dest_size, const char *src, co
             return NULL;
         }
     }
+#elif defined(_WIN32)
+    // WARN(Rafael): Some MinGW versions seems not to support ´libpathcch.lib´ by now let's use ´shlwpai.lib´.
+    char drive[MAX_PATH] = "", *d = NULL;
+    char canonical[MAX_PATH] = "", *c = NULL;
+    if (GetCurrentDirectoryA(sizeof(drive), drive) == 0) {
+        return NULL;
+    }
+
+    if ((d = strstr(drive, ":")) != NULL && (d + 1) < (&drive[0] + sizeof(drive))) {
+        d[1] = 0;
+    } else {
+        return NULL;
+    }
+
+    snprintf(dest, dest_size, "%s", drive);
+    d = dest + strlen(dest);
+
+    Canonicalize(canonical, src);
+    c = strstr(canonical, ":\\");
+    if (canonical[0] == '\\' && strlen(canonical) == 1) {
+        canonical[0] = 0;
+    } else if (canonical[0] == '\\') {
+        c = canonical[1];
+    }
+
+    snprintf(d, dest_size - (d - dest), ":\\%s", (c == NULL) ? canonical : c);
 #else
 # error Some code wanted.
 #endif

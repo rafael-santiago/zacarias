@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 int zc_detach(void) {
-    int zcd = zcdev_open();
+    zc_dev_t zcd = zcdev_open();
     int err = EXIT_FAILURE;
     char *user = NULL;
     size_t user_size = 0;
@@ -23,7 +23,7 @@ int zc_detach(void) {
     size_t pwdb_passwd_size = 0;
     zc_device_status_t status;
 
-    if (zcd == -1) {
+    if (zcd == ZC_INVALID_DEVICE) {
         goto zc_detach_epilogue;
     }
 
