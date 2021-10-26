@@ -9,8 +9,10 @@
 #include <cmd/utils.h>
 #include <kryptos.h>
 #include <string.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
+#if defined(__unix__)
+# include <sys/ioctl.h>
+# include <fcntl.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -33,14 +35,16 @@ zc_dev_t zcdev_open(void) {
     }
 
     return zcd;
-#elif defined(_WIN32
-    zc_dev_t zcd = CreateFile(gZacariasSymLinkName, GENERIC_ALL, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, 0);
+#elif defined(_WIN32)
+    zc_dev_t zcd = CreateFileA(ZACARIAS_DEVICE_LINK, GENERIC_ALL, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, 0);
     int ntry = 10;
-    char err_buf[1024] = "";
+    char err_buf[1024];
+
+    memset(err_buf, 0, sizeof(err_buf));
 
     while (zcd == INVALID_HANDLE_VALUE && ntry-- > 0) {
         Sleep(1000);
-        zcd = CreateFile(gZacariasSymLinkName, GENERIC_ALL, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, 0);
+        zcd = CreateFileA(ZACARIAS_DEVICE_LINK, GENERIC_ALL, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, 0);
     }
 
     if (zcd == INVALID_HANDLE_VALUE) {
@@ -48,8 +52,8 @@ zc_dev_t zcdev_open(void) {
                        NULL,
                        GetLastError(),
                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                       buf,
-                       sizeof(buf),
+                       err_buf,
+                       sizeof(err_buf),
                        NULL);
         fprintf(stderr, "ERROR: Unable to open zacarias device : failure detail : %s\n", err_buf);
     }
@@ -283,7 +287,9 @@ static int zcdev_ioctl(const zc_dev_t zcd, const unsigned long cmd, struct zc_de
     int ntry = 10;
     DWORD ret_bytes = 0;
     BOOL done = DeviceIoControl(zcd, (DWORD)cmd, ioctx, sizeof(struct zc_devio_ctx), ioctx, sizeof(struct zc_devio_ctx), &ret_bytes, 0);
-    char err_buf[1024] = "";
+    char err_buf[1024];
+
+    memset(err_buf, 0, sizeof(err_buf));
 
     while (!done && ntry-- > 0) {
         done = DeviceIoControl(zcd, (DWORD)cmd, ioctx, sizeof(struct zc_devio_ctx), ioctx, sizeof(struct zc_devio_ctx), &ret_bytes, 0);
@@ -294,8 +300,8 @@ static int zcdev_ioctl(const zc_dev_t zcd, const unsigned long cmd, struct zc_de
                        NULL,
                        GetLastError(),
                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                       buf,
-                       sizeof(buf),
+                       err_buf,
+                       sizeof(err_buf),
                        NULL);
         fprintf(stderr, "ERROR: Unable to communicate with zacarias device : failure detail : %s\n", err_buf);
     }

@@ -13,6 +13,9 @@
 #elif defined(__FreeBSD__)
 # include <sys/param.h>
 # include <sys/linker.h>
+#elif defined(_WIN32)
+# include <cmd/utils.h>
+# include <winsvc.h>
 #endif
 #include <unistd.h>
 #include <fcntl.h>
@@ -63,6 +66,10 @@ int zc_device_help(void) {
 static int zc_device_install(void) {
     int err = EXIT_FAILURE;
     char *device_driver_path = NULL;
+#if defined(_WIN32)
+    SC_HANDLE zacarias_service = NULL, hmanager = NULL;
+    char device_driver_fullpath[MAX_PATH] = "";
+#endif
 
     ZC_GET_OPTION_OR_DIE(device_driver_path, "device-driver-path", zc_device_install_epilogue);
 
@@ -89,8 +96,50 @@ static int zc_device_install(void) {
     } else {
         err = EXIT_SUCCESS;
     }
+#elif defined(_WIN32)
+    zc_device_uninstall();
+    if ((hmanager = OpenSCManagerA(NULL, NULL, SC_MANAGER_ALL_ACCESS)) == NULL) {
+        fprintf(stderr, "ERROR: Unable to open sc manager.\n");
+        goto zc_device_install_epilogue;
+    }
+
+    get_canonical_path(device_driver_fullpath,
+                       sizeof(device_driver_fullpath) - 1,
+                       device_driver_path,
+                       strlen(device_driver_path));
+
+    zacarias_service = CreateServiceA(hmanager,
+                                      ZACARIAS_SERVICE,
+                                      ZACARIAS_DISPLAY_NAME,
+                                      SC_MANAGER_CREATE_SERVICE,
+                                      SERVICE_KERNEL_DRIVER,
+                                      SERVICE_DEMAND_START,
+                                      SERVICE_ERROR_NORMAL,
+                                      device_driver_fullpath,
+                                      NULL,
+                                      NULL,
+                                      NULL,
+                                      NULL,
+                                      NULL);
+    if (zacarias_service != NULL) {
+        CloseServiceHandle(zacarias_service);
+        if (StartService(zacarias_service, 0, NULL) == TRUE) {
+            err = EXIT_SUCCESS;
+        } else {
+            fprintf(stderr, "ERROR: Unable to start the device driver service.\n");
+            zc_device_uninstall();
+        }
+    } else {
+        fprintf(stderr, "ERROR: While trying to install device driver '%s'.\n", device_driver_path);
+    }
 #else
 # error Some code wanted.
+#endif
+
+#if defined(_WIN32)
+    if (hmanager != NULL) {
+        CloseServiceHandle(hmanager);
+    }
 #endif
 
 zc_device_install_epilogue:
@@ -114,6 +163,40 @@ static int zc_device_uninstall(void) {
 
     if ((err = kldunload(fd)) != 0) {
         fprintf(stderr, "ERROR: Unable to uninstall kernel module.\n");
+    }
+#elif defined(_WIN32)
+    SERVICE_STATUS sc_status;
+    SC_HANDLE hmanager = NULL;
+    SC_HANDLE zacarias_service = NULL;
+
+    if ((hmanager = OpenSCManagerA(NULL, NULL, SC_MANAGER_ALL_ACCESS)) == NULL) {
+        fprintf(stderr, "ERROR: Unable to open sc manager.\n");
+        goto zc_device_uninstall_epilogue;
+    }
+    if ((zacarias_service = OpenServiceA(hmanager, ZACARIAS_SERVICE, SERVICE_ALL_ACCESS)) == NULL) {
+        fprintf(stderr, "ERROR: Unable to open zacarias service.\n");
+        goto zc_device_uninstall_epilogue;
+    }
+    if (QueryServiceStatus(zacarias_service, &sc_status) == TRUE && sc_status.dwCurrentState == SERVICE_RUNNING) {
+        if (ControlService(zacarias_service, SERVICE_CONTROL_STOP, &sc_status) == FALSE) {
+            fprintf(stderr, "ERROR: Unable to stop zacarias service.\n");
+            goto zc_device_uninstall_epilogue;
+        }
+    }
+    if (DeleteService(zacarias_service) == TRUE) {
+        err = EXIT_SUCCESS;
+    } else {
+        fprintf(stderr, "ERROR: Unable to delete zacarias service.\n");
+    }
+
+zc_device_uninstall_epilogue:
+
+    if (zacarias_service != NULL) {
+        CloseServiceHandle(zacarias_service);
+    }
+
+    if (hmanager != NULL) {
+        CloseServiceHandle(hmanager);
     }
 #else
 # error Some code wanted.

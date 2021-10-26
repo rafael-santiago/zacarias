@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <signal.h>
 
 struct  zc_data_drain_ctx {
     unsigned char *password;
@@ -233,7 +234,7 @@ static int zc_password_del(void) {
     int err = 0;
     zc_device_status_t status;
 
-    if (zcd == - 1) {
+    if (zcd == ZC_INVALID_DEVICE) {
         err = errno;
         goto zc_password_del_epilogue;
     }
@@ -307,10 +308,12 @@ static int zc_password_get(void) {
 
     memset(&zc_drain, 0, sizeof(zc_drain));
 
+#if defined(__unix__)
     if (!zacarias_set_kbd_layout("pt-br")) {
         fprintf(stderr, "ERROR: Unable to set internal keyboard layout.\n");
         goto zc_password_get_epilogue;
     }
+#endif
 
     ZC_GET_OPTION_OR_DIE(user, "user", zc_password_get_epilogue);
     user_size = strlen(user);

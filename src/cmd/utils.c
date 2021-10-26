@@ -9,7 +9,8 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/stat.h>
-#if defined(_WIN32
+#if defined(_WIN32)
+# include <windows.h>
 # include <shlwapi.h>
 #endif
 #include <stdlib.h>
@@ -129,7 +130,7 @@ char *get_canonical_path(char *dest, const size_t dest_size, const char *src, co
     if (canonical[0] == '\\' && strlen(canonical) == 1) {
         canonical[0] = 0;
     } else if (canonical[0] == '\\') {
-        c = canonical[1];
+        c = &canonical[1];
     }
 
     snprintf(d, dest_size - (d - dest), ":\\%s", (c == NULL) ? canonical : c);

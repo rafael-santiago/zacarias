@@ -47,6 +47,8 @@ zc.prologue() {
         }  else if (isdir("/usr/local/lib")) {
             $libraries.add_item("/usr/local/lib");
         }
+    } else {
+        $ldflags.add_item("-lshlwapi");
     }
     if (build("libaegis") != 0) {
         hefesto.project.abort(1);

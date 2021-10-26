@@ -719,7 +719,7 @@ int zc_dev_act_detach_profile(struct zc_devio_ctx **devio) {
         goto zc_dev_act_detach_profile_epilogue;
     }
 
-    // WARN(Rafael): Maybe it is so much paranoid. Maybe remove it in the future.
+    // WARN(Rafael): Maybe it is overkill. Maybe remove it in the future.
     zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size);
 
     if (zacarias_profiles_ctx_del(&g_cdev()->profiles, d->user, d->user_size) != 0) {
