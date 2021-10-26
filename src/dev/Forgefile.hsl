@@ -21,7 +21,7 @@ zacarias-cdev.preloading() {
     $curr_toolset = get_lkm_toolset();
     if (hefesto.sys.os_name() == "windows") {
         var exit_code type int;
-        $exit_code = hefesto.sys.forge("zacarias-sys", "WinForgefile.hsl", "");
+        $exit_code = hefesto.sys.forge("zacarias-sys", "WinForgefile.hsl", hefesto.project.cmdline());
         hefesto.project.abort($exit_code);
     }
 }

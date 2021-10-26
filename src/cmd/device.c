@@ -97,7 +97,6 @@ static int zc_device_install(void) {
         err = EXIT_SUCCESS;
     }
 #elif defined(_WIN32)
-    zc_device_uninstall();
     if ((hmanager = OpenSCManagerA(NULL, NULL, SC_MANAGER_ALL_ACCESS)) == NULL) {
         fprintf(stderr, "ERROR: Unable to open sc manager.\n");
         goto zc_device_install_epilogue;
@@ -107,6 +106,11 @@ static int zc_device_install(void) {
                        sizeof(device_driver_fullpath) - 1,
                        device_driver_path,
                        strlen(device_driver_path));
+
+    if ((zacarias_service = OpenServiceA(hmanager, ZACARIAS_SERVICE, SERVICE_ALL_ACCESS)) != NULL) {
+        zc_device_uninstall();
+        CloseServiceHandle(zacarias_service);
+    }
 
     zacarias_service = CreateServiceA(hmanager,
                                       ZACARIAS_SERVICE,

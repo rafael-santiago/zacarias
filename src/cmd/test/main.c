@@ -155,7 +155,13 @@ CUTE_TEST_CASE(get_canonical_path_tests)
     printf("%s\n", result);
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, input, strlen(input)) == NULL);
 
+#if defined(__unix__)
     CUTE_ASSERT(mkdir("404", 0666) == EXIT_SUCCESS);
+#elif defined(_WIN32)
+    CUTE_ASSERT(mkdir("404") == EXIT_SUCCESS);
+#else
+# error Some code wanted.
+#endif
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, input, strlen(input)) == &result[0]);
     CUTE_ASSERT(memcmp(result, input, strlen(input)) == 0);
 
@@ -548,7 +554,13 @@ CUTE_TEST_CASE(attach_tests)
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
 
+#if defined(__unix__)
     CUTE_ASSERT(mkdir("tmp", 0666) == EXIT_SUCCESS);
+#elif defined(_WIN32)
+    CUTE_ASSERT(mkdir("tmp") == EXIT_SUCCESS);
+#else
+# error Some code wanted.
+#endif
     CUTE_ASSERT(chdir("tmp") == EXIT_SUCCESS);
     snprintf(args, sizeof(args) - 1, "--pwdb=../passwd --user=rs");
     CUTE_ASSERT(zc("attach", args, "123mudar*\n") == EXIT_SUCCESS);
@@ -598,6 +610,8 @@ CUTE_TEST_CASE_END
 static int zc(const char *command, const char *args, const char *keyboard_data) {
 #if defined(__unix__)
     const char zc_binary[] = "bin/zc";
+#elif defined(_WIN32)
+    const char zc_binary[] = "bin\\zc.exe";
 #else
 # error Some code wanted.
 #endif
@@ -608,15 +622,19 @@ static int zc(const char *command, const char *args, const char *keyboard_data) 
     struct stat st;
     char backbuf[4096] = "";
 
-#if defined(__unix__)
     do {
         if (strlen(backbuf) > 4000) {
             break;
         }
+#if defined(__unix__)
         strcat(backbuf, "../");
+#elif defined(_WIN32)
+        strcat(backbuf, "..\\");
+#else
+# error Some code wanted.
+#endif
         snprintf(command_line, sizeof(command_line) - 1, "%s%s", backbuf, zc_binary);
     } while (stat(command_line, &st) != EXIT_SUCCESS);
-#endif
 
     if (keyboard_data != NULL) {
         fp = fopen(".keybd_data", "wb");
@@ -645,6 +663,8 @@ static int traced_zc(const char *command, const char *args, const char *keyboard
         "strace -o out.txt";
 #elif defined(__FreeBSD__)
         "truss -o out.txt";
+#else
+        "";
 #endif
     char command_line[4096];
     FILE *fp;
@@ -684,6 +704,8 @@ static int traced_zc(const char *command, const char *args, const char *keyboard
 static int zacarias_install(void) {
 #if defined(__unix__)
     const char zacarias_lkm[] = "../../dev/zacarias.ko";
+#elif defined(_WIN32)
+    const char zacarias_lkm[] = "..\\..\\dev\\zacarias.sys";
 #else
 # error Some code wanted.
 #endif
@@ -703,6 +725,8 @@ static int can_run_syscall_tracing_tests(void) {
         "strace -V >/dev/null 2>&1";
 #elif defined(__FreeBSD__)
         "truss truss >/dev/null 2>&1";
+#else
+        "";
 #endif
     return (system(cmdline) == 0);
 }
