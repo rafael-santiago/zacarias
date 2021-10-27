@@ -43,7 +43,7 @@ int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
     if (NT_SUCCESS(status)) {
         status = ZwWriteFile(file_handle, NULL, NULL, NULL, &io_sts, buf, (ULONG)buf_size, NULL, NULL);
         if (NT_SUCCESS(status)) {
-            retval = (int)io_sts.Information;
+            retval = 0;
         }
         ZwFlushBuffersFile(file_handle, &io_sts);
     }
@@ -108,7 +108,7 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
 
         status = ZwReadFile(file_handle, NULL, NULL, NULL, &io_sts, *buf, (ULONG)*buf_size, NULL, NULL);
         if (NT_SUCCESS(status)) {
-            retval = (int)*buf_size;
+            retval = 0;
         } else {
             kryptos_freeseg(*buf, *buf_size);
             *buf_size = 0;
