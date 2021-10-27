@@ -702,3 +702,43 @@ function has_bad_funcs(func_signatures type list, srcs type list, incs type list
 
     result ($founds.count() > 0);
 }
+
+function get_msvc_artifact_postfix() : result type string {
+    var cfg_postfix type string;
+    $cfg_postfix = "mt";
+
+    var option type list;
+    $option = hefesto.sys.get_option("compile-model");
+    if ($option.count() > 0) {
+        var compile_model type string;
+        $compile_model = $option.item(0);
+        if ($compile_model == "debug") {
+            $cfg_postfix = $cfg_postfix + "d";
+        }
+    }
+
+    result $cfg_postfix;
+}
+
+function get_msvc_platform() : result type string {
+    var option type list;
+    var arch type string;
+
+    $option = hefesto.sys.get_option("cpu-arch");
+    if ($option.count() == 0) {
+        var programfilesx86 type string;
+        $programfilesx86 = hefesto.sys.env("ProgramFiles(x86)");
+        if ($programfilesx86.len() > 0) {
+            result "x64";
+        }
+        result "Win32";
+    }
+
+    $arch = $option.item(0);
+
+    if($arch == "x86" || $arch == "X86") {
+        result "Win32";
+    }
+
+    result $arch;
+}
