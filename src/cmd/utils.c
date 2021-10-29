@@ -109,31 +109,10 @@ char *get_canonical_path(char *dest, const size_t dest_size, const char *src, co
         }
     }
 #elif defined(_WIN32)
-    // WARN(Rafael): Some MinGW versions seems not to support ´libpathcch.lib´ by now let's use ´shlwpai.lib´.
-    char drive[MAX_PATH] = "", *d = NULL;
-    char canonical[MAX_PATH] = "", *c = NULL;
-    if (GetCurrentDirectoryA(sizeof(drive), drive) == 0) {
+    memset(dest, 0, dest_size);
+    if (GetFullPathNameA(src, dest_size, dest, NULL) == 0) {
         return NULL;
     }
-
-    if ((d = strstr(drive, ":")) != NULL && (d + 1) < (&drive[0] + sizeof(drive))) {
-        d[1] = 0;
-    } else {
-        return NULL;
-    }
-
-    snprintf(dest, dest_size, "%s", drive);
-    d = dest + strlen(dest);
-
-    PathCanonicalizeA(canonical, src);
-    c = strstr(canonical, ":\\");
-    if (canonical[0] == '\\' && strlen(canonical) == 1) {
-        canonical[0] = 0;
-    } else if (canonical[0] == '\\') {
-        c = &canonical[1];
-    }
-
-    snprintf(d, dest_size - (d - dest), ":\\%s", (c == NULL) ? canonical : c);
 #else
 # error Some code wanted.
 #endif
