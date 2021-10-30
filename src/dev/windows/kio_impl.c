@@ -23,7 +23,7 @@ int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
     }
 
     RtlInitAnsiString(&temp_astr, filepath);
-    status = RtlAnsiStringToUnicodeString(&filepath_ustr, &temp_astr, FALSE);
+    status = RtlAnsiStringToUnicodeString(&filepath_ustr, &temp_astr, TRUE);
     if (!NT_SUCCESS(status)) {
         return 1;
     }
@@ -46,9 +46,10 @@ int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
             retval = 0;
         }
         ZwFlushBuffersFile(file_handle, &io_sts);
+        ZwClose(file_handle);
     }
 
-    ZwClose(file_handle);
+    RtlFreeUnicodeString(&filepath_ustr);
 
     return retval;
 }
@@ -56,9 +57,9 @@ int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
 int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
     OBJECT_ATTRIBUTES file_attr;
     HANDLE file_handle = 0;
-    UNICODE_STRING filepath_ustr;
+    UNICODE_STRING filepath_ustr = { 0 };
     ANSI_STRING temp_astr;
-    NTSTATUS status = STATUS_UNSUCCESSFUL, create_file_status = STATUS_UNSUCCESSFUL;
+    NTSTATUS status = STATUS_UNSUCCESSFUL, create_file_status = STATUS_UNSUCCESSFUL, unicode_conv_status = STATUS_UNSUCCESSFUL;
     IO_STATUS_BLOCK io_sts;
     int retval = 1;
     FILE_STANDARD_INFORMATION file_info = { 0 };
@@ -70,10 +71,12 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
     *buf_size = 0;
 
     RtlInitAnsiString(&temp_astr, filepath);
-    status = RtlAnsiStringToUnicodeString(&filepath_ustr, &temp_astr, FALSE);
-    if (!NT_SUCCESS(status)) {
+    unicode_conv_status = RtlAnsiStringToUnicodeString(&filepath_ustr, &temp_astr, TRUE);
+    if (!NT_SUCCESS(unicode_conv_status)) {
         goto kread_impl_epilogue;
     }
+
+    KdPrint(("filepath = %ws\n", filepath_ustr.Buffer));
 
     InitializeObjectAttributes(&file_attr, &filepath_ustr, OBJ_KERNEL_HANDLE, NULL, NULL);
     create_file_status = ZwCreateFile(&file_handle,
@@ -118,6 +121,10 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
 kread_impl_epilogue:
     if (NT_SUCCESS(create_file_status)) {
         ZwClose(file_handle);
+    }
+
+    if (NT_SUCCESS(unicode_conv_status)) {
+        RtlFreeUnicodeString(&filepath_ustr);
     }
 
     return 1;

@@ -21,7 +21,7 @@ typedef int (*zc_cmd_func)(void);
 # define ZC_INVALID_DEVICE INVALID_HANDLE_VALUE
 # define ZACARIAS_SERVICE "dev_zacarias"
 # define ZACARIAS_DISPLAY_NAME "ZacariasDevice"
-# define ZACARIAS_DEVICE_LINK "\\??\\ZacariasDeviceLink"
+# define ZACARIAS_DEVICE_LINK "\\\\.\\ZacariasDeviceLink"
 #else
 # error Some code wanted.
 #endif

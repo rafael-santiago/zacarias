@@ -119,3 +119,47 @@ char *get_canonical_path(char *dest, const size_t dest_size, const char *src, co
 
     return dest;
 }
+
+#if defined(_WIN32)
+char *get_ntpath(char *dest, const size_t dest_size, const char *src, const size_t src_size) {
+    char dos_device[MAX_PATH];
+    char *s = NULL, *s_end = NULL;
+    char device_name[MAX_PATH];
+    char temp[4096];
+    DWORD device_name_size;
+    size_t temp_size;
+
+    if (dest == NULL || dest_size == 0 || src == NULL || src_size == 0) {
+        return NULL;
+    }
+
+    if ((s = strstr(src, ":")) == NULL) {
+        return NULL;
+    }
+
+    s_end = s + 1;
+
+    if ((s_end - src) > sizeof(dos_device) - 1) {
+        return NULL;
+    }
+
+    memset(dos_device, 0, sizeof(dos_device));
+    memcpy(dos_device, src, s_end - src);
+    device_name_size = QueryDosDeviceA(dos_device, device_name, sizeof(device_name) - 1); 
+
+    if (device_name_size == 0) {
+        return NULL;
+    }
+
+    memset(temp, 0, sizeof(temp));
+    temp_size = snprintf(temp, sizeof(temp) - 1, "%s\\%s", device_name, s_end + ((size_t)s_end[0] == '\\' && s_end < (src + src_size)));
+
+    if (temp_size > (dest_size - 1)) {
+        return NULL;
+    }
+
+    snprintf(dest, dest_size - 1, "%s", temp);
+
+    return dest;
+}
+#endif

@@ -58,7 +58,7 @@ zc_dev_t zcdev_open(void) {
         fprintf(stderr, "ERROR: Unable to open zacarias device : failure detail : %s\n", err_buf);
     }
 
-    return INVALID_HANDLE_VALUE;
+    return zcd;
 #else
 # error Some code wanted.
 #endif
@@ -286,10 +286,19 @@ static int zcdev_ioctl(const zc_dev_t zcd, const unsigned long cmd, struct zc_de
 #elif defined(_WIN32)
     int ntry = 10;
     DWORD ret_bytes = 0;
-    BOOL done = DeviceIoControl(zcd, (DWORD)cmd, ioctx, sizeof(struct zc_devio_ctx), ioctx, sizeof(struct zc_devio_ctx), &ret_bytes, 0);
+    BOOL done = FALSE;
     char err_buf[1024];
 
     memset(err_buf, 0, sizeof(err_buf));
+
+    if (ioctx->pwdb_path_size > 0) {
+        if (get_ntpath(ioctx->pwdb_path, sizeof(ioctx->pwdb_path) - 1, ioctx->pwdb_path, ioctx->pwdb_path_size) == NULL) {
+            return EXIT_FAILURE;
+        }
+        ioctx->pwdb_path_size = strlen(ioctx->pwdb_path);
+    }
+
+    done = DeviceIoControl(zcd, (DWORD)cmd, ioctx, sizeof(struct zc_devio_ctx), ioctx, sizeof(struct zc_devio_ctx), &ret_bytes, 0);
 
     while (!done && ntry-- > 0) {
         done = DeviceIoControl(zcd, (DWORD)cmd, ioctx, sizeof(struct zc_devio_ctx), ioctx, sizeof(struct zc_devio_ctx), &ret_bytes, 0);
