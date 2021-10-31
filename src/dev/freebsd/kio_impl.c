@@ -5,7 +5,7 @@
  * be found in the COPYING file.
  *
  */
-#include <freebsd/kio_impl.h>
+#include <sys/types.h>
 #include <sys/malloc.h>
 #include <sys/uio.h>
 #include <sys/syscallsubr.h>
@@ -13,7 +13,7 @@
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 
-int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
+int kwrite(const char *filepath, void *buf, const size_t buf_size) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic push
@@ -47,7 +47,7 @@ int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
 #pragma pop
 }
 
-int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
+int kread(const char *filepath, void **buf, size_t *buf_size) {
     struct uio uio_ctx = { 0 };
     struct iovec iovec_ctx = { 0 };
     struct thread *td = curthread;

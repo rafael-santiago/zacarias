@@ -5,11 +5,10 @@
  * be found in the COPYING file.
  *
  */
-#include <windows/kio_impl.h>
 #include <ntifs.h>
 #include <kryptos.h>
 
-int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
+int kwrite(const char *filepath, void *buf, const size_t buf_size) {
     OBJECT_ATTRIBUTES file_attr;
     HANDLE file_handle;
     UNICODE_STRING filepath_ustr;
@@ -54,7 +53,7 @@ int kwrite_impl(const char *filepath, void *buf, const size_t buf_size) {
     return retval;
 }
 
-int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
+int kread(const char *filepath, void **buf, size_t *buf_size) {
     OBJECT_ATTRIBUTES file_attr;
     HANDLE file_handle = 0;
     UNICODE_STRING filepath_ustr = { 0 };
@@ -73,7 +72,7 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
     RtlInitAnsiString(&temp_astr, filepath);
     unicode_conv_status = RtlAnsiStringToUnicodeString(&filepath_ustr, &temp_astr, TRUE);
     if (!NT_SUCCESS(unicode_conv_status)) {
-        goto kread_impl_epilogue;
+        goto kread_epilogue;
     }
 
     InitializeObjectAttributes(&file_attr, &filepath_ustr, OBJ_KERNEL_HANDLE, NULL, NULL);
@@ -96,7 +95,7 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
                                         FileStandardInformation);
 
         if (!NT_SUCCESS(status)) {
-            goto kread_impl_epilogue;
+            goto kread_epilogue;
         }
 
         *buf_size = (size_t) file_info.EndOfFile.QuadPart;
@@ -104,7 +103,7 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
         *buf = kryptos_newseg(*buf_size + 1);
         if (*buf == NULL) {
             *buf_size = 0;
-            goto kread_impl_epilogue;
+            goto kread_epilogue;
         }
 
         status = ZwReadFile(file_handle, NULL, NULL, NULL, &io_sts, *buf, (ULONG)*buf_size, NULL, NULL);
@@ -116,7 +115,7 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
         }
     }
 
-kread_impl_epilogue:
+kread_epilogue:
     if (NT_SUCCESS(create_file_status)) {
         ZwClose(file_handle);
     }

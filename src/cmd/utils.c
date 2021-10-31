@@ -18,7 +18,19 @@
 #include <stdio.h>
 
 void del_scr_line(void) {
+#if !defined(_WIN32)
     fprintf(stdout, "\r                                                                                              \r");
+#else
+    CONSOLE_SCREEN_BUFFER_INFO cinfo;
+    SHORT x;
+    char erase_buf[4096];
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cinfo);
+    memset(erase_buf, 0, sizeof(erase_buf));
+    for (x = 0; x < cinfo.dwMaximumWindowSize.X - 1 && x < sizeof(erase_buf); x++) {
+        erase_buf[x] = ' ';
+    }
+    fprintf(stdout, "\r%s\r", erase_buf);
+#endif
     fflush(stdout);
 }
 

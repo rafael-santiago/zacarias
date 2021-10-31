@@ -477,7 +477,6 @@ kryptos_u8_t *zacarias_getuserkey(size_t *key_size) {
     *key_size = kp - key;
 
 zacarias_getuserkey_epilogue:
-
     memset(line, 0, sizeof(line));
 
     SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), con_mode);
