@@ -76,8 +76,6 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
         goto kread_impl_epilogue;
     }
 
-    KdPrint(("filepath = %ws\n", filepath_ustr.Buffer));
-
     InitializeObjectAttributes(&file_attr, &filepath_ustr, OBJ_KERNEL_HANDLE, NULL, NULL);
     create_file_status = ZwCreateFile(&file_handle,
                                       GENERIC_READ,
@@ -90,7 +88,7 @@ int kread_impl(const char *filepath, void **buf, size_t *buf_size) {
                                       FILE_SYNCHRONOUS_IO_NONALERT,
                                       NULL,
                                       0);
-    if (NT_SUCCESS(status)) {
+    if (!NT_SUCCESS(status)) {
         status = ZwQueryInformationFile(file_handle,
                                         &io_sts,
                                         &file_info,
@@ -127,5 +125,5 @@ kread_impl_epilogue:
         RtlFreeUnicodeString(&filepath_ustr);
     }
 
-    return 1;
+    return retval;
 }
