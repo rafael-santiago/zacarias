@@ -55,7 +55,7 @@ zc_dev_t zcdev_open(void) {
                        err_buf,
                        sizeof(err_buf),
                        NULL);
-        fprintf(stderr, "ERROR: Unable to open zacarias device : failure detail : %s\n", err_buf);
+        fprintf(stderr, "ERROR: Unable to open zacarias device : failure detail : %s", err_buf);
     }
 
     return zcd;

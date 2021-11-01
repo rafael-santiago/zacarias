@@ -30,15 +30,15 @@ int zc_attach(void) {
     struct stat st;
     int do_init = zc_get_bool_option("init", 0);
 
-    if (zcd == ZC_INVALID_DEVICE) {
-        err = errno;
-        goto zc_attach_epilogue;
-    }
-
     pwdb_passwd[0] = pwdb_passwd[1] = NULL;
     pwdb_passwd_size[0] = pwdb_passwd_size[1] = 0;
     session_passwd[0] = session_passwd[1] = NULL;
     session_passwd_size[0] = session_passwd_size[1] = 0;
+
+    if (zcd == ZC_INVALID_DEVICE) {
+        err = errno;
+        goto zc_attach_epilogue;
+    }
 
     ZC_GET_OPTION_OR_DIE(pwdb_path, "pwdb", zc_attach_epilogue);
     pwdb_path_size = strlen(pwdb_path);
