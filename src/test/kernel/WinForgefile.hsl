@@ -7,6 +7,7 @@
 #
 
 include ../../build/toolsets.hsl
+include ~/toolsets/windows/driver/util/mod_utils.hsl
 
 local var src type list;
 local var includes type list;
@@ -57,4 +58,40 @@ libzcsec-kernel-tests-sys.prologue() {
 }
 
 libzcsec-kernel-tests-sys.epilogue() {
+    if (hefesto.sys.last_forge_result() == 0) {
+        copy_win_driver_artifact();
+        if (insmod(hefesto.sys.make_path(hefesto.sys.pwd(), "libzcsec-kernel-tests.sys")) != 0) {
+            hefesto.project.abort(1);
+        }
+        if (rmmod("libzcsec-kernel-tests.sys") != 0) {
+            hefesto.sys.echo("ERROR: Uanble to remove device driver test!\n");
+            hefesto.project.abort(1);
+        }
+    }
+}
+
+local function copy_win_driver_artifact() : result type none {
+    var artifact_filepath type string;
+    $artifact_filepath = get_msvc_platform() + "\\";
+
+    var option type list;
+    $option = hefesto.sys.get_option("compile-model");
+
+    var compile_model type string;
+    if ($option.count() > 0) {
+        $compile_model = $option.item(0);
+    }
+
+    if ($compile_model.len() == 0 || $compile_model == "debug") {
+        $artifact_filepath = $artifact_filepath + "debug";
+    } else {
+        $artifact_filepath = $artifact_filepath + "release";
+    }
+
+    $artifact_filepath = hefesto.sys.make_path(hefesto.sys.pwd(), $artifact_filepath + "\\libzcsec-kernel-tests.sys");
+
+    if (hefesto.sys.cp($artifact_filepath, "libzcsec-kernel-tests.sys") != 1) {
+        hefesto.sys.echo("BUILD ERROR: Unable to copy device driver artifact.\n");
+        hefesto.project.abort(1);
+    }
 }

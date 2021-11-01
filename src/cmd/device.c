@@ -114,8 +114,14 @@ static int zc_device_install(void) {
     }
 
     if ((zacarias_service = OpenServiceA(hmanager, ZACARIAS_SERVICE, SERVICE_ALL_ACCESS)) != NULL) {
-        zc_device_uninstall();
+        fprintf(stderr, "ERROR: While trying to install kernel module '%s'.\n", device_driver_path);
+        // INFO(Rafael): Even being possible of doing a clean reinstall on Windows, better to fail, since
+        //               the previous instance can have sessioned profiles and unloading it would result on
+        //               losing those ephemeral pieces of access information.
+        //zc_device_uninstall();
         CloseServiceHandle(zacarias_service);
+        zacarias_service = NULL;
+        goto zc_device_install_epilogue;
     }
 
     zacarias_service = CreateServiceA(hmanager,

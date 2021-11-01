@@ -121,6 +121,10 @@ char *get_canonical_path(char *dest, const size_t dest_size, const char *src, co
         }
     }
 #elif defined(_WIN32)
+    if (dest == NULL || dest_size == 0 || src == NULL || src_size == 0) {
+        return NULL;
+    }
+
     memset(dest, 0, dest_size);
     if (GetFullPathNameA(src, dest_size, dest, NULL) == 0) {
         return NULL;

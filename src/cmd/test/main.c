@@ -49,7 +49,9 @@ CUTE_TEST_CASE(cmd_tests)
         fprintf(stdout, "WARN: device_install_uninstall_stressing_tests skipped.\n");
         fprintf(stdout, "WARN: regular_using_tests skipped.\n");
     }
+#if !defined(_WIN32)
     CUTE_RUN_TEST(syscall_tracing_mitigation_tests);
+#endif
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(device_install_uninstall_stressing_tests)
@@ -63,7 +65,11 @@ CUTE_TEST_CASE(device_install_uninstall_stressing_tests)
     size_t a;
     for (a = 0; a < attempts_nr; a++) {
         printf("%.0f%% completed...\r", ((float)a / (float)attempts_nr) * 100);
+#if defined(__linux__) || defined(__FreeBSD__)
         CUTE_ASSERT(zc("device", "install --device-driver-path=../../dev/zacarias.ko", NULL) == EXIT_SUCCESS);
+#elif defined(_WIN32)
+        CUTE_ASSERT(zc("device", "install --device-driver-path=..\\..\\dev\\zacarias.sys", NULL) == EXIT_SUCCESS);
+#endif
         CUTE_ASSERT(zc("device", "uninstall", NULL) == EXIT_SUCCESS);
     }
     printf("                            \r");
@@ -122,8 +128,15 @@ CUTE_TEST_CASE_END
 CUTE_TEST_CASE(device_install_tests)
     zc("device", "uninstall", NULL);
     CUTE_ASSERT(zc("device", "install", NULL) != EXIT_SUCCESS);
+#if defined(__linux__) || defined(__FreeBSD__)
     CUTE_ASSERT(zc("device", "install --device-driver-path=../../dev/zacarias.ko", NULL) == EXIT_SUCCESS);
     CUTE_ASSERT(zc("device", "install --device-driver-path=../../dev/zacarias.ko", NULL) != EXIT_SUCCESS);
+#elif defined(_WIN32)
+    CUTE_ASSERT(zc("device", "install --device-driver-path=..\\..\\dev\\zacarias.sys", NULL) == EXIT_SUCCESS);
+    CUTE_ASSERT(zc("device", "install --device-driver-path=..\\..\\dev\\zacarias.sys", NULL) != EXIT_SUCCESS);
+#else
+# error Some code wanted.
+#endif
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(device_uninstall_tests)
@@ -145,15 +158,24 @@ CUTE_TEST_CASE(get_canonical_path_tests)
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, NULL, 6) == NULL);
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "passwd", 0) == NULL);
 
+#if defined(__unix__)
     snprintf(expected, sizeof(expected) - 1, "%s/passwd", cwd);
+#else
+    snprintf(expected, sizeof(expected) - 1, "%s\\passwd", cwd);
+#endif
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "passwd", 6) == &result[0]);
     CUTE_ASSERT(memcmp(result, expected, strlen(expected)) == 0);
 
+#if defined(__unix__)
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "404/passwd", 10) == NULL);
+#endif
 
+#if defined(__unix__)
     snprintf(input, sizeof(input) - 1, "%s/404/passwd", cwd);
-    printf("%s\n", result);
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, input, strlen(input)) == NULL);
+#elif defined(_WIN32)
+    snprintf(input, sizeof(input) - 1, "%s\\404\\passwd", cwd);
+#endif
 
 #if defined(__unix__)
     CUTE_ASSERT(mkdir("404", 0666) == EXIT_SUCCESS);
@@ -169,8 +191,13 @@ CUTE_TEST_CASE(get_canonical_path_tests)
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "../404/passwd", 13) == &result[0]);
     CUTE_ASSERT(memcmp(result, input, strlen(input)) == 0);
 
+#if defined(__unix__)
     snprintf(expected, sizeof(expected) - 1, "%s/passwd", cwd);
     CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "../passwd", 9) == &result[0]);
+#elif defined(_WIN32)
+    snprintf(expected, sizeof(expected) - 1, "%s\\passwd", cwd);
+    CUTE_ASSERT(get_canonical_path(result, sizeof(result) - 1, "..\\passwd", 9) == &result[0]);
+#endif
     CUTE_ASSERT(memcmp(result, expected, strlen(expected)) == 0);
 
     CUTE_ASSERT(chdir("..") == EXIT_SUCCESS);
