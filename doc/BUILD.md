@@ -126,20 +126,20 @@ First of all a mantra:
 
 >I do not provide signed drivers and I am not interested in doing it. If you want to do so, go ahead but I will not endorse you.
 
-Until now (2021) ``FreeBSD`` is the only supported platform that does not offers those complications. Some
+Until now (2021) ``FreeBSD`` is the only supported platform that does not offer those complications. Some
 ``Linux`` versions use ``UEFI`` boot in order to control which driver should really be loaded or not. Similarly
 ``Windows`` does it in a less acrobatic and more self-sufficient way. In both cases the drivers must be signed
 and you need to follow some additional steps to make the driver loading happens on those platforms.
 
-On ``Linux`` the process only includes sign the kernel module by  using a PK key pair and a password. During
+On ``Linux`` the process only includes sign the kernel module by using a PK key pair and a password. During
 the next boot after doing it the password will be asked during boot. Does it boring? A little, Zzzz.
 
 On ``Windows`` you need to attest your device driver against some ``Microsoft`` testing suite by using their
-``HLK Studio``. You need a Windows server and a machine running the windows version that you are intending to
+``HLK Studio``. You need a Windows server and a machine running the Windows version that you are intending to
 load this attested device driver. They provide some virtual machines but only Hypher-V based. After that you
-generate a package and submit it on Microsoft site to be signed. Finally you download the signed version. Yes,
-it is a long and pretty boring way. Everything little change on device driver will make you re-run all those
-tasks. Good luck!
+generate a package and submit it at Microsoft site to be signed. Finally, you download the signed version. Yes,
+it is a long and pretty boring way. Every little change on device driver will make you re-run all those tasks.
+Good luck!
 
 I am a software developer not a lawyer and all this talk about certification make me fall asleep. Now you should
 understand why I do not provide signed drivers and will not do it so.
@@ -147,5 +147,8 @@ understand why I do not provide signed drivers and will not do it so.
 If you want to load the unsigned drivers on ``Linux`` you need to run it in a non-uefi boot based machine. On
 ``Windows`` you can disable the driver enforcement by running ``bcdedit /set testsigning on`` (``UEFI`` must
 be previously disabled on your ``BIOS``).
+
+Quite frankly, if you have loaded a rootkit into your system, that requires root or administrator privileges
+to make it happen, you really deserve a rootkit into your system. Sorry for the sincerity.
 
 [``Back``](#contents)
