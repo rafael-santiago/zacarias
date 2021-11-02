@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(_WIN32)
+# include <windows.h>
+#endif
 
 static int zc(const char *command, const char *args, const char *keyboard_data);
 static int traced_zc(const char *command, const char *args, const char *keyboard_data);
@@ -31,10 +34,17 @@ CUTE_DECLARE_TEST_CASE(device_install_uninstall_stressing_tests);
 CUTE_DECLARE_TEST_CASE(regular_using_tests);
 CUTE_DECLARE_TEST_CASE(syscall_tracing_mitigation_tests);
 
+#if defined(_WIN32)
+CUTE_DECLARE_TEST_CASE(get_ntpath_tests);
+#endif
+
 CUTE_MAIN(cmd_tests);
 
 CUTE_TEST_CASE(cmd_tests)
     CUTE_RUN_TEST(get_canonical_path_tests);
+#if defined(_WIN32)
+    CUTE_RUN_TEST(get_ntpath_tests);
+#endif
     CUTE_RUN_TEST(device_install_tests);
     CUTE_RUN_TEST(device_uninstall_tests);
     CUTE_RUN_TEST(attach_tests);
@@ -54,13 +64,33 @@ CUTE_TEST_CASE(cmd_tests)
 #endif
 CUTE_TEST_CASE_END
 
+#if defined(_WIN32)
+CUTE_TEST_CASE(get_ntpath_tests)
+    const char *path = "C:\\Whatever\\abc.txt";
+    char dest[MAX_PATH];
+    size_t dest_size;
+    char expected[MAX_PATH];
+    CUTE_ASSERT(QueryDosDeviceA("C:", expected, sizeof(expected) - 1) != 0);
+    strcat(expected, "\\Whatever\\abc.txt");
+    CUTE_ASSERT(get_ntpath(NULL, sizeof(dest) - 1, path, strlen(path)) == NULL);
+    CUTE_ASSERT(get_ntpath(dest, 0, path, strlen(path)) == NULL);
+    CUTE_ASSERT(get_ntpath(dest, sizeof(dest) - 1, NULL, strlen(path)) == NULL);
+    CUTE_ASSERT(get_ntpath(dest, sizeof(dest) - 1, path, 0) == NULL);
+    CUTE_ASSERT(get_ntpath(dest, sizeof(dest) - 1, &path[2], strlen(&path[2])) == NULL);
+    CUTE_ASSERT(get_ntpath(dest, sizeof(dest) - 1, path, strlen(path)) == &dest[0]);
+    dest_size = strlen(dest);
+    CUTE_ASSERT(dest_size == strlen(expected));
+    CUTE_ASSERT(memcmp(dest, expected, dest_size) == 0);
+CUTE_TEST_CASE_END
+#endif
+
 CUTE_TEST_CASE(device_install_uninstall_stressing_tests)
     // INFO(Rafael): An important regression testing for Linux device.
     //               Since char device creation on Linux is everything except simple,
     //               there was a bug on it that was causing failures when attempting
     //               many insmod/rmmods. Now it is being done correctly according to
     //               the new but (still complicated) way. Anyway, executing it on
-    //               FreeBSD will no hurt.
+    //               FreeBSD and Windows will no hurt.
     const size_t attempts_nr = 10000;
     size_t a;
     for (a = 0; a < attempts_nr; a++) {

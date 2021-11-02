@@ -1,5 +1,5 @@
-(A) Implement get_nt_path() unit tests on Windows. +User,+Tests
-(A) Find a way of implementing tracing tests on Windows. +User,+Tests
+(A) Refresh documentation in order to include Windows port information. +User,+Documentation
+(B) Find a way of implementing tracing tests on Windows. +User,+Tests
 x (A) Only recompile dependencies from kernel mode tests if '--clean' is passed. +Dev,+Sys,+Tests,+Build
 x (A) Make kernel mode tests infrastructure. +Dev,+Sys,+Tests
 x (A) Inspect memory corruption present at plbuf_edit_shuffle. dev/sec/test is breaking randomly. +Dev,+Test,+BugHunting
@@ -45,3 +45,4 @@ x (A) Implement FreeBSD version. +Dev,+Sys,+Evolvement
 x (A) Add anti-debugging mitigation. +User,+SecurityHardening
 x (A) Create syscall tracing system test. +User,+Test
 x (A) Windows port. +Dev,+Sys,+User,+Build,+Tests,+SupportShift,+Evolvement
+x (A) Implement get_ntpath() unit tests on Windows. +User,+Tests
