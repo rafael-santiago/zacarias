@@ -124,7 +124,7 @@ If you want to uninstall, use: ``hefesto --uninstall``.
 
 First of all a mantra:
 
->I do not provide signed drivers and I am not interested in doing it. If you want to doing so, go ahead but I will not endorse you.
+>I do not provide signed drivers and I am not interested in doing it. If you want to do so, go ahead but I will not endorse you.
 
 Until now (2021) ``FreeBSD`` is the only supported platform that does not offers those complications. Some
 ``Linux`` versions use ``UEFI`` boot in order to control which driver should really be loaded or not. Similarly
