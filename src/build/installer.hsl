@@ -48,21 +48,35 @@ local function do_install() : result type int {
     var src_artifacts type list;
     var dest_artifacts type list;
 
-    if (hefesto.sys.os_name() == "linux" || hefesto.sys.os_name() == "freebsd") {
-        $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "dev/zacarias.ko"));
-        $dest_artifacts.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
+    if (hefesto.sys.os_name() == "linux" || hefesto.sys.os_name() == "freebsd" || hefesto.sys.os_name() == "windows") {
+        if (hefesto.sys.os_name() == "linux" || hefesto.sys.os_name() == "freebsd") {
+            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "dev/zacarias.ko"));
+            $dest_artifacts.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
 
-        $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../bin/zc"));
-        $dest_artifacts.add_item("/usr/local/share/zacarias/bin/zc");
+            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../bin/zc"));
+            $dest_artifacts.add_item("/usr/local/share/zacarias/bin/zc");
 
-        $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/MANUAL.md"));
-        $dest_artifacts.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
+            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/MANUAL.md"));
+            $dest_artifacts.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
 
-        $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/man/zacarias.1"));
-        $dest_artifacts.add_item("/usr/local/man/man1/zacarias.1");
+            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/man/zacarias.1"));
+            $dest_artifacts.add_item("/usr/local/man/man1/zacarias.1");
+        } else if (hefesto.sys.os_name() == "windows") {
+            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "dev\\zacarias.sys"));
+            $dest_artifacts.add_item("C:\\zacarias\\sys\\zacarias.sys");
+
+            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "..\\bin\\zc.exe"));
+            $dest_artifacts.add_item("C:\\zacarias\\bin\\zc.exe");
+
+            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "..\\doc\\MANUAL.md"));
+            $dest_artifacts.add_item("c:\\doc\\MANUAL.md");
+        }
 
         $err = do_install_cp_files($dest_artifacts, $src_artifacts);
         if ($err == 0) {
+            if (hefesto.sys.os_name() == "windows") {
+                export_zc_path();
+            }
             hefesto.sys.echo("INFO: Installed.\n");
         } else {
             # INFO(Rafael): Somethig went wrong. Try to rollback as much as possible.
@@ -73,6 +87,71 @@ local function do_install() : result type int {
     }
 
     result $err;
+}
+
+local function export_zc_path() : result type none {
+    var path type string;
+    $path = hefesto.sys.env("WINREG:HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\\PATH");
+    if ($path.len() > 0) {
+        if ($path.match("C:\\\\zacarias\\\\bin") == 0) {
+            if ($path.at($path.len() - 1) != ";") {
+                $path = $path + ";";
+            }
+            $path = $path + "C:\\zacarias\\bin;";
+            if (hefesto.sys.setenv("WINREG:HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\\PATH", $path) != 0) {
+                hefesto.sys.echo("WARN: Unable to export zc path. Try to do it yourself.\n");
+            }
+        }
+    } else {
+        hefesto.sys.echo("WARN: Unable to export zc path. Try to do it yourself.\n");
+    }
+}
+
+local function unexport_zc_path() : result type none {
+    var str_path type string;
+    $str_path = hefesto.sys.env("WINREG:HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\\PATH");
+    if ($str_path.len() > 0) {
+        var path type list;
+        $path = path_env_to_list($str_path);
+        var erased type int;
+        $erased = 0;
+        var p type int;
+        $p = 0;
+        $str_path = "";
+        while ($p < $path.count()) {
+            if ($path.item($p) != "C:\\zacarias\\bin") {
+                $str_path = $str_path + $path.item($p) + ";";
+            } else {
+                $erased = 1;
+            }
+            $p = $p + 1;
+        }
+        if ($erased != 0) {
+            if (hefesto.sys.setenv("WINREG:HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\\PATH", $str_path) != 0) {
+                hefesto.sys.echo("WARN: Unable to unexport zc path. Try to do it yourself.\n");
+            }
+        }
+    }
+}
+
+local function path_env_to_list(path type string) : result type list {
+    var item type string;
+    var p type int;
+    var path_lst type list;
+    $p = 0;
+    while ($p < $path.len()) {
+        if ($path.at($p) == ";" && $item.len() > 0) {
+            $path_lst.add_item($item);
+            $item = "";
+        } else {
+            if ($path.at($p) != ";") $item = $item + $path.at($p);
+        }
+        $p = $p + 1;
+    }
+    if ($item.len() > 0) {
+        $path_lst.item($item);
+    }
+    result $path_lst;
 }
 
 local function do_install_cp_files(dest type list, src type list) : result type int {
@@ -124,17 +203,31 @@ local function do_uninstall() : result type int {
 
     var to_burn type list;
 
-    if (hefesto.sys.os_name() == "linux" ||
-        hefesto.sys.os_name() == "freebsd") {
-        $to_burn.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
-        $to_burn.add_item("/usr/local/share/zacarias/bin/zc");
-        $to_burn.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
-        $to_burn.add_item("/usr/local/man/man1/zacarias.1");
-        $to_burn.add_item("/usr/local/share/zacarias/bin");
-        $to_burn.add_item("/usr/local/share/zacarias/doc");
-        $to_burn.add_item("/usr/local/share/zacarias");
+    if (hefesto.sys.os_name() == "linux"   ||
+        hefesto.sys.os_name() == "freebsd" ||
+        hefesto.sys.os_name() == "windows") {
+        if (hefesto.sys.os_name() == "linux" || hefesto.sys.os_name() == "freebsd") {
+            $to_burn.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
+            $to_burn.add_item("/usr/local/share/zacarias/bin/zc");
+            $to_burn.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
+            $to_burn.add_item("/usr/local/man/man1/zacarias.1");
+            $to_burn.add_item("/usr/local/share/zacarias/bin");
+            $to_burn.add_item("/usr/local/share/zacarias/doc");
+            $to_burn.add_item("/usr/local/share/zacarias");
+        } else if (hefesto.sys.os_name() == "windows") {
+            $to_burn.add_item("C:\\zacarias\\sys\\zacarias.sys");
+            $to_burn.add_item("C:\\zacarias\\bin\\zc.exe");
+            $to_burn.add_item("C:\\zacarias\\doc\\MANUAL.md");
+            $to_burn.add_item("C:\\zacarias\\sys");
+            $to_burn.add_item("C:\\zacarias\\bin");
+            $to_burn.add_item("C:\\zacarias\\doc");
+            $to_burn.add_item("C:\\zacarias");
+        }
         $err = do_uninstall_rm_paths($to_burn);
         if ($err == 0) {
+            if (hefesto.sys.os_name() == "windows") {
+                unexport_zc_path();
+            }
             hefesto.sys.echo("INFO: Uninstalled.\n");
         }
     } else {

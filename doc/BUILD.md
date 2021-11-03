@@ -118,6 +118,9 @@ is time to start reading the [user's manual](https://github.com/rafael-santiago/
 
 If you want to uninstall, use: ``hefesto --uninstall``.
 
+On ``Windows`` the installer is able to export the command line tool path, but you need to run the install from
+a command prompt with Administrator privileges and after that you need to do a log-off and finally log-on again.
+
 [``Back``](#contents)
 
 ## Secure boot, signature enforcement and software bureaucracy hypes et al
