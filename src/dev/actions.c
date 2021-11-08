@@ -61,7 +61,7 @@ int zc_dev_act_add_password(struct zc_devio_ctx **devio) {
                                  d->pwdb_passwd, d->pwdb_passwd_size) == 0) {
             kryptos_freeseg(profile->pwdb, profile->pwdb_size);
             profile->pwdb_size = 0;
-            if (kread(profile->pwdb_path, &profile->pwdb, &profile->pwdb_size) != 0) {
+            if (kread(profile->pwdb_path, (void **)&profile->pwdb, &profile->pwdb_size) != 0) {
                 d->status = kPWDBReadingError;
                 err = 0;
                 ZC_DBG("kread has failed.\n");
@@ -228,7 +228,7 @@ int zc_dev_act_del_password(struct zc_devio_ctx **devio) {
             kryptos_freeseg(profile->pwdb, profile->pwdb_size);
             profile->pwdb = NULL;
             profile->pwdb_size = 0;
-            if (kread(profile->pwdb_path, &profile->pwdb, &profile->pwdb_size) != 0) {
+            if (kread(profile->pwdb_path, (void **)&profile->pwdb, &profile->pwdb_size) != 0) {
                 err = 0;
                 d->status = kPWDBReadingError;
                 ZC_DBG("kread has failed.\n");
@@ -581,7 +581,7 @@ int zc_dev_act_attach_profile(struct zc_devio_ctx **devio) {
     }
 
     if (d->action == kAttachProfile) {
-        if (kread(d->pwdb_path, &pwdb, &pwdb_size) != 0) {
+        if (kread(d->pwdb_path, (void **)&pwdb, &pwdb_size) != 0) {
             d->status = kPWDBReadingError;
             ZC_DBG("kread has failed.\n");
             goto zc_dev_act_attach_profile_epilogue;

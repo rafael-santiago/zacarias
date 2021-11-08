@@ -95,7 +95,7 @@ system will not be changed. Follows the command line sample based on my own envi
 ```
 you@AdventureGalley:~/zacarias/src# hefesto --libX11-pkg=/tmp/libX11-1.6.3.tar.gz \
 > --libXtst-pkg=/tmp/libXtst-1.2.2.tar.gz --libxcb-pkg=/tmp/libxcb-1.11.tar.bz2 \
-> --libXext-pkg=/tmp/libXext-1.3.3.tar.gz --libXdcmp-pkg=/tmp/libXdcmp-1.1.1.tar.bz2 \
+> --libXext-pkg=/tmp/libXext-1.3.3.tar.gz --libXdmcp-pkg=/tmp/libXdmcp-1.1.1.tar.bz2 \
 > --libXau-pkg=/tmp/libXau-1.0.8.tar.bz2
 ```
 

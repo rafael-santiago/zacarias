@@ -12,6 +12,7 @@
 #include <sys/proc.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
+#include <kio.h>
 
 int kwrite(const char *filepath, void *buf, const size_t buf_size) {
 #pragma GCC diagnostic push
