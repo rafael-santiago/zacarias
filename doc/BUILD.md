@@ -142,7 +142,8 @@ On ``Windows`` you need to attest your device driver against some ``Microsoft`` 
 load this attested device driver. They provide some virtual machines but only Hypher-V based. After that you
 generate a package and submit it at Microsoft site to be signed. Finally, you download the signed version. Yes,
 it is a long and pretty boring way. Every little change on device driver will make you re-run all those tasks.
-Good luck!
+At least I have executed all driver verifier tests against the device driver, so HLK tests should not complain
+about anything. Good luck!  
 
 I am a software developer not a lawyer and all this talk about certification make me fall asleep. Now you should
 understand why I do not provide signed drivers and will not do it so.
