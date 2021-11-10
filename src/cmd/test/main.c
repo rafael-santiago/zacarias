@@ -74,7 +74,9 @@ CUTE_TEST_CASE(cmd_tests)
     CUTE_RUN_TEST(syscall_tracing_mitigation_tests);
 #endif
 #if !defined(__linux__)
-    CUTE_RUN_TEST(debugging_avoidance_tests);
+    if (CUTE_GET_OPTION("quick-tests") == NULL) {
+        CUTE_RUN_TEST(debugging_avoidance_tests);
+    }
 #endif
 CUTE_TEST_CASE_END
 
