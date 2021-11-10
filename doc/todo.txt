@@ -1,5 +1,4 @@
 (A) Build Windows device driver with release configuration by default. +Dev,+Sys
-(B) Find a way of implementing tracing tests on Windows. +User,+Tests
 x (A) Only recompile dependencies from kernel mode tests if '--clean' is passed. +Dev,+Sys,+Tests,+Build
 x (A) Make kernel mode tests infrastructure. +Dev,+Sys,+Tests
 x (A) Inspect memory corruption present at plbuf_edit_shuffle. dev/sec/test is breaking randomly. +Dev,+Test,+BugHunting
@@ -48,3 +47,4 @@ x (A) Windows port. +Dev,+Sys,+User,+Build,+Tests,+SupportShift,+Evolvement
 x (A) Implement get_ntpath() unit tests on Windows. +User,+Tests
 x (A) Refresh documentation in order to include Windows port information. +User,+Documentation
 x (A) Implement install stuff for Windows. +User,+Build
+x (B) Find a way of implementing tracing tests on Windows. +User,+Tests

@@ -20,6 +20,12 @@ static int traced_zc(const char *command, const char *args, const char *keyboard
 static int zacarias_install(void);
 static int zacarias_uninstall(void);
 static int can_run_syscall_tracing_tests(void);
+static int has_gdb(void);
+static int has_lldb(void);
+static FILE *gdb(const char *stderr_path);
+static void gdb_run(FILE *gdb_proc, const char *command_line);
+static void gdb_quit(FILE *gdb_proc);
+static void gdb_target_exec(FILE *gdb_proc, const char *binary_path);
 
 CUTE_DECLARE_TEST_CASE(cmd_tests);
 CUTE_DECLARE_TEST_CASE(get_canonical_path_tests);
@@ -33,6 +39,7 @@ CUTE_DECLARE_TEST_CASE(password_get_tests);
 CUTE_DECLARE_TEST_CASE(device_install_uninstall_stressing_tests);
 CUTE_DECLARE_TEST_CASE(regular_using_tests);
 CUTE_DECLARE_TEST_CASE(syscall_tracing_mitigation_tests);
+CUTE_DECLARE_TEST_CASE(debugging_avoidance_tests);
 
 #if defined(_WIN32)
 CUTE_DECLARE_TEST_CASE(get_ntpath_tests);
@@ -62,6 +69,47 @@ CUTE_TEST_CASE(cmd_tests)
 #if !defined(_WIN32)
     CUTE_RUN_TEST(syscall_tracing_mitigation_tests);
 #endif
+    CUTE_RUN_TEST(debugging_avoidance_tests);
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(debugging_avoidance_tests)
+#if defined(_WIN32)
+    char *install_cmd = "install --device-driver-path=..\\..\\dev\\zacarias.sys";
+    char *zc_path = "..\\..\\..\\bin\\zc.exe";
+#elif defined(__linux__) || defined(__FreeBSD__)
+    char *install_cmd = "install --device-driver-path=../../dev/zacarias.ko";
+    char *zc_path = "../../../bin/zc";
+#else
+# error Some code wanted.
+#endif
+    pid_t pid = 0;
+    FILE *debugger = NULL, *fp = NULL;
+    char buf[65535];
+    struct stat st;
+
+    if (has_gdb()) {
+        zc("device", "uninstall", NULL);
+        CUTE_ASSERT(zc("device", install_cmd, NULL) == EXIT_SUCCESS);
+        remove("gdb-stderr.txt");
+        debugger = gdb("gdb-stderr.txt");
+        CUTE_ASSERT(debugger != NULL);
+        gdb_target_exec(debugger, zc_path);
+        gdb_run(debugger, "attach --user=rs --pwdb=test.db --init");
+        gdb_quit(debugger);
+        fclose(debugger);
+        CUTE_ASSERT(zc("device", "uninstall", NULL) == EXIT_SUCCESS);
+#if defined(_WIN32)
+        Sleep(5000);
+#endif
+        CUTE_ASSERT(stat("gdb-stderr.txt", &st) == EXIT_SUCCESS);
+        fp = fopen("gdb-stderr.txt", "r");
+        CUTE_ASSERT(fp != NULL);
+        fread(buf, 1, sizeof(buf), fp);
+        fclose(fp);
+        CUTE_ASSERT(strstr(buf, "ALERT: A debugger attachment was detect. Aborting execution to avoid more damage.\n"
+                                "       Do not execute zc again until make sure that your system is clean.\n") != NULL);
+        remove("gdb-stderr.txt");
+    }
 CUTE_TEST_CASE_END
 
 #if defined(_WIN32)
@@ -786,4 +834,45 @@ static int can_run_syscall_tracing_tests(void) {
         "";
 #endif
     return (system(cmdline) == 0);
+}
+
+static int has_gdb(void) {
+#if defined(__unix__)
+    return (system("gdb --version >/dev/null 2>&1") == 0);
+#elif defined(_WIN32)
+    return (system("gdb --version >nul 2>&1") == 0);
+#else
+# error Some code wanted.
+#endif
+}
+
+static int has_lldb(void) {
+#if defined(__unix__)
+    return (system("lldb --version >/dev/null 2>&1") == 0);
+#elif defined(_WIN32)
+    return (system("lldb --version >nul 2>&1") == 0);
+#else
+# error Some code wanted.
+#endif
+}
+
+static FILE *gdb(const char *stderr_path) {
+    char cmdline[4096];
+    snprintf(cmdline, sizeof(cmdline) - 1, "gdb >%s 2>&1", stderr_path);
+    return popen(cmdline, "w");
+}
+
+static void gdb_target_exec(FILE *gdb_proc, const char *binary_path) {
+    char cmd[4096];
+    snprintf(cmd, sizeof(cmd) - 1, "target exec %s\n", binary_path);
+    fprintf(gdb_proc, "%s", cmd);
+}
+
+static void gdb_run(FILE *gdb_proc, const char *command_line) {
+    fprintf(gdb_proc, "run %s\n", command_line);
+}
+
+static void gdb_quit(FILE *gdb_proc) {
+    fprintf(gdb_proc, "quit\n");
+    fflush(gdb_proc);
 }
