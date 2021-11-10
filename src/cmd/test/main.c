@@ -26,6 +26,10 @@ static FILE *gdb(const char *stderr_path);
 static void gdb_run(FILE *gdb_proc, const char *command_line);
 static void gdb_quit(FILE *gdb_proc);
 static void gdb_target_exec(FILE *gdb_proc, const char *binary_path);
+static FILE *lldb(const char *stderr_path);
+static void lldb_run(FILE *lldb_proc, const char *command_line);
+static void lldb_quit(FILE *lldb_proc);
+static void lldb_file(FILE *lldb_proc, const char *binary_path);
 
 CUTE_DECLARE_TEST_CASE(cmd_tests);
 CUTE_DECLARE_TEST_CASE(get_canonical_path_tests);
@@ -88,6 +92,7 @@ CUTE_TEST_CASE(debugging_avoidance_tests)
     struct stat st;
 
     if (has_gdb()) {
+        printf("*** Testing anti-debugging against GDB...\n");
         zc("device", "uninstall", NULL);
         CUTE_ASSERT(zc("device", install_cmd, NULL) == EXIT_SUCCESS);
         remove("gdb-stderr.txt");
@@ -95,20 +100,54 @@ CUTE_TEST_CASE(debugging_avoidance_tests)
         CUTE_ASSERT(debugger != NULL);
         gdb_target_exec(debugger, zc_path);
         gdb_run(debugger, "attach --user=rs --pwdb=test.db --init");
+        sleep(5);
+        fprintf(debugger, "abc\nabc\n");
         gdb_quit(debugger);
-        fclose(debugger);
+        pclose(debugger);
         CUTE_ASSERT(zc("device", "uninstall", NULL) == EXIT_SUCCESS);
 #if defined(_WIN32)
         Sleep(5000);
+#else
+        sleep(5);
 #endif
         CUTE_ASSERT(stat("gdb-stderr.txt", &st) == EXIT_SUCCESS);
         fp = fopen("gdb-stderr.txt", "r");
         CUTE_ASSERT(fp != NULL);
         fread(buf, 1, sizeof(buf), fp);
         fclose(fp);
-        CUTE_ASSERT(strstr(buf, "ALERT: A debugger attachment was detect. Aborting execution to avoid more damage.\n"
-                                "       Do not execute zc again until make sure that your system is clean.\n") != NULL);
+        CUTE_ASSERT(strstr(buf, "ALERT: A debugger attachment was detect. Aborting execution to avoid more damage.") != NULL);
+        CUTE_ASSERT(strstr(buf, "Do not execute zc again until make sure that your system is clean.") != NULL);
         remove("gdb-stderr.txt");
+    }
+
+    if (has_lldb()) {
+        printf("*** Testing anti-debugging against LLDB...\n");
+        zc("device", "uninstall", NULL);
+        CUTE_ASSERT(zc("device", install_cmd, NULL) == EXIT_SUCCESS);
+        remove("lldb-stderr.txt");
+        debugger = lldb("lldb-stderr.txt");
+        CUTE_ASSERT(debugger != NULL);
+        lldb_file(debugger, zc_path);
+        lldb_run(debugger, "attach --user=rs --pwdb=test.db --init");
+        sleep(5);
+        fprintf(debugger, "abc\nabc\n");
+        fflush(debugger);
+        lldb_quit(debugger);
+        pclose(debugger);
+        CUTE_ASSERT(zc("device", "uninstall", NULL) == EXIT_SUCCESS);
+#if defined(_WIN32)
+        Sleep(5000);
+#else
+        sleep(5);
+#endif
+        CUTE_ASSERT(stat("lldb-stderr.txt", &st) == EXIT_SUCCESS);
+        fp = fopen("lldb-stderr.txt", "r");
+        CUTE_ASSERT(fp != NULL);
+        fread(buf, 1, sizeof(buf), fp);
+        fclose(fp);
+        CUTE_ASSERT(strstr(buf, "ALERT: A debugger attachment was detect. Aborting execution to avoid more damage.") != NULL);
+        CUTE_ASSERT(strstr(buf,"Do not execute zc again until make sure that your system is clean.") != NULL);
+        remove("lldb-stderr.txt");
     }
 CUTE_TEST_CASE_END
 
@@ -875,4 +914,24 @@ static void gdb_run(FILE *gdb_proc, const char *command_line) {
 static void gdb_quit(FILE *gdb_proc) {
     fprintf(gdb_proc, "quit\n");
     fflush(gdb_proc);
+}
+
+static FILE *lldb(const char *stderr_path) {
+    char cmdline[4096];
+    snprintf(cmdline, sizeof(cmdline) - 1, "lldb >%s 2>&1", stderr_path);
+    return popen(cmdline, "w");
+}
+
+static void lldb_file(FILE *lldb_proc, const char *binary_path) {
+    char cmdline[4096];
+    snprintf(cmdline, sizeof(cmdline) - 1, "file %s\n", binary_path);
+    fprintf(lldb_proc, "%s", cmdline);
+}
+
+static void lldb_run(FILE *lldb_proc, const char *command_line) {
+    fprintf(lldb_proc, "run %s\n", command_line);
+}
+
+static void lldb_quit(FILE *lldb_proc) {
+    fprintf(lldb_proc, "quit\n");
 }
