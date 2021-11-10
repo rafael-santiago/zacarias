@@ -12,21 +12,44 @@
 #if defined(_WIN32)
 # include <windows.h>
 # include <shlwapi.h>
+#elif defined(__unix__)
+# include <termios.h>
+# include <sys/ioctl.h>
+# include <fcntl.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
 void del_scr_line(void) {
-#if !defined(_WIN32)
-    fprintf(stdout, "\r                                                                                              \r");
-#else
+#if defined(__unix__)
+    int fd = open(ttyname(STDOUT_FILENO), O_RDONLY);
+    struct winsize winsz;
+    char erase_buf[4096];
+    size_t x;
+    if (fd == -1) {
+        fprintf(stdout, "\r                                       "
+                        "                                                       \r");
+    } else {
+        if (ioctl(fd, TIOCGWINSZ, &winsz) == -1) {
+            fprintf(stdout, "\r                                   "
+                            "                                                           \r");
+        } else {
+            memset(erase_buf, 0, sizeof(erase_buf));
+            for (x = 0; x < winsz.ws_col && x < sizeof(erase_buf) - 1; x++) {
+                erase_buf[x] = ' ';
+            }
+            fprintf(stdout, "\r%s\r", erase_buf);
+        }
+        close(fd);
+    }
+#elif defined(_WIN32)
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
     SHORT x;
     char erase_buf[4096];
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cinfo);
     memset(erase_buf, 0, sizeof(erase_buf));
-    for (x = 0; x < cinfo.dwMaximumWindowSize.X - 1 && x < sizeof(erase_buf); x++) {
+    for (x = 0; x < cinfo.dwMaximumWindowSize.X - 1 && x < sizeof(erase_buf) - 1; x++) {
         erase_buf[x] = ' ';
     }
     fprintf(stdout, "\r%s\r", erase_buf);

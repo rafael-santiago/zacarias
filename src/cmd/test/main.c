@@ -73,7 +73,9 @@ CUTE_TEST_CASE(cmd_tests)
 #if !defined(_WIN32)
     CUTE_RUN_TEST(syscall_tracing_mitigation_tests);
 #endif
+#if !defined(__linux__)
     CUTE_RUN_TEST(debugging_avoidance_tests);
+#endif
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(debugging_avoidance_tests)
