@@ -58,6 +58,7 @@ cmd-tests.prologue() {
         $ldflags.add_item("-lpthread");
     } else if (hefesto.sys.os_name() == "windows") {
         $ldflags.add_item("-lshlwapi");
+        $ldflags.add_item("-lfltlib");
     }
 }
 

@@ -49,6 +49,7 @@ zc.prologue() {
         }
     } else {
         $ldflags.add_item("-lshlwapi");
+        $ldflags.add_item("-lfltlib");
     }
     if (build("libaegis") != 0) {
         hefesto.project.abort(1);
