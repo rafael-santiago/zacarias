@@ -1,3 +1,4 @@
+(A) Create a password sub-command that lists the existent alias into a PWDB (aliases). +Dev,+Sys,+User,+NewFeature
 x (A) Build Windows device driver with release configuration by default. +Dev,+Sys
 x (A) Only recompile dependencies from kernel mode tests if '--clean' is passed. +Dev,+Sys,+Tests,+Build
 x (A) Make kernel mode tests infrastructure. +Dev,+Sys,+Tests
