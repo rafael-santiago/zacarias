@@ -17,6 +17,7 @@ This is the general ``Zacarias`` repository layout:
         - ``defs``: Definitions related to the device driver.
         - ``freebsd``: Platform dependent parts of the device driver for FreeBSD.
         - ``linux``: Platform dependent parts of the device driver for Linux.
+        - ``windows``: Platform dependent parts of the device driver for Windows.
         - ``sec``: Codes directly related to security.
             - ``test``: Prelimiar user-mode unit tests from those security related stuff.
     - ``kbd``: Codes related to keyboard management.

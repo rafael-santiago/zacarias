@@ -30,4 +30,7 @@ kryptos_u8_t *plbuf_edit_passwd(const kryptos_u8_t *plbuf, const size_t plbuf_si
                                 const kryptos_u8_t *alias, const size_t alias_size,
                                 size_t *passwd_size);
 
+kryptos_u8_t *plbuf_edit_aliases(const kryptos_u8_t *plbuf, const size_t plbuf_size,
+                                 size_t *aliases_size);
+
 #endif

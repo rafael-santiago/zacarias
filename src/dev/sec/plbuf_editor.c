@@ -16,6 +16,74 @@ static const kryptos_u8_t *findalias(const kryptos_u8_t *haystack, const kryptos
 
 static kryptos_u8_t *random_plbuf_entry(size_t *size);
 
+kryptos_u8_t *plbuf_edit_aliases(const kryptos_u8_t *plbuf, const size_t plbuf_size,
+                                 size_t *aliases_size) {
+    const kryptos_u8_t *p = NULL, *p_end = NULL;
+    kryptos_u8_t *aliases = NULL, *ap = NULL, *ap_end = NULL;
+
+    if (plbuf == NULL || plbuf_size == 0 || aliases_size == NULL) {
+        goto plbuf_edit_aliases_epilogue;
+    }
+
+    p = plbuf;
+    p_end = p + plbuf_size;
+
+    *aliases_size = 0;
+
+    while (p != p_end) {
+        p++;
+        if (*p != '\t') {
+            (*aliases_size)++;
+        } else {
+            do {
+                p++;
+            } while (p != p_end && *p != '\n');
+        }
+    }
+
+    if (*aliases_size == 0) {
+        goto plbuf_edit_aliases_epilogue;
+    }
+
+    aliases = (kryptos_u8_t *) kryptos_newseg(*aliases_size + 1);
+
+    if (aliases == NULL) {
+        *aliases_size = 0;
+        goto plbuf_edit_aliases_epilogue;
+    }
+
+    memset(aliases, 0, *aliases_size + 1);
+    ap = aliases;
+    ap_end = ap + *aliases_size;
+
+    p = plbuf;
+
+    while (p != p_end && ap != ap_end) {
+        if (*p != '\t') {
+            *ap = *p;
+        } else {
+            ap++;
+            if (ap == ap_end) {
+                // INFO(Rafael): It should never happen in normal conditions.
+                continue;
+            }
+            *ap = '\n';
+            do {
+                p++;
+            } while (p != p_end && *p != '\n');
+        }
+        p++;
+        ap++;
+    }
+
+plbuf_edit_aliases_epilogue:
+
+    p = p_end = NULL;
+    ap = ap_end = NULL;
+
+    return aliases;
+}
+
 kryptos_u8_t *plbuf_edit_passwd(const kryptos_u8_t *plbuf, const size_t plbuf_size,
                                 const kryptos_u8_t *alias, const size_t alias_size,
                                 size_t *passwd_size) {
