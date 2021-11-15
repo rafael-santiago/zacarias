@@ -33,8 +33,9 @@ kryptos_u8_t *plbuf_edit_aliases(const kryptos_u8_t *plbuf, const size_t plbuf_s
     while (p != p_end) {
         p++;
         if (*p != '\t') {
-            (*aliases_size)++;
+            (*aliases_size) += 1;
         } else {
+            (*aliases_size) += 1;
             do {
                 p++;
             } while (p != p_end && *p != '\n');
@@ -62,7 +63,6 @@ kryptos_u8_t *plbuf_edit_aliases(const kryptos_u8_t *plbuf, const size_t plbuf_s
         if (*p != '\t') {
             *ap = *p;
         } else {
-            ap++;
             if (ap == ap_end) {
                 // INFO(Rafael): It should never happen in normal conditions.
                 continue;

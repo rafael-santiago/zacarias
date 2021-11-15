@@ -80,6 +80,8 @@ CUTE_TEST_CASE(plbuf_editor_tests)
     }, *test, *test_end;
     kryptos_u8_t *passwd;
     size_t passwd_size;
+    kryptos_u8_t *aliases = NULL;
+    size_t aliases_size;
 
     test = &test_vector[0];
     test_end = test + sizeof(test_vector) / sizeof(test_vector[0]);
@@ -109,6 +111,20 @@ CUTE_TEST_CASE(plbuf_editor_tests)
     CUTE_ASSERT(plbuf_edit_find(plbuf, plbuf_size, "cern", 0) == 0);
 
     CUTE_ASSERT(plbuf_edit_find(plbuf, plbuf_size, "404", 3) == 0);
+
+    CUTE_ASSERT(plbuf_edit_aliases(NULL, plbuf_size, &aliases_size) == NULL);
+    CUTE_ASSERT(plbuf_edit_aliases(plbuf, 0, &aliases_size) == NULL);
+    CUTE_ASSERT(plbuf_edit_aliases(plbuf, plbuf_size, NULL) == NULL);
+
+    aliases_size = 0;
+    aliases = plbuf_edit_aliases(plbuf, plbuf_size, &aliases_size);
+
+    CUTE_ASSERT(aliases != NULL && aliases_size != 0);
+
+    CUTE_ASSERT(strstr(aliases, "nasa") != NULL);
+    CUTE_ASSERT(strstr(aliases, "cern") != NULL);
+    CUTE_ASSERT(strstr(aliases, "home") != NULL);
+    kryptos_freeseg(aliases, aliases_size);
 
     test = &test_vector[0];
 
