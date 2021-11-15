@@ -49,6 +49,10 @@ NTSTATUS cdev_ioctl(PDEVICE_OBJECT dev, PIRP irp) {
             status = zc_dev_act_get_password(&dev_p);
             break;
 
+        case ZACARIAS_ALIASES:
+            status = zc_dev_act_aliases(&dev_p);
+            break;
+
         default:
             ZC_DBG("Unknown command received\n");
             dev_p->status = kUnknownDeviceCommand;

@@ -50,6 +50,7 @@ typedef enum {
     kGetPassword          = 0x00000020,
     kWithRndPassword      = 0x00000040,
     kInitAndAttachProfile = 0x00000080,
+    kAliases              = 0x00000100,
 }zc_device_action_t;
 
 typedef enum {
@@ -65,6 +66,7 @@ typedef enum {
     kPWDBReadingError,
     kPWDBWritingError,
     kUnknownDeviceCommand,
+    kNotEnoughBuffer,
     kZcDeviceStatusNr,
 }zc_device_status_t;
 
@@ -81,6 +83,7 @@ static char *gZacariasDeviceStatusVerbose[kZcDeviceStatusNr] = {
     "PWDB reading error",
     "PWDB writing error",
     "Unknown device command",
+    "Not enough buffer",
 };
 
 #define zc_dev_decode_status(s) ( ((s) >= 0 && (s) < kZcDeviceStatusNr) ?\
@@ -116,6 +119,7 @@ struct zc_devio_ctx {
 # define ZACARIAS_GET_PASSWORD           _IOWR(ZACARIAS_IOC_MAGIC, 4, struct zc_devio_ctx *)
 # define ZACARIAS_IS_SESSIONED_PROFILE   _IOWR(ZACARIAS_IOC_MAGIC, 5, struct zc_devio_ctx *)
 # define ZACARIAS_SETKEY                 _IOWR(ZACARIAS_IOC_MAGIC, 6, struct zc_devio_ctx *)
+# define ZACARIAS_ALIASES                _IOWR(ZACARIAS_IOC_MAGIC, 7, struct zc_devio_ctx *)
 #elif defined(__FreeBSD__)
 # define ZACARIAS_ATTACH_PROFILE         _IOWR(ZACARIAS_IOC_MAGIC, 0, struct zc_devio_ctx)
 # define ZACARIAS_DETACH_PROFILE         _IOWR(ZACARIAS_IOC_MAGIC, 1, struct zc_devio_ctx)
@@ -124,6 +128,7 @@ struct zc_devio_ctx {
 # define ZACARIAS_GET_PASSWORD           _IOWR(ZACARIAS_IOC_MAGIC, 4, struct zc_devio_ctx)
 # define ZACARIAS_IS_SESSIONED_PROFILE   _IOWR(ZACARIAS_IOC_MAGIC, 5, struct zc_devio_ctx)
 # define ZACARIAS_SETKEY                 _IOWR(ZACARIAS_IOC_MAGIC, 6, struct zc_devio_ctx)
+# define ZACARIAS_ALIASES                _IOWR(ZACARIAS_IOC_MAGIC, 7, struct zc_devio_ctx)
 #elif defined(_WIN32)
 # define ZACARIAS_ATTACH_PROFILE         CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0, METHOD_BUFFERED, FILE_WRITE_DATA)
 # define ZACARIAS_DETACH_PROFILE         CTL_CODE(FILE_DEVICE_UNKNOWN, 0x1, METHOD_BUFFERED, FILE_WRITE_DATA)
@@ -132,6 +137,7 @@ struct zc_devio_ctx {
 # define ZACARIAS_GET_PASSWORD           CTL_CODE(FILE_DEVICE_UNKNOWN, 0x4, METHOD_BUFFERED, FILE_READ_DATA)
 # define ZACARIAS_IS_SESSIONED_PROFILE   CTL_CODE(FILE_DEVICE_UNKNOWN, 0x5, METHOD_BUFFERED, FILE_READ_DATA)
 # define ZACARIAS_SETKEY                 CTL_CODE(FILE_DEVICE_UNKNOWN, 0x6, METHOD_BUFFERED, FILE_WRITE_DATA)
+# define ZACARIAS_ALIASES                CTL_CODE(FILE_DEVICE_UNKNOWN, 0x7, METHOD_BUFFERED, FILE_READ_DATA)
 #endif
 
 #endif

@@ -40,6 +40,7 @@ CUTE_DECLARE_TEST_CASE(detach_tests);
 CUTE_DECLARE_TEST_CASE(password_add_tests);
 CUTE_DECLARE_TEST_CASE(password_del_tests);
 CUTE_DECLARE_TEST_CASE(password_get_tests);
+CUTE_DECLARE_TEST_CASE(password_aliases_tests);
 CUTE_DECLARE_TEST_CASE(device_install_uninstall_stressing_tests);
 CUTE_DECLARE_TEST_CASE(regular_using_tests);
 CUTE_DECLARE_TEST_CASE(syscall_tracing_mitigation_tests);
@@ -62,6 +63,7 @@ CUTE_TEST_CASE(cmd_tests)
     CUTE_RUN_TEST(detach_tests);
     CUTE_RUN_TEST(password_add_tests);
     CUTE_RUN_TEST(password_del_tests);
+    CUTE_RUN_TEST(password_aliases_tests);
     CUTE_RUN_TEST(password_get_tests);
     if (CUTE_GET_OPTION("quick-tests") == NULL) {
         CUTE_RUN_TEST(device_install_uninstall_stressing_tests);
@@ -584,6 +586,53 @@ CUTE_TEST_CASE(password_del_tests)
     CUTE_ASSERT(zc("password", "del --user=rs --alias=200.com --sessioned", "123mudar*\ngoo goo muck\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
+    remove("passwd");
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(password_aliases_tests)
+    struct stat st;
+
+    remove("aliases");
+    remove("passwd");
+    zacarias_uninstall();
+    CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --init", "123mudar@\n123mudar@\n") == EXIT_SUCCESS);
+    CUTE_ASSERT(stat("passwd", &st) == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("password", "aliases", "123mudar@\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "aliases --user=meeseeks", "123\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "aliases --user=rs", "123mudar@\n") == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("password",
+                   "add --user=rs --alias=rick.sanches@plumb.us",
+                   "123mudar@\nburrp!\nburrp!\n") == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("password",
+                   "add --user=rs --alias=jerry@nowhere",
+                   "123mudar@\n1234\n4321\n") != EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("password",
+                   "add --user=rs --alias=jerry@nowhere",
+                   "123mudar@\n1234\n1234\n") == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("password",
+                   "add --user=rs --alias=morty@teenager",
+                   "123mudar@\njess!ca\njess!ca\n") == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("password",
+                   "add --user=rs --alias=summer@cellphone",
+                   "123mudar@\nethan\nethan\n") == EXIT_SUCCESS);
+
+
+    CUTE_ASSERT(zc("password",
+                   "add --user=rs --alias=beth@wine",
+                   "123mudar@\nw!n3\nw!n3\n") == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("password", "aliases --user=rs", "123m?\n") != EXIT_SUCCESS);
+    CUTE_ASSERT(zc("password", "aliases --user=rs aliases.txt", "123mudar@\n") == EXIT_SUCCESS);
+
+    zacarias_uninstall();
     remove("passwd");
 CUTE_TEST_CASE_END
 

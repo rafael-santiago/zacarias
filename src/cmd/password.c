@@ -29,14 +29,16 @@ struct  zc_data_drain_ctx {
 static int zc_password_add(void);
 static int zc_password_del(void);
 static int zc_password_get(void);
+static int zc_password_aliases(void);
 static int zc_password_unk(void);
 
 static void zc_drain_out_data(void *args);
 
 static struct zc_exec_table_ctx g_zc_password_subcommands[] = {
-    { "add", zc_password_add, NULL },
-    { "del", zc_password_del, NULL },
-    { "get", zc_password_get, NULL },
+    {     "add", zc_password_add,     NULL },
+    {     "del", zc_password_del,     NULL },
+    {     "get", zc_password_get,     NULL },
+    { "aliases", zc_password_aliases, NULL },
 };
 
 static size_t g_zc_password_subcommands_nr = sizeof(g_zc_password_subcommands) / sizeof(g_zc_password_subcommands[0]);
@@ -107,13 +109,68 @@ int zc_password(void) {
 int zc_password_help(void) {
     fprintf(stdout, "use: zc password add --user=<name> --alias=<name> [--sessioned]\n"
                     "     zc password del --user=<name> --alias=<name> [--sessioned]\n"
-                    "     zc password get --user=<name> --alias=<name> [--timeout=<seconds>]\n");
+                    "     zc password get --user=<name> --alias=<name> [--timeout=<seconds>]\n"
+                    "     zc password aliases --user=<name>\n");
     return EXIT_SUCCESS;
 }
 
 static int zc_password_unk(void) {
     fprintf(stderr, "ERROR: unknown password subcommand.\n");
     return 1;
+}
+
+static int zc_password_aliases(void) {
+    int err = EXIT_FAILURE;
+    zc_dev_t zcd = zcdev_open();
+    char *user = NULL;
+    size_t user_size = 0;
+    unsigned char *pwdb_passwd = NULL;
+    size_t pwdb_passwd_size = 0;
+    zc_device_status_t status;
+    char *aliases = NULL;
+    size_t aliases_size = 0;
+
+    if (zcd == ZC_INVALID_DEVICE) {
+        err = errno;
+        goto zc_password_aliases_epilogue;
+    }
+
+    ZC_GET_OPTION_OR_DIE(user, "user", zc_password_aliases_epilogue);
+    user_size = strlen(user);
+
+    fprintf(stdout, "Pwdb password: ");
+    pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
+    del_scr_line();
+
+    if (pwdb_passwd == NULL || pwdb_passwd_size == 0) {
+        fprintf(stderr, "ERROR: Null pwdb password.\n");
+        goto zc_password_aliases_epilogue;
+    }
+
+    err = zcdev_aliases(zcd, user, user_size, pwdb_passwd, pwdb_passwd_size, &aliases, &aliases_size, &status);
+
+    if (err == 0 && status == kNoError) {
+        if (aliases_size > 0) {
+            fprintf(stdout, "%s", aliases);
+        }
+    } else if (err == 0 && status != kNoError) {
+        zcdev_perror(status);
+        err = EXIT_FAILURE;
+    }
+
+zc_password_aliases_epilogue:
+
+    if (pwdb_passwd != NULL) {
+        kryptos_freeseg(pwdb_passwd, pwdb_passwd_size);
+        pwdb_passwd_size = 0;
+    }
+
+    if (aliases != NULL) {
+        kryptos_freeseg(aliases, aliases_size);
+        aliases_size = 0;
+    }
+
+    return err;
 }
 
 static int zc_password_add(void) {

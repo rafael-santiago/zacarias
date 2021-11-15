@@ -61,6 +61,10 @@ int zcdev_get_password(const zc_dev_t zcd, const char *user, const size_t user_s
                        unsigned char **password, size_t *password_size,
                        zc_device_status_t *status);
 
+int zcdev_aliases(const zc_dev_t zcd, const char *user, const size_t user_size,
+                  const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
+                  char **aliases, size_t *aliases_size, zc_device_status_t *status);
+
 void zcdev_perror(const zc_device_status_t status);
 
 #endif

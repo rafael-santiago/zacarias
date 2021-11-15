@@ -211,6 +211,43 @@ int zcdev_del_password(const zc_dev_t zcd, const char *user, const size_t user_s
     return err;
 }
 
+int zcdev_aliases(const zc_dev_t zcd, const char *user, const size_t user_size,
+                  const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
+                  char **aliases, size_t *aliases_size, zc_device_status_t *status) {
+
+    int err = EXIT_FAILURE;
+    struct zc_devio_ctx ioctx;
+
+    memset(&ioctx, 0, sizeof(ioctx));
+
+    ioctx.action = kAliases;
+
+    ioctx.user_size = (user_size > sizeof(ioctx.user) - 1) ? sizeof(ioctx.user) - 1 : user_size;
+    memcpy(ioctx.user, user, ioctx.user_size);
+
+    ioctx.pwdb_passwd_size = (pwdb_passwd_size > sizeof(ioctx.pwdb_passwd) - 1) ? sizeof(ioctx.pwdb_passwd) - 1
+                                                                                : pwdb_passwd_size;
+    memcpy(ioctx.pwdb_passwd, pwdb_passwd, ioctx.pwdb_passwd_size);
+
+    if ((err = zcdev_ioctl(zcd, ZACARIAS_ALIASES, &ioctx)) == 0) {
+        *status = ioctx.status;
+    }
+
+    if (ioctx.status == kNoError) {
+        *aliases_size = 0;
+        *aliases = (char *) kryptos_newseg(ioctx.passwd_size + 1);
+        if (*aliases != NULL) {
+            *aliases_size = ioctx.passwd_size;
+            memset(*aliases, 0, ioctx.passwd_size + 1);
+            memcpy(*aliases, ioctx.passwd, ioctx.passwd_size);
+        }
+    }
+
+    memset(&ioctx, 0, sizeof(ioctx));
+
+    return err;
+}
+
 int zcdev_get_password(const zc_dev_t zcd, const char *user, const size_t user_size,
                        const unsigned char *pwdb_passwd, const size_t pwdb_passwd_size,
                        const char *alias, const size_t alias_size,

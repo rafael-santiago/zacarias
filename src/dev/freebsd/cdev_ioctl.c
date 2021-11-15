@@ -44,6 +44,10 @@ int cdev_ioctl(struct cdev *dev __unused, u_long cmd, caddr_t data, int flag __u
             error = zc_dev_act_get_password(&dev_p);
             break;
 
+        case ZACARIAS_ALIASES:
+            error = zc_dev_act_aliases(&dev_p);
+            break;
+
         default:
             ZC_DBG("Unknown command received.\n");
             dev_p->status = kUnknownDeviceCommand;

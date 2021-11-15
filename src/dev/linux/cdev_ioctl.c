@@ -6,6 +6,7 @@
  *
  */
 #include <linux/cdev_ioctl.h>
+#include <linux/version.h>
 #include <defs/io.h>
 #include <defs/zc_dbg.h>
 #include <asm/uaccess.h>
@@ -16,12 +17,20 @@ long cdev_ioctl(struct file *fp, unsigned int cmd, unsigned long user_param) {
     long error = 0;
     struct zc_devio_ctx devio, *dev_p;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0)
     if ((void *)user_param == NULL ||
         !access_ok(VERIFY_WRITE, (void __user *)user_param, _IOC_SIZE(cmd))) {
         // INFO(Rafael): Verifying for writing includes verifying for reading.
         error = EFAULT;
         goto cdev_ioctl_epilogue;
     }
+#else
+    if ((void *)user_param == NULL ||
+        !access_ok((void __user *)user_param, _IOC_SIZE(cmd))) {
+        error = EFAULT;
+        goto cdev_ioctl_epilogue;
+    }
+#endif
 
     if (kcpy(&devio, (struct zc_devio_ctx *)user_param, sizeof(struct zc_devio_ctx)) != 0) {
         error = EFAULT;
@@ -51,15 +60,9 @@ long cdev_ioctl(struct file *fp, unsigned int cmd, unsigned long user_param) {
             error = zc_dev_act_get_password(&dev_p);
             break;
 
-        /*case ZACARIAS_IS_SESSIONED_PROFILE:
-            ZC_DBG("ZACARIAS_IS_SESSIONED_PROFILE command received.\n");
-            error = zc_dev_act_is_sessioned_profile(&dev_p);
+        case ZACARIAS_ALIASES:
+            error = zc_dev_act_aliases(&dev_p);
             break;
-
-        case ZACARIAS_SETKEY:
-            ZC_DBG("ZACARIAS_SETKEY command received.\n");
-            error = zc_dev_act_setkey(&dev_p);
-            break;*/
 
         default:
             ZC_DBG("Unknown command received.\n");

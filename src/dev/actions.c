@@ -332,6 +332,86 @@ zc_dev_act_del_password_epilogue:
     return err;
 }
 
+int zc_dev_act_aliases(struct zc_devio_ctx **devio) {
+    int err = EFAULT;
+    struct zc_devio_ctx *d = *devio;
+    zacarias_profile_ctx *profile = NULL;
+    unsigned char *aliases = NULL;
+    size_t aliases_size = 0;
+
+    if (!cdev_mtx_trylock(&g_cdev()->lock)) {
+        ZC_DBG("return EBUSY.\n");
+        return EBUSY;
+    }
+
+    if (d->user_size == 0) {
+        err = 0;
+        d->status = kInvalidParams;
+        ZC_DBG("invalid sizes (d->user_size = %lu).\n", d->alias_size);
+        goto zc_dev_act_aliases_epilogue;
+    }
+
+    profile = zacarias_profiles_ctx_get(g_cdev()->profiles, d->user, d->user_size);
+    if (profile == NULL) {
+        err = 0;
+        d->status = kProfileNotAttached;
+        ZC_DBG("profile not found.\n");
+        goto zc_dev_act_aliases_epilogue;
+    }
+
+    if (zacarias_decrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size) != 0) {
+        err = 0;
+        d->status = kAuthenticationFailure;
+        ZC_DBG("zacarias_decrypt_pwdb() has failed.\n");
+        goto zc_dev_act_aliases_epilogue;
+    }
+
+    if (plbuf_edit_detach(&profile->plbuf, &profile->plbuf_size) != 0) {
+        err = 0;
+        d->status = kGeneralError;
+        zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size);
+        ZC_DBG("zacarias_edit_detach() has failed.\n");
+        goto zc_dev_act_aliases_epilogue;
+    }
+
+    aliases = plbuf_edit_aliases(profile->plbuf, profile->plbuf_size, &aliases_size);
+    if (aliases_size < sizeof(d->passwd)) {
+        if (aliases_size > 0) {
+            memcpy(d->passwd, aliases, aliases_size);
+        }
+        d->passwd_size = aliases_size;
+        d->status = kNoError;
+    } else {
+        d->status = kGeneralError;
+    }
+
+    if (plbuf_edit_shuffle(&profile->plbuf, &profile->plbuf_size) != 0) {
+        err = 0;
+        kryptos_freeseg(profile->plbuf, profile->plbuf_size);
+        profile->plbuf = NULL;
+        profile->plbuf_size = 0;
+        ZC_DBG("zacarias_edit_shuffle() has failed.\n");
+        goto zc_dev_act_aliases_epilogue;
+    }
+
+    zacarias_encrypt_pwdb(&profile, d->pwdb_passwd, d->pwdb_passwd_size);
+    err = 0;
+
+zc_dev_act_aliases_epilogue:
+
+    if (aliases != NULL) {
+        kryptos_freeseg(aliases, aliases_size);
+        aliases = NULL;
+        aliases_size = 0;
+    }
+
+    d = NULL;
+    profile = NULL;
+    cdev_mtx_unlock(&g_cdev()->lock);
+
+    return err;
+}
+
 int zc_dev_act_get_password(struct zc_devio_ctx **devio) {
     int err = EFAULT;
     struct zc_devio_ctx *d = *devio;
