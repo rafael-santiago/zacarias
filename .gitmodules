@@ -4,3 +4,6 @@
 [submodule "src/lib/aegis"]
 	path = src/lib/aegis
 	url = https://github.com/rafael-santiago/aegis
+[submodule "src/lib/kryptos"]
+	path = src/lib/kryptos
+	url = https://github.com/rafael-santiago/zacarias
