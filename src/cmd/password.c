@@ -151,7 +151,7 @@ static int zc_password_aliases(void) {
 
     if (err == 0 && status == kNoError) {
         if (aliases_size > 0) {
-            fprintf(stdout, "%s", aliases);
+            fwrite(aliases, 1, aliases_size, stdout);
         }
     } else if (err == 0 && status != kNoError) {
         zcdev_perror(status);

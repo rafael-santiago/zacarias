@@ -377,6 +377,7 @@ int zc_dev_act_aliases(struct zc_devio_ctx **devio) {
     aliases = plbuf_edit_aliases(profile->plbuf, profile->plbuf_size, &aliases_size);
     if (aliases_size < sizeof(d->passwd)) {
         if (aliases_size > 0) {
+            memset(d->passwd, 0, sizeof(d->passwd));
             memcpy(d->passwd, aliases, aliases_size);
         }
         d->passwd_size = aliases_size;
