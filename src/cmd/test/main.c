@@ -493,6 +493,8 @@ CUTE_TEST_CASE(regular_using_tests)
     CUTE_ASSERT(zc("password", "get --user=zaca --alias=harlen-shuffle@rolling.stones",
                    "MonkeyBoy\n") == EXIT_SUCCESS);
 
+    CUTE_ASSERT(zc("password", "aliases --user=zaca", "MonkeyBoy\n") == EXIT_SUCCESS);
+
     CUTE_ASSERT(zc("detach", "--user=rs", "GiveTheMuleWhatHeWants\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("detach", "--user=zaca", "MonkeyBoy\n") == EXIT_SUCCESS);
@@ -605,7 +607,7 @@ CUTE_TEST_CASE(password_aliases_tests)
     CUTE_ASSERT(zc("password", "aliases --user=rs", "123mudar@\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password",
-                   "add --user=rs --alias=rick.sanches@plumb.us",
+                   "add --user=rs --alias=rick.sanchez@plumb.us",
                    "123mudar@\nburrp!\nburrp!\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password",
@@ -617,7 +619,7 @@ CUTE_TEST_CASE(password_aliases_tests)
                    "123mudar@\n1234\n1234\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password",
-                   "add --user=rs --alias=morty@teenager",
+                   "add --user=rs --alias=morty@teenagerhood",
                    "123mudar@\njess!ca\njess!ca\n") == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("password",
