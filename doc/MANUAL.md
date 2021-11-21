@@ -20,6 +20,7 @@ In this sense, if we got a leak, this leak will be less harmful.
     - [Adding a password](#adding-a-password)
     - [Deleting a password](#deleting-a-password)
     - [Getting a password](#getting-a-password)
+    - [Listing all aliases from a PWDB](#listing-all-aliases-from-a-pwdb)
     - [Detaching your profile](#detaching-your-profile)
     - [Sessioned profiles](#sessioned-profiles)
 
@@ -158,6 +159,29 @@ you@AdventureGalley:~/# zc password get --user=kidd --alias=treasure@island.pira
 ```
 
 It will ask your general PWDB password. Being it well authenticated you will get your password soon.
+
+[``Back``](#contents)
+
+### Listing all aliases from a PWDB
+
+If you need to list all aliases stored into a PWDB the command ``password`` and its sub-command ``aliases`` will do the job.
+You need to provide the following information to run this command:
+
+1. Who you are. Use ``--user`` option to inform it.
+
+```
+you@AdventureGalley:~/# zc password aliases --user=kidd
+```
+
+The above command sample will list all aliases stored into the PWDB. You can apply some glob pattern filtering by providing
+the glob(s) after the ``--user`` option as follows:
+
+```
+you@AdventureGalley:~/# zc password aliases --user=kidd *@island.pirate-bay.com rum-can[1234]-tales Q*An?e_sRev*
+```
+
+Now this presented command will only list aliases that matches ``*@island.pirate-bay.com``, ``rum-can[1234]-tales`` or
+``Q*An?e_sRev*`` globs.
 
 [``Back``](#contents)
 
