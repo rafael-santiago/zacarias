@@ -51,10 +51,10 @@ local function do_install() : result type int {
     if (hefesto.sys.os_name() == "linux" || hefesto.sys.os_name() == "freebsd" || hefesto.sys.os_name() == "windows") {
         if (hefesto.sys.os_name() == "linux" || hefesto.sys.os_name() == "freebsd") {
             $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "dev/zacarias.ko"));
-            $dest_artifacts.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
+            $dest_artifacts.add_item("/usr/local/bin/zacarias.ko");
 
             $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../bin/zc"));
-            $dest_artifacts.add_item("/usr/local/share/zacarias/bin/zc");
+            $dest_artifacts.add_item("/usr/local/bin/zc");
 
             $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/MANUAL.md"));
             $dest_artifacts.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
@@ -207,8 +207,8 @@ local function do_uninstall() : result type int {
         hefesto.sys.os_name() == "freebsd" ||
         hefesto.sys.os_name() == "windows") {
         if (hefesto.sys.os_name() == "linux" || hefesto.sys.os_name() == "freebsd") {
-            $to_burn.add_item("/usr/local/share/zacarias/bin/zacarias.ko");
-            $to_burn.add_item("/usr/local/share/zacarias/bin/zc");
+            $to_burn.add_item("/usr/local/bin/zacarias.ko");
+            $to_burn.add_item("/usr/local/bin/zc");
             $to_burn.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
             $to_burn.add_item("/usr/local/man/man1/zacarias.1");
             $to_burn.add_item("/usr/local/share/zacarias/bin");
