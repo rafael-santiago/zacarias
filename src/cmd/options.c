@@ -19,6 +19,13 @@ void zc_set_argc_argv(const int argc, char **argv) {
     g_argv = argv;
 }
 
+char *zc_get_raw_arg(const size_t arg_nr) {
+    if (g_argv == NULL || arg_nr > g_argc) {
+        return NULL;
+    }
+    return &g_argv[arg_nr][0];
+}
+
 char *zc_get_option(const char *option, char *default_value) {
     char **arg, **arg_end;
     char temp[4096];

@@ -6,6 +6,7 @@
  *
  */
 #include <cmd/utils.h>
+#include <cmd/strglob.h>
 #include <cutest.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -45,6 +46,7 @@ CUTE_DECLARE_TEST_CASE(device_install_uninstall_stressing_tests);
 CUTE_DECLARE_TEST_CASE(regular_using_tests);
 CUTE_DECLARE_TEST_CASE(syscall_tracing_mitigation_tests);
 CUTE_DECLARE_TEST_CASE(debugging_avoidance_tests);
+CUTE_DECLARE_TEST_CASE(strglob_tests);
 
 #if defined(_WIN32)
 CUTE_DECLARE_TEST_CASE(get_ntpath_tests);
@@ -57,6 +59,7 @@ CUTE_TEST_CASE(cmd_tests)
 #if defined(_WIN32)
     CUTE_RUN_TEST(get_ntpath_tests);
 #endif
+    CUTE_RUN_TEST(strglob_tests);
     CUTE_RUN_TEST(device_install_tests);
     CUTE_RUN_TEST(device_uninstall_tests);
     CUTE_RUN_TEST(attach_tests);
@@ -804,6 +807,42 @@ CUTE_TEST_CASE(detach_tests)
 
     remove("passwd");
     CUTE_ASSERT(zacarias_uninstall() == EXIT_SUCCESS);
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(strglob_tests)
+    struct strglob_tests_ctx {
+        const char *str;
+        const char *pattern;
+        int result;
+    };
+    struct strglob_tests_ctx tests[] = {
+        { NULL,                         NULL                                                       , 0 },
+        { "abc",                        "abc"                                                      , 1 },
+        { "abc",                        "ab"                                                       , 0 },
+        { "abc",                        "a?c"                                                      , 1 },
+        { "abc",                        "ab[abdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.c]", 1 },
+        { "abc",                        "ab[abdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.?]", 0 },
+        { "ab*",                        "ab[c*]"                                                   , 1 },
+        { "ab*",                        "ab[*c]"                                                   , 1 },
+        { "abc",                        "ab*"                                                      , 1 },
+        { "abc",                        "abc*"                                                     , 1 },
+        { "strglob.c",                  "strglo*.c"                                                , 1 },
+        { "parangaricutirimirruaru!!!", "*"                                                        , 1 },
+        { "parangaritititero",          "?"                                                        , 0 },
+        { "parangaritititero",          "?*"                                                       , 1 },
+        { "parangaricutirimirruaru",    "paran*"                                                   , 1 },
+        { "parangaricutirimirruaru",    "parruari"                                                 , 0 },
+        { "parangaricutirimirruaru",    "paran*garicuti"                                           , 0 },
+        { "parangaricutirimirruaru",    "paran*garicutirimirruaru"                                 , 1 },
+        { "parangaricutirimirruaru",    "paran*ru"                                                 , 1 },
+        { "hell yeah!",                 "*yeah!"                                                   , 1 },
+        { ".",                          "*[Gg]lenda*"                                              , 0 },
+    };
+    size_t tests_nr = sizeof(tests) / sizeof(tests[0]), t;
+
+    for (t = 0; t < tests_nr; t++) {
+        CUTE_ASSERT(strglob(tests[t].str, tests[t].pattern) == tests[t].result);
+    }
 CUTE_TEST_CASE_END
 
 static int zc(const char *command, const char *args, const char *keyboard_data) {

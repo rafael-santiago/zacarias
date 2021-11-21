@@ -39,7 +39,7 @@ cmd-tests.prologue() {
     var oldcwd type string;
     $oldcwd = hefesto.sys.pwd();
     hefesto.sys.cd("../o");
-    $ldflags.ls(".*(utils).o$");
+    $ldflags.ls(".*(utils|strglob).o$");
     hefesto.sys.cd($oldcwd);
 
     # INFO(Rafael): Due to we are including explicitly utils.o we need to link -lzcc after it otherwise

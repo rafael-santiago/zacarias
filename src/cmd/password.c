@@ -11,6 +11,7 @@
 #include <cmd/devio.h>
 #include <cmd/utils.h>
 #include <cmd/didumean.h>
+#include <cmd/strglob.h>
 #include <kbd/kbd.h>
 #include <kryptos.h>
 #include <ctype.h>
@@ -127,9 +128,13 @@ static int zc_password_aliases(void) {
     unsigned char *pwdb_passwd = NULL;
     size_t pwdb_passwd_size = 0;
     zc_device_status_t status;
-    char *aliases = NULL;
+    char *aliases = NULL, *ap, *ap_off, *ap_end;
     size_t aliases_size = 0;
     FILE *out = NULL;
+    int do_glob_matching = 0;
+    size_t arg_nr = 0;
+    char *glob = NULL;
+    char alias[ZC_STR_NR];
 
     if (zcd == ZC_INVALID_DEVICE) {
         err = errno;
@@ -138,6 +143,8 @@ static int zc_password_aliases(void) {
 
     ZC_GET_OPTION_OR_DIE(user, "user", zc_password_aliases_epilogue);
     user_size = strlen(user);
+
+    do_glob_matching = ((glob = zc_get_raw_arg(4)) != NULL);
 
     fprintf(stdout, "Pwdb password: ");
     pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
@@ -153,7 +160,30 @@ static int zc_password_aliases(void) {
     if (err == 0 && status == kNoError) {
         if (aliases_size > 0) {
             out = get_stdout();
-            fwrite(aliases, 1, aliases_size, out);
+            if (!do_glob_matching) {
+                fwrite(aliases, 1, aliases_size, out);
+            } else {
+                arg_nr = 5;
+                do {
+                    ap = aliases;
+                    ap_end = ap + aliases_size;
+                    while (ap < ap_end) {
+                        ap_off = ap;
+                        while (ap_off != ap_end && *ap_off != '\n') {
+                            ap_off++;
+                        }
+                        if (ap_off - ap + 1 < sizeof(alias)) {
+                            memcpy(alias, ap, ap_off - ap + 1);
+                            if (strglob(alias, glob)) {
+                                fwrite(alias, 1, ap_off - ap + 1, out);
+                            }
+                        } else {
+                            fprintf(stderr, "ERROR: not enough buffer.\n");
+                        }
+                        ap = ap_off + 1;
+                    }
+                } while ((glob = zc_get_raw_arg(arg_nr++)) != NULL);
+            }
         }
     } else if (err == 0 && status != kNoError) {
         zcdev_perror(status);
