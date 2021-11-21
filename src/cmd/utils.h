@@ -9,6 +9,7 @@
 #define ZACARIAS_CMD_UTILS_H 1
 
 #include <stdlib.h>
+#include <stdio.h>
 
 void del_scr_line(void);
 
@@ -19,5 +20,7 @@ char *get_canonical_path(char *dest, const size_t dest_size, const char *src, co
 # if defined(_WIN32)
 char *get_ntpath(char *dest, const size_t dest_size, const char *src, const size_t src_size);
 # endif
+
+FILE *get_stdout(void);
 
 #endif

@@ -19,7 +19,23 @@
 #endif
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+
+static int has_less(void);
+static int has_more(void);
+
+FILE *get_stdout(void) {
+    FILE *pager = NULL;
+
+    if (has_less()) {
+        pager = popen("less", "w");
+    }
+
+    if (pager == NULL && has_more()) {
+        pager = popen("more", "w");
+    }
+
+    return (pager == NULL) ? stdout : pager;
+}
 
 void del_scr_line(void) {
 #if defined(__unix__)
@@ -202,3 +218,19 @@ char *get_ntpath(char *dest, const size_t dest_size, const char *src, const size
     return dest;
 }
 #endif
+
+static int has_less(void) {
+#if defined(__unix__)
+    return (system("less -V > /dev/null 2>&1") == 0);
+#else
+    return 0;
+#endif
+}
+
+static int has_more(void) {
+#if defined(__unix__)
+    return (system("more -V > /dev/null 2>&1") == 0);
+#else
+    return 0;
+#endif
+}

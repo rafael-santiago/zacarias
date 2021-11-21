@@ -129,6 +129,7 @@ static int zc_password_aliases(void) {
     zc_device_status_t status;
     char *aliases = NULL;
     size_t aliases_size = 0;
+    FILE *out = NULL;
 
     if (zcd == ZC_INVALID_DEVICE) {
         err = errno;
@@ -151,7 +152,8 @@ static int zc_password_aliases(void) {
 
     if (err == 0 && status == kNoError) {
         if (aliases_size > 0) {
-            fwrite(aliases, 1, aliases_size, stdout);
+            out = get_stdout();
+            fwrite(aliases, 1, aliases_size, out);
         }
     } else if (err == 0 && status != kNoError) {
         zcdev_perror(status);
@@ -168,6 +170,10 @@ zc_password_aliases_epilogue:
     if (aliases != NULL) {
         kryptos_freeseg(aliases, aliases_size);
         aliases_size = 0;
+    }
+
+    if (out != NULL && out != stdout) {
+        pclose(out);
     }
 
     return err;
