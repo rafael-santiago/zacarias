@@ -184,7 +184,7 @@ Now this presented command will only list aliases that matches ``*@island.pirate
 ``Q*An?e_sRev*`` globs.
 
 By default this command will try to use the best system pager available on your system (btw: ``less`` or ``more``).
-If you do not want paged data you must pass ``--unpaged`` option as the follows:
+If you do not want paged data you must pass ``--unpaged`` option as follows:
 
 ```
 you@AdventureGalley:~/# zc password aliases --user=kidd --unpaged *rivals*
@@ -212,7 +212,7 @@ Maybe you can see the necessity of informing the general PWDB password as a weak
 as much as possible the necessity of informing this critical data you could give sessioned profiles a try.
 
 A sessioned profile is a profile that at the moment of its attachment a session password is configured. Once configured any
-``password get`` command will only requires this temporary password instead of the general one. However, bearmind if you want
+``password get`` command will only requires this temporary password instead of the general one. However, bear in mind if you want
 to add or delete passwords from your PWDB, the two passwords will be required (the general and the session password).
 
 Attaching a sessioned profile is straightforward:
