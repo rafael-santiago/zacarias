@@ -111,7 +111,7 @@ int zc_password_help(void) {
     fprintf(stdout, "use: zc password add --user=<name> --alias=<name> [--sessioned]\n"
                     "     zc password del --user=<name> --alias=<name> [--sessioned]\n"
                     "     zc password get --user=<name> --alias=<name> [--timeout=<seconds>]\n"
-                    "     zc password aliases --user=<name>\n");
+                    "     zc password aliases --user=<name> [--unpaged] [<alias>...]\n");
     return EXIT_SUCCESS;
 }
 
@@ -130,11 +130,12 @@ static int zc_password_aliases(void) {
     zc_device_status_t status;
     char *aliases = NULL, *ap, *ap_off, *ap_end;
     size_t aliases_size = 0;
-    FILE *out = NULL;
+    FILE *out = stdout;
     int do_glob_matching = 0;
     size_t arg_nr = 0;
     char *glob = NULL;
     char alias[ZC_STR_NR];
+    int unpaged = 0;
 
     if (zcd == ZC_INVALID_DEVICE) {
         err = errno;
@@ -144,7 +145,9 @@ static int zc_password_aliases(void) {
     ZC_GET_OPTION_OR_DIE(user, "user", zc_password_aliases_epilogue);
     user_size = strlen(user);
 
-    do_glob_matching = ((glob = zc_get_raw_arg(4)) != NULL);
+    unpaged = zc_get_bool_option("unpaged", 0);
+
+    do_glob_matching = ((glob = zc_get_raw_arg(4 + unpaged)) != NULL);
 
     fprintf(stdout, "Pwdb password: ");
     pwdb_passwd = zacarias_getuserkey(&pwdb_passwd_size);
@@ -159,11 +162,13 @@ static int zc_password_aliases(void) {
 
     if (err == 0 && status == kNoError) {
         if (aliases_size > 0) {
-            out = get_stdout();
+            if (!unpaged) {
+                out = get_stdout();
+            }
             if (!do_glob_matching) {
                 fwrite(aliases, 1, aliases_size, out);
             } else {
-                arg_nr = 5;
+                arg_nr = 5 + unpaged;
                 do {
                     ap = aliases;
                     ap_end = ap + aliases_size;

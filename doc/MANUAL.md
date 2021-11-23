@@ -183,6 +183,13 @@ you@AdventureGalley:~/# zc password aliases --user=kidd *@island.pirate-bay.com 
 Now this presented command will only list aliases that matches ``*@island.pirate-bay.com``, ``rum-can[1234]-tales`` or
 ``Q*An?e_sRev*`` globs.
 
+By default this command will try to use the best system pager available on your system (btw: ``less`` or ``more``).
+If you do not want paged data you must pass ``--unpaged`` option as the follows:
+
+```
+you@AdventureGalley:~/# zc password aliases --user=kidd --unpaged *rivals*
+```
+
 [``Back``](#contents)
 
 ### Detaching your profile
