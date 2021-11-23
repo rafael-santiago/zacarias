@@ -118,9 +118,9 @@ KUTE_TEST_CASE(plbuf_editor_tests)
 
     KUTE_ASSERT(aliases != NULL && aliases_size != 0);
 
-    KUTE_ASSERT(strstr(aliases, "nasa") != NULL);
-    KUTE_ASSERT(strstr(aliases, "cern") != NULL);
-    KUTE_ASSERT(strstr(aliases, "home") != NULL);
+    KUTE_ASSERT(strstr((char *)aliases, "nasa") != NULL);
+    KUTE_ASSERT(strstr((char *)aliases, "cern") != NULL);
+    KUTE_ASSERT(strstr((char *)aliases, "home") != NULL);
     kryptos_freeseg(aliases, aliases_size);
 
     test = &test_vector[0];
