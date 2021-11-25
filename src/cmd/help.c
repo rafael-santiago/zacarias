@@ -75,8 +75,13 @@ int zc_help(void) {
 
 int zc_help_help(void) {
     struct zc_exec_table_ctx *cmd = &g_command_table[0], *cmd_end = cmd + g_command_table_nr;
-    fprintf(stdout, "use: zc help <topic>\n");
-    fprintf(stdout, "\nThe available commands are:\n");
+    fprintf(stdout, "zc and zacarias device are Copyright (C) 2020-2021 by Rafael Santiago.\n\n"
+                    "Use this software at your own risk.\nI am not responsible for any misuse of "
+                    "it, including some kind of damage, data loss etc.\nThe software is provided "
+                    "with no warranty.\n"
+                    "___\n"
+                    "use: zc help <topic>\n"
+                    "\nThe available commands are:\n");
     while (cmd != cmd_end) {
         fprintf(stdout, "\t%s\n", cmd->cmd_name);
         cmd++;
