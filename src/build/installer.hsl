@@ -56,8 +56,8 @@ local function do_install() : result type int {
             $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../bin/zc"));
             $dest_artifacts.add_item("/usr/local/bin/zc");
 
-            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/MANUAL.md"));
-            $dest_artifacts.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
+            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/MANUAL.txt"));
+            $dest_artifacts.add_item("/usr/local/share/zacarias/doc/MANUAL.txt");
 
             $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "../doc/man/zacarias.1"));
             $dest_artifacts.add_item("/usr/local/man/man1/zacarias.1");
@@ -68,8 +68,8 @@ local function do_install() : result type int {
             $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "..\\bin\\zc.exe"));
             $dest_artifacts.add_item("C:\\zacarias\\bin\\zc.exe");
 
-            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "..\\doc\\MANUAL.md"));
-            $dest_artifacts.add_item("c:\\doc\\MANUAL.md");
+            $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "..\\doc\\MANUAL.txt"));
+            $dest_artifacts.add_item("c:\\doc\\MANUAL.txt");
         }
 
         $err = do_install_cp_files($dest_artifacts, $src_artifacts);
@@ -209,7 +209,7 @@ local function do_uninstall() : result type int {
         if (hefesto.sys.os_name() == "linux" || hefesto.sys.os_name() == "freebsd") {
             $to_burn.add_item("/usr/local/bin/zacarias.ko");
             $to_burn.add_item("/usr/local/bin/zc");
-            $to_burn.add_item("/usr/local/share/zacarias/doc/MANUAL.md");
+            $to_burn.add_item("/usr/local/share/zacarias/doc/MANUAL.txt");
             $to_burn.add_item("/usr/local/man/man1/zacarias.1");
             $to_burn.add_item("/usr/local/share/zacarias/bin");
             $to_burn.add_item("/usr/local/share/zacarias/doc");
@@ -217,7 +217,7 @@ local function do_uninstall() : result type int {
         } else if (hefesto.sys.os_name() == "windows") {
             $to_burn.add_item("C:\\zacarias\\sys\\zacarias.sys");
             $to_burn.add_item("C:\\zacarias\\bin\\zc.exe");
-            $to_burn.add_item("C:\\zacarias\\doc\\MANUAL.md");
+            $to_burn.add_item("C:\\zacarias\\doc\\MANUAL.txt");
             $to_burn.add_item("C:\\zacarias\\sys");
             $to_burn.add_item("C:\\zacarias\\bin");
             $to_burn.add_item("C:\\zacarias\\doc");

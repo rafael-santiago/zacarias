@@ -11,6 +11,7 @@
 #include <cmd/detach.h>
 #include <cmd/password.h>
 #include <cmd/device.h>
+#include <cmd/man.h>
 #include <cmd/help.h>
 
 #define ZC_REGISTER_COMMAND(name) { #name, zc_ ##name, zc_ ##name ##_help }
@@ -22,6 +23,7 @@ struct zc_exec_table_ctx g_command_table[] = {
     ZC_REGISTER_COMMAND(device),
     ZC_REGISTER_COMMAND(help),
     ZC_REGISTER_COMMAND(version),
+    ZC_REGISTER_COMMAND(man),
 };
 
 size_t g_command_table_nr = sizeof(g_command_table) / sizeof(g_command_table[0]);
