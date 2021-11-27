@@ -69,7 +69,7 @@ local function do_install() : result type int {
             $dest_artifacts.add_item("C:\\zacarias\\bin\\zc.exe");
 
             $src_artifacts.add_item(hefesto.sys.make_path(zacarias_rootdir(), "..\\doc\\MANUAL.txt"));
-            $dest_artifacts.add_item("c:\\doc\\MANUAL.txt");
+            $dest_artifacts.add_item("c:\\zacarias\\doc\\MANUAL.txt");
         }
 
         $err = do_install_cp_files($dest_artifacts, $src_artifacts);
