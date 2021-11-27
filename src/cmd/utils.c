@@ -224,7 +224,7 @@ static int has_less(void) {
 #if defined(__unix__)
     int err = -1;
     if (fork() == 0) {
-        err = execl("/bin/sh", "sh", "-c", "less -V > /dev/null 2>&1", 0);
+        err = execl("/bin/sh", "sh", "-c", "less -V > /dev/null 2>&1", NULL);
         exit(err);
     } else {
         wait(&err);
@@ -239,7 +239,7 @@ static int has_more(void) {
 #if defined(__unix__)
     int err = -1;
     if (fork() == 0) {
-        err = execl("/bin/sh", "sh", "-c", "more -V > /dev/null 2>&1", 0);
+        err = execl("/bin/sh", "sh", "-c", "more -V > /dev/null 2>&1", NULL);
         exit(err);
     } else {
         wait(&err);
