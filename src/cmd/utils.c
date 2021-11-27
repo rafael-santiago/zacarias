@@ -16,6 +16,7 @@
 # include <termios.h>
 # include <sys/ioctl.h>
 # include <fcntl.h>
+# include <sys/wait.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
@@ -221,7 +222,14 @@ char *get_ntpath(char *dest, const size_t dest_size, const char *src, const size
 
 static int has_less(void) {
 #if defined(__unix__)
-    return (system("less -V > /dev/null 2>&1") == 0);
+    int err = -1;
+    if (fork() == 0) {
+        err = execl("/bin/sh", "sh", "-c", "less -V > /dev/null 2>&1", 0);
+        exit(err);
+    } else {
+        wait(&err);
+    }
+    return (err == 0);
 #else
     return 0;
 #endif
@@ -229,7 +237,14 @@ static int has_less(void) {
 
 static int has_more(void) {
 #if defined(__unix__)
-    return (system("more -V > /dev/null 2>&1") == 0);
+    int err = -1;
+    if (fork() == 0) {
+        err = execl("/bin/sh", "sh", "-c", "more -V > /dev/null 2>&1", 0);
+        exit(err);
+    } else {
+        wait(&err);
+    }
+    return (err == 0);
 #else
     return 0;
 #endif
