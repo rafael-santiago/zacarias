@@ -33,6 +33,7 @@ zc.prologue() {
     if (hefesto.sys.os_name() != "windows") {
         $ldflags.add_item("-lX11");
         $ldflags.add_item("-lXtst");
+        $ldflags.add_item("-lpthread");
         $option = hefesto.sys.get_option("disable-static");
         if ($option.count() == 0) {
             if (build("libXorg") != 0) {

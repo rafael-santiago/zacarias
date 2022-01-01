@@ -10,6 +10,9 @@
 #include <sec/plbuf_editor.h>
 #include <ctx/ctx.h>
 #if defined(__linux__)
+# include <linux/version.h>
+#endif
+#if defined(__linux__) && LINUX_VERSION_CODE < KERNEL_VERSION(5,11,0)
 # include <string.h>
 #endif
 
