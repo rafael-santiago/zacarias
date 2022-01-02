@@ -105,7 +105,7 @@ You can find the related ``Xorg`` tarballs at: <https://www.x.org/releases/indiv
 <https://xcb.freedesktop.org/dist>.
 
 Maybe your unix-like system will also need to install dev packages of X11 try to ask your package manager to install
-the following packages: ``libx11-dev`` and ``libxtst-dev``.
+the following packages: ``libx11-dev``, ``libxtst-dev``, ``xcb-proto`` and finally ``python3-xcbgen``.
 
 Anyway, if you do not mind about library hooking, you can use shared linking by passing ``--disable-static`` to
 ``Hefesto`` as follows:
