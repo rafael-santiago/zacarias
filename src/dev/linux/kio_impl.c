@@ -88,7 +88,22 @@ int kread(const char *filepath, void **buf, size_t *buf_size) {
     }
 #endif
 
+    // INFO(Rafael): Unfortunately, Linux kernel is a mess with all thousand cosmetic changes.
+    //               Compare FreeBSD and Windows device drivers versions and you will understand
+    //               my complaint. This is messy and unstable for developers. This mess and constant
+    //               compatibility breaking is frustrating and pisses me off a bunch. I am tired of
+    //               those little problems from a version to another. I am starting to let Linux and
+    //               focusing only on Windows and FreeBSD kernels, I want to develop may stuff without
+    //               having to be worried about so basic stuff that should be stable and untouched.
+    //               Some points in a software after some years must become axioms, they work, people
+    //               have been using it among different versions through years and period. Break your
+    //               leg before breaking backward compatibility should be a rule of thumb for some
+    //               critical areas on their code base.
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(5,11,0)
     bytes_total = kernel_read(file, 0, data, data_size);
+#else
+    bytes_total = kernel_read(file, data, data_size, 0);
+#endif
     filp_close(file, NULL);
 
     *(char **)buf = data;
