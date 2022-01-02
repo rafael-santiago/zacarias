@@ -93,7 +93,7 @@ int kread(const char *filepath, void **buf, size_t *buf_size) {
     //               my complaint. This is messy and unstable for developers. This mess and constant
     //               compatibility breaking is frustrating and pisses me off a bunch. I am tired of
     //               those little problems from a version to another. I am starting to let Linux and
-    //               focusing only on Windows and FreeBSD kernels, I want to develop may stuff without
+    //               focusing only on Windows and FreeBSD kernels, I want to develop my own stuff without
     //               having to be worried about so basic stuff that should be stable and untouched.
     //               Some points in a software after some years must become axioms, they work, people
     //               have been using it among different versions through years and period. Break your
