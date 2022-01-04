@@ -53,4 +53,14 @@ zacarias-cdev.prologue() {
 }
 
 zacarias-cdev.epilogue() {
+    if (hefesto.sys.last_forge_result() == 0 &&
+        hefesto.sys.os_name() == "linux") {
+        var option type list;
+        $option = hefesto.sys.get_option("sign-lkm");
+        if ($option.count() > 0) {
+            if (sign_linux_lkm("zacarias.ko") != 0) {
+                hefesto.project.abort(1);
+            }
+        }
+    }
 }

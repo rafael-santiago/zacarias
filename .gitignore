@@ -28,3 +28,5 @@ src/*/test/bin/*
 */test/kernel/export_syms
 */test/kernel/x86
 */test/kernel/machine
+etc/*.pem
+*.mod

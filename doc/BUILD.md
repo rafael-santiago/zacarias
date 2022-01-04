@@ -9,6 +9,7 @@ build and install ``Hefesto``. There is no reason to be scared! ;)
 - [Setup your environment](#setup-your-environment)
 - [Cloning Zacarias repository](#cloning-zacarias-repository)
 - [Building](#building)
+- [Dealing with lkm signing on Linux](#dealing-with-lkm-signing-on-linux)
 - [Secure boot, signature enforcement and software bureaucracy hypes et al](#secure-boot-signature-enforcement-and-software-bureaucracy-hypes-et-al)
 
 ## Setup your environment
@@ -123,6 +124,40 @@ If you want to uninstall, use: ``hefesto --uninstall``.
 
 On ``Windows`` the installer is able to export the command line tool path, but you need to run the install from
 a command prompt with Administrator privileges and after that you need to do a log-off and finally log-on again.
+
+[``Back``](#contents)
+
+## Dealing with lkm signing on Linux
+
+If your Linux kernel was built with module signature verification the ``Zacarias`` device driver
+must be signed. In this way you will be able to insert and use it accordingly, otherwise an
+error suggesting you to signing the lkm before using it will be displayed.
+
+Currently the build has the ability of signing the generated device drivers. In order to do it
+you must flag out your signing intentions by passing the option ``--sign-lkm``.
+
+When not indicating any previous generated key pair (private and public) the build will
+try to generate a new one at the toplevel ``etc`` from your repo copy, under the names
+``zcdev_priv.pem`` and ``zcdev_pub.pem``. The build also will try to add the public key to your
+system keyring, due to it is necessary to indicate the id of your system keyring by passing the
+option ``--system-keyring-id``, too. E.g.:
+
+```
+you@AdvendureGalley:~/zacarias/src# hefesto --sign-lkm \
+> --system-keyring-id=0x10abcabc
+```
+
+In order to figure out the address of your system keyring run the command ``cat /proc/keys``,
+looking for ``.system_keyring`` entry. More information can be found [here](https://www.kernel.org/doc/html/v4.10/admin-guide/module-signing.html).
+
+If you have already a key pair (private and public) previously added to your system keyring you
+can indicate the fullpath to them by using ``--priv-key-path`` and ``--pub-key-path``. E.g.:
+
+```
+you@AdvendureGalley:~/zacarias/src# hefesto --sign-lkm \
+> --priv-key-path=/etc/my_local_lkm_keys_store/priv.pem \
+> --pub-key-path=/etc/my_local_lkm_keys_store/pub.pem
+```
 
 [``Back``](#contents)
 

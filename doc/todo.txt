@@ -1,3 +1,4 @@
+x (A) Implement Linux lkm signing build routine. +Build,+Dev,+Sys
 x (A) Implement man command. +User,+NewFeature,+Documentation
 x (A) Implement a wildcard filter for password aliases command -> '--filter=*@tutanota.com'. +User,+NewFeature
 x (A) Create a password sub-command that lists the existent alias into a PWDB (aliases). +Dev,+Sys,+User,+NewFeature
