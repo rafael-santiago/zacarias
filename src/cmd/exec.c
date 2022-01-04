@@ -126,7 +126,7 @@ static void zc_sigint_watchdog(int signo) {
 
 #if defined(__unix__)
 void zc_tr_abait(void) {
-    int fd = -1;
+    /*int fd = -1;
     size_t times_nr = 1, t;
     size_t bytes_nr = 0;
     char buf[256];
@@ -143,6 +143,11 @@ void zc_tr_abait(void) {
         read(fd, buf, bytes_nr);
         usleep(50);
     }
-    close(fd);
+    close(fd);*/
+    kryptos_u8_t *buf = kryptos_get_random_block(8192 << 3);
+    if (buf != NULL) {
+        buf[buf[(8192 << 3) - 1]] = 0;
+        kryptos_freeseg(buf, 8192 << 3);
+    }
 }
 #endif
