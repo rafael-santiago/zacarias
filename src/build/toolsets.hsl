@@ -748,7 +748,15 @@ function is_secure_boot_based_env() : result type int {
     if (hefesto.sys.os_name() != "linux") {
         result 0;
     }
-    result 0;
+    var oldcwd type string;
+    $oldcwd = hefesto.sys.pwd();
+    if (hefesto.sys.cd("/sys/firmware/efi/efivars") == 0) {
+        result 0;
+    }
+    var efivars type list;
+    $efivars.ls("SecureBoot-.*");
+    hefesto.sys.cd($oldcwd);
+    result ($efivars.count() > 0);
 }
 
 local function mk_keypair(priv_key_path type string,
