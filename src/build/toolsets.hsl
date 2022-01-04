@@ -744,7 +744,6 @@ function get_msvc_platform() : result type string {
 }
 
 function is_secure_boot_based_env() : result type int {
-    # TODO(Rafael): Verify efivars.
     if (hefesto.sys.os_name() != "linux") {
         result 0;
     }

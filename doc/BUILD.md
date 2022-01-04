@@ -131,7 +131,7 @@ a command prompt with Administrator privileges and after that you need to do a l
 
 If your Linux kernel was built with module signature verification the ``Zacarias`` device driver
 must be signed. In this way you will be able to insert and use it accordingly, otherwise an
-error suggesting you to signing the lkm before using it will be displayed.
+error suggesting you to sign the lkm before using it will be displayed.
 
 Currently the build has the ability of signing the generated device drivers. In order to do it
 you must flag out your signing intentions by passing the option ``--sign-lkm``.
