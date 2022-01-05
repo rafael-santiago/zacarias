@@ -159,6 +159,16 @@ you@AdvendureGalley:~/zacarias/src# hefesto --sign-lkm \
 > --pub-key-path=/etc/my_local_lkm_keys_store/pub.pem
 ```
 
+If you are using secure boot the lkm signing will be more straightforward. You only need to pass
+``--sign-lkm``:
+
+```
+you@AdvendureGalley:~/zacarias/src# hefesto --sign-lkm
+```
+
+All that bizarre dance among ``openssl``, ``mokutil`` and your good will and patience will be performed,
+just follow the steps.
+
 [``Back``](#contents)
 
 ## Secure boot, signature enforcement and software bureaucracy hypes et al

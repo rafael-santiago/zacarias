@@ -1,3 +1,4 @@
+x (A) Add some support for signing lkm on secureboot based environments (Linux). +Build,+Dev,+Sys
 x (A) Implement Linux lkm signing build routine. +Build,+Dev,+Sys
 x (A) Implement man command. +User,+NewFeature,+Documentation
 x (A) Implement a wildcard filter for password aliases command -> '--filter=*@tutanota.com'. +User,+NewFeature

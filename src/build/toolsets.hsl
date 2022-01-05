@@ -743,7 +743,7 @@ function get_msvc_platform() : result type string {
     result $arch;
 }
 
-function is_secure_boot_based_env() : result type int {
+local function is_secure_boot_based_env() : result type int {
     if (hefesto.sys.os_name() != "linux") {
         result 0;
     }
@@ -756,6 +756,79 @@ function is_secure_boot_based_env() : result type int {
     $efivars.ls("SecureBoot-.*");
     hefesto.sys.cd($oldcwd);
     result ($efivars.count() > 0);
+}
+
+local function mk_der_keypair(priv_key_filename type string,
+                              pub_key_filename type string) : result type int {
+    # INFO(Rafael): Until now I am based on Debian/Ubuntu way of thinking
+    #               those stuff.
+    if (isdir("/var/lib/shim-signed/mok") == 0) {
+        mktree("/var/lib/shim-signed/mok");
+    }
+
+    var priv_key_filepath type string;
+    $priv_key_filepath = hefesto.sys.make_path("/var/lib/shim-signed/mok", $priv_key_filename);
+    var pub_key_filepath type string;
+    $pub_key_filepath = hefesto.sys.make_path("/var/lib/shim-signed/mok", $pub_key_filename);
+
+    if (isfile($priv_key_filepath) && isfile($pub_key_filepath)) {
+        # INFO(Rafael): We got a previously enrolled key, let's just use it!
+        result 0;
+    }
+
+    var err type int;
+    $err = hefesto.sys.run("openssl req -new -x509 -newkey rsa:4096 -keyout " +
+                           $priv_key_filepath + " -outform DER -out " + $pub_key_filepath +
+                           " -days 36500 -subj \"/CN=ZacariasPWManager/\" -nodes");
+    if ($err == 0) {
+        var pem_filepath type string;
+        $pem_filepath = $pub_key_filename;
+        $pem_filepath.replace("\\..*$", ".pem");
+        $pem_filepath = hefesto.sys.make_path("/var/lib/shim-signed/mok", $pem_filepath);
+        $err = hefesto.sys.run("openssl x509 -inform der -in " + $pub_key_filepath + " -out " + $pem_filepath);
+        if ($err != 0) {
+            hefesto.sys.rm($priv_key_filepath);
+            hefesto.sys.rm($pub_key_filepath);
+            hefesto.sys.echo("ERROR: Unable to generate MOK/DER keypair.\n");
+        }
+        $err = enroll_key($pub_key_filepath);
+        if ($err != 0) {
+            hefesto.sys.rm($priv_key_filepath);
+            hefesto.sys.rm($pub_key_filepath);
+            hefesto.sys.rm($pem_filepath);
+        }
+    } else {
+        hefesto.sys.rm($priv_key_filepath);
+        hefesto.sys.rm($pub_key_filepath);
+        hefesto.sys.echo("ERROR: Unable to generate MOK/DER keypair.\n");
+    }
+
+    result $err;
+}
+
+local function enroll_key(pub_key_filename type string) : result type int {
+    var pub_key_filepath type string;
+    $pub_key_filepath = hefesto.sys.make_path("/var/lib/shim-signed/mok", $pub_key_filename);
+    var err type int;
+    $err = hefesto.sys.run("mokutil --import " + $pub_key_filepath);
+    if ($err == 0) {
+        $err = hefesto.sys.run("mokutil --list-new");
+        if ($err == 0) {
+            hefesto.sys.echo("INFO: Now you need to:\n" +
+                             "        - Reboot your machine\n" +
+                             "        - Enter MOK manager EFI utility:\n" +
+                             "            - Enroll MOK\n" +
+                             "            - Continue\n" +
+                             "            - Confirm\n" +
+                             "            - Enter password\n" +
+                             "            - Reboot\n");
+        } else {
+            hefesto.sys.echo("ERROR: Unable to enroll key.\n");
+        }
+    } else {
+        hefesto.sys.echo("ERROR: Unable to enroll key.\n");
+    }
+    result $err;
 }
 
 local function mk_keypair(priv_key_path type string,
@@ -791,7 +864,7 @@ local function mk_keypair(priv_key_path type string,
 local function sign_ko(mod_path type string,
                        priv_key_path type string,
                        pub_key_path type string) : result type int {
-    result hefesto.sys.run("/usr/src/linux-headers-$(uname -r)/scripts/sign-file sha512 " +
+    result hefesto.sys.run("/usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 " +
                            $priv_key_path + " " + $pub_key_path + " " + $mod_path);
 }
 
@@ -801,6 +874,11 @@ local function add_pubkey_to_keyring(keyring_id type string,
 }
 
 function sign_linux_lkm(mod_path type string) : result type int {
+
+    if (is_secure_boot_based_env()) {
+        result sign_linux_lkm_secureboot($mod_path);
+    }
+
     var priv_key_path type string;
     var pub_key_path type string;
     var system_keyring_id type string;
@@ -856,4 +934,18 @@ function sign_linux_lkm(mod_path type string) : result type int {
     }
 
     result 0;
+}
+
+local function sign_linux_lkm_secureboot(mod_path type string) : result type int {
+    if (mk_der_keypair("zcdev_key.priv", "zcdev_key.der") != 0) {
+        result 1;
+    }
+
+    var priv_key_filepath type string;
+    $priv_key_filepath = hefesto.sys.make_path("/var/lib/shim-signed/mok", "zcdev_key.priv");
+
+    var pub_key_filepath type string;
+    $pub_key_filepath = hefesto.sys.make_path("/var/lib/shim-signed/mok", "zcdev_key.der");
+
+    result sign_ko($mod_path, $priv_key_filepath, $pub_key_filepath);
 }
