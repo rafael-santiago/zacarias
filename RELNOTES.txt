@@ -1,0 +1,37 @@
+1. Latest releases are on the top.
+2. The versions are cumulative, any feature drop is informed.
+3. Usually, I try to do my best in order to bring you 'RELNOTES' instead of notes from hell ;)
+
+    Rafael
+--
+
+vx20220000 [git-tag: 'vx20220000']
+
+    First formalization of what I have been using along the last months.
+
+    Features:
+
+        - Profile attachment/detachment.
+        - Password addition, deletion and getting.
+        - Sessioned profiles.
+        - Some anti-debugging mitigations.
+        - Some password leaking countermeasures:
+            * Static linking by default.
+            * Libc hooking avoidance for more critical parts (for people that still prefers shared linking).
+            * Password database edition done only from kernel-side.
+            * Sessioned profiles.
+        - Encryption/authentication scheme: AES-256/GCM
+        - KDF: Argon2i
+        - Device drivers signature not supported but some signing infrastructure/conveniences are offered
+          by the build.
+        - Installing/Uninstalling conveniences offered by the build.
+
+    Bugfixes:
+
+        - None.
+
+     Support:
+
+        FreeBSD
+        Windows
+        Linux
