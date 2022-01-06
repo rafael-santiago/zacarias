@@ -35,6 +35,6 @@ extern struct zc_exec_table_ctx g_command_table[];
 
 extern size_t g_command_table_nr;
 
-#define ZC_VERSION "0.0.1"
+#define ZC_VERSION "vx20220000"
 
 #endif

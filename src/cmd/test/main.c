@@ -47,6 +47,7 @@ CUTE_DECLARE_TEST_CASE(regular_using_tests);
 CUTE_DECLARE_TEST_CASE(syscall_tracing_mitigation_tests);
 CUTE_DECLARE_TEST_CASE(debugging_avoidance_tests);
 CUTE_DECLARE_TEST_CASE(strglob_tests);
+CUTE_DECLARE_TEST_CASE(version_tests);
 
 #if defined(_WIN32)
 CUTE_DECLARE_TEST_CASE(get_ntpath_tests);
@@ -60,6 +61,7 @@ CUTE_TEST_CASE(cmd_tests)
     CUTE_RUN_TEST(get_ntpath_tests);
 #endif
     CUTE_RUN_TEST(strglob_tests);
+    CUTE_RUN_TEST(version_tests);
     CUTE_RUN_TEST(device_install_tests);
     CUTE_RUN_TEST(device_uninstall_tests);
     CUTE_RUN_TEST(attach_tests);
@@ -83,6 +85,19 @@ CUTE_TEST_CASE(cmd_tests)
         CUTE_RUN_TEST(debugging_avoidance_tests);
     }
 #endif
+CUTE_TEST_CASE_END
+
+CUTE_TEST_CASE(version_tests)
+    FILE *fp;
+    char out[1024];
+    CUTE_ASSERT(zc("version", "> out.txt", NULL) == EXIT_SUCCESS);
+    fp = fopen("out.txt", "rb");
+    CUTE_ASSERT(fp != NULL);
+    memset(out, 0, sizeof(out));
+    fread(out, 1, sizeof(out), fp);
+    fclose(fp);
+    CUTE_ASSERT(strcmp(out, "zc version vx20220000\n") == 0);
+    remove("out.txt");
 CUTE_TEST_CASE_END
 
 CUTE_TEST_CASE(debugging_avoidance_tests)
@@ -336,7 +351,11 @@ CUTE_TEST_CASE(regular_using_tests)
     remove("passwd");
     zacarias_uninstall();
 
+    CUTE_ASSERT(zc("version", NULL, NULL) == EXIT_SUCCESS);
+
     CUTE_ASSERT(zacarias_install() == EXIT_SUCCESS);
+
+    CUTE_ASSERT(zc("version", NULL, NULL) == EXIT_SUCCESS);
 
     CUTE_ASSERT(zc("attach", "--pwdb=passwd --user=rs --init",
                    "GiveTheMUleWhatHeWants\nGiveTheMuleWhatHeWants\n") != EXIT_SUCCESS);
