@@ -9,6 +9,7 @@ build and install ``Hefesto``. There is no reason to be scared! ;)
 - [Setup your environment](#setup-your-environment)
 - [Cloning Zacarias repository](#cloning-zacarias-repository)
 - [Building](#building)
+- [Speeding up the build by skipping up some slow tests](#speeding-up-the-build-by-skipping-up-some-slow-tests)
 - [Dealing with lkm signing on Linux](#dealing-with-lkm-signing-on-linux)
 - [Secure boot, signature enforcement and software bureaucracy hypes et al](#secure-boot-signature-enforcement-and-software-bureaucracy-hypes-et-al)
 
@@ -124,6 +125,17 @@ If you want to uninstall, use: ``hefesto --uninstall``.
 
 On ``Windows`` the installer is able to export the command line tool path, but you need to run the install from
 a command prompt with Administrator privileges and after that you need to do a log-off and finally log-on again.
+
+[``Back``](#contents)
+
+## Speeding up the build by skipping up some slow tests
+
+If you are building due to installing issues I will strongly discourage you from doing it, anyway, if you are developing or
+are in a rush and needing to get some results asap, pass the option ``--quick-tests``:
+
+```
+you@AdvendureGalley:~/zacarias/src# hefesto --quick-tests
+```
 
 [``Back``](#contents)
 
