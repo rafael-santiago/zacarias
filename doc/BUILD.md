@@ -130,8 +130,8 @@ a command prompt with Administrator privileges and after that you need to do a l
 
 ## Speeding up the build by skipping up some slow tests
 
-If you are building due to installing issues I will strongly discourage you from doing it, anyway, if you are developing or
-are in a rush and needing to get some results asap, pass the option ``--quick-tests``:
+If you are building due to installing motivations I will strongly discourage you from doing it, anyway, if you are
+developing or are in a rush and needing to get some results asap, pass the option ``--quick-tests``:
 
 ```
 you@AdvendureGalley:~/zacarias/src# hefesto --quick-tests
